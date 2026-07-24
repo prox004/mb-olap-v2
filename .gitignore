@@ -210,7 +210,6 @@ pyrightconfig.json
 /frontend
 /prompts
 /data
-/sample
 /package.json
 start_dev.py
 start_dev.bat
