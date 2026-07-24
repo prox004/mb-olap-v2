@@ -206,6 +206,6 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
-/frontend
+
 /prompts
 /data
