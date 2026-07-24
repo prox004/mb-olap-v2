@@ -1,0 +1,9 @@
+{
+  "name": "mb-olap-v2",
+  "version": "2.0.0",
+  "description": "MB-OLAP V2 Enterprise Retail OLAP Engine & Analytics Platform",
+  "scripts": {
+    "dev": "python start_dev.py",
+    "start": "python start_dev.py"
+  }
+}
