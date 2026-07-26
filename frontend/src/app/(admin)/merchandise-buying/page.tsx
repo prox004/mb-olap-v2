@@ -63,7 +63,7 @@ export default function MerchandiseBuyingPage() {
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-            📦 SKU Velocity Performance Explorer
+             SKU Velocity Performance Explorer
           </button>
           <button
             onClick={() => setActiveTab("deadstock")}
@@ -73,7 +73,7 @@ export default function MerchandiseBuyingPage() {
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-            💀 Dead Stock Liquidation Desk
+             Dead Stock Liquidation Desk
           </button>
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function MerchandiseBuyingPage() {
       {/* Connection Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
-          ⚠️ Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+           Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
         </div>
       )}
 

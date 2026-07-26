@@ -1,5 +1,6 @@
 import React from "react";
 import { VelocityBreakdownItem } from "@/hooks/useMerchandiseData";
+import { ArrowDownIcon, ArrowUpIcon, BoltIcon, TimeIcon } from "@/icons";
 
 interface VelocitySummaryCardsProps {
   breakdown: VelocityBreakdownItem[];
@@ -31,7 +32,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       tag: "WOC < 4 Wks",
       count: fast.count,
       stockValue: formatLakhs(fast.stockValue),
-      icon: "🚀",
+      icon: <BoltIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />,
       badgeColor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
       borderColor: "border-l-emerald-500",
     },
@@ -40,7 +41,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       tag: "WOC 4-12 Wks",
       count: medium.count,
       stockValue: formatLakhs(medium.stockValue),
-      icon: "⚖️",
+      icon: <TimeIcon className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
       badgeColor: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800",
       borderColor: "border-l-blue-500",
     },
@@ -49,7 +50,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       tag: "WOC > 12 Wks",
       count: slow.count,
       stockValue: formatLakhs(slow.stockValue),
-      icon: "🐢",
+      icon: <ArrowDownIcon className="h-5 w-5 text-amber-600 dark:text-amber-300" />,
       badgeColor: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800",
       borderColor: "border-l-amber-500",
     },
@@ -58,7 +59,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       tag: "0 Sales / Stock > 0",
       count: dead.count,
       stockValue: formatLakhs(dead.stockValue),
-      icon: "💀",
+      icon: <ArrowUpIcon className="h-5 w-5 rotate-180 text-rose-600 dark:text-rose-300" />,
       badgeColor: "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800",
       borderColor: "border-l-rose-500",
     },
@@ -82,7 +83,9 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
           className={`p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 border-l-4 ${c.borderColor} shadow-xs flex flex-col justify-between`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xl">{c.icon}</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800">
+              {c.icon}
+            </span>
             <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${c.badgeColor}`}>
               {c.tag}
             </span>

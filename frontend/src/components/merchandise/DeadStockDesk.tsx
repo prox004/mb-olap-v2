@@ -31,7 +31,7 @@ export const DeadStockDesk: React.FC<DeadStockDeskProps> = ({
       {/* Action Notification Alert */}
       {actionNotice && (
         <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300 text-xs font-semibold">
-          ✅ {actionNotice}
+           {actionNotice}
         </div>
       )}
 
@@ -39,7 +39,7 @@ export const DeadStockDesk: React.FC<DeadStockDeskProps> = ({
       <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-rose-200">
-            💀 90-Day Dead Stock Liquidation Desk
+             90-Day Dead Stock Liquidation Desk
           </span>
           <h2 className="text-2xl font-extrabold mt-1">
             ₹{totalCapitalLakhs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Lakhs
@@ -54,7 +54,7 @@ export const DeadStockDesk: React.FC<DeadStockDeskProps> = ({
             onClick={() => handleAction("ALL_DEAD_STOCK", "Bulk Clearance Markdown 50% Off")}
             className="px-4 py-2 text-xs font-bold bg-white text-rose-700 hover:bg-rose-50 rounded-xl shadow-xs transition-all"
           >
-            🏷️ Bulk Markdown (50% Off)
+             Bulk Markdown (50% Off)
           </button>
         </div>
       </div>

@@ -33,7 +33,7 @@ export default function CategoryPerformancePage() {
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-            🌳 Hierarchy Tree View
+             Hierarchy Tree View
           </button>
           <button
             onClick={() => setActiveTab("matrix")}
@@ -43,7 +43,7 @@ export default function CategoryPerformancePage() {
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-            📊 Performance Matrix (Scatter)
+             Performance Matrix (Scatter)
           </button>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function CategoryPerformancePage() {
       {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
-          ⚠️ Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+           Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
         </div>
       )}
 

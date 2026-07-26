@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { SkuVelocityItem } from "@/hooks/useMerchandiseData";
@@ -64,9 +64,8 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
             placeholder="Search by Barcode, Description, or Vendor..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-brand-500"
+            className="w-full px-4 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-brand-500"
           />
-          <span className="absolute left-3 top-2.5 text-gray-400 text-xs">🔍</span>
         </div>
 
         {/* Velocity Filter Switcher */}
@@ -97,7 +96,7 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
               <th className="p-3">Department</th>
               <th className="p-3">Vendor</th>
               <th className="p-3 cursor-pointer select-none" onClick={() => onSortChange("net_revenue")}>
-                Revenue (₹) {sortBy === "net_revenue" && (sortOrder === "desc" ? "↓" : "↑")}
+                Revenue (₹) {sortBy === "net_revenue" && (sortOrder === "desc" ? "Desc" : "Asc")}
               </th>
               <th className="p-3 text-right">Sales Units</th>
               <th className="p-3 text-right">Stock Value</th>
@@ -192,7 +191,7 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
                 onClick={() => setSelectedSku(null)}
                 className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               >
-                ✕
+                x
               </button>
             </div>
 

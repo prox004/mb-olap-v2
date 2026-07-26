@@ -5,6 +5,10 @@ from backend.app.schemas.response import StandardResponse
 from backend.app.api.v1.endpoints.executive import router as executive_router
 from backend.app.api.v1.endpoints.category import router as category_router
 from backend.app.api.v1.endpoints.merchandise import router as merchandise_router
+from backend.app.api.v1.endpoints.analytics import router as analytics_router
+from backend.app.api.v1.endpoints.financial import router as financial_router
+from backend.app.api.v1.endpoints.vendor import router as vendor_router
+from backend.app.api.v1.endpoints.colour import router as colour_router
 
 api_router = APIRouter()
 
@@ -12,6 +16,10 @@ api_router = APIRouter()
 api_router.include_router(executive_router, prefix="/executive", tags=["CEO Executive Dashboard"])
 api_router.include_router(category_router, prefix="/category", tags=["Category Performance"])
 api_router.include_router(merchandise_router, prefix="/merchandise", tags=["Merchandise Buying"])
+api_router.include_router(analytics_router, prefix="/analytics", tags=["Size & Price Analytics"])
+api_router.include_router(financial_router, prefix="/financial", tags=["Financial & GMROI"])
+api_router.include_router(vendor_router, prefix="/vendor", tags=["Vendor Performance"])
+api_router.include_router(colour_router, prefix="/colour", tags=["Colour Analytics"])
 
 @api_router.get("/health", response_model=StandardResponse[dict], tags=["System Health"])
 def health_check(db: DuckDBPyConnection = Depends(get_db)):

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useOlapFilter } from "@/context/OlapFilterContext";
@@ -52,12 +52,23 @@ export function OlapFilterBar() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Title & Active Filter Badge */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex items-center gap-2 text-left group"
+          >
             <span className="flex h-3 w-3 rounded-full bg-brand-500 animate-pulse"></span>
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-white uppercase tracking-wider">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-white uppercase tracking-wider group-hover:text-brand-500 transition-colors">
               OLAP Slice & Dice Filters
             </h3>
-          </div>
+            <svg
+              className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           {activeFilterCount > 0 && (
             <span className="px-2.5 py-0.5 text-xs font-medium rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
               {activeFilterCount} Active Filter{activeFilterCount > 1 ? "s" : ""}
@@ -69,7 +80,7 @@ export function OlapFilterBar() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             {isOpen ? "Hide Filters" : "Show Filters"}
           </button>
@@ -84,8 +95,9 @@ export function OlapFilterBar() {
         </div>
       </div>
 
-      {/* Filter Body */}
-      <div className={`mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-100 dark:border-gray-800 pt-4 ${isOpen ? "block" : "hidden md:grid"}`}>
+      {/* Filter Body - Expandable Dropdown */}
+      {isOpen && (
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-100 dark:border-gray-800 pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
         {/* Outlets Multi-Select */}
         <div>
           <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
@@ -177,6 +189,7 @@ export function OlapFilterBar() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

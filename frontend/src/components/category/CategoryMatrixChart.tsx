@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import dynamic from "next/dynamic";
@@ -32,10 +32,10 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
     .map((m) => ({ x: m.sell_through_pct, y: m.margin_pct, name: m.department }));
 
   const series = [
-    { name: "🌟 Winners (Star Performers)", data: winners },
-    { name: "⏳ High Margin / Slow Movers", data: highMarginSlow },
-    { name: "⚡ Volume Drivers", data: volumeDrivers },
-    { name: "⚠️ Overstocked / Underperformers", data: underperformers },
+    { name: "Winners (Star Performers)", data: winners },
+    { name: "High Margin / Slow Movers", data: highMarginSlow },
+    { name: "Volume Drivers", data: volumeDrivers },
+    { name: "Overstocked / Underperformers", data: underperformers },
   ];
 
   const options: ApexOptions = {

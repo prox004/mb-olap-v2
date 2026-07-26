@@ -30,7 +30,7 @@ export function CategoryTopMovers({ data, loading }: { data: TopMoversData; load
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              🚀 Top 5 Fastest Moving Categories
+               Top 5 Fastest Moving Categories
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">Ranked by Sell-Through Velocity %</p>
           </div>
@@ -69,7 +69,7 @@ export function CategoryTopMovers({ data, loading }: { data: TopMoversData; load
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              ⚠️ Top 5 Overstocked Underperformers
+               Top 5 Overstocked Underperformers
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">Ranked by High Weeks of Cover (WOC)</p>
           </div>

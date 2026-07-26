@@ -22,9 +22,9 @@ def run_size_price_analytics_etl():
             COALESCE(i.Department, 'UNKNOWN') AS department,
             COALESCE(NULLIF(TRIM(i.CNAME5), ''), 'FREE_SIZE') AS size_code,
             SUM(f.GOODS_RECEIVE_QUANTITY) AS total_bought_units,
-            SUM(f.NET_SALE_QUANTITY) AS total_sold_units,
+            SUM(ABS(f.NET_SALE_QUANTITY)) AS total_sold_units,
             SUM(f.CLOSING_STOCK_QUANTITY) AS current_stock_units,
-            SUM(f.NET_SALE_AMOUNT) AS net_revenue
+            SUM(ABS(f.NET_SALE_AMOUNT)) AS net_revenue
         FROM fact_cube_monthly f
         LEFT JOIN dim_item i ON f.BARCODE = i.ICODE
         GROUP BY i.Division, i.Department, i.CNAME5
@@ -69,8 +69,8 @@ def run_size_price_analytics_etl():
                 WHEN COALESCE(i.MRP, i.RATE, 0.0) BETWEEN 500 AND 1000 THEN '500 - 1000'
                 ELSE '> 1000'
             END AS price_band,
-            f.NET_SALE_QUANTITY,
-            f.NET_SALE_AMOUNT,
+            ABS(f.NET_SALE_QUANTITY) AS NET_SALE_QUANTITY,
+            ABS(f.NET_SALE_AMOUNT) AS NET_SALE_AMOUNT,
             f.GP_AMOUNT,
             f.CLOSING_STOCK_QUANTITY
         FROM fact_cube_monthly f

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { CategoryHierarchyItem } from "@/hooks/useCategoryData";
@@ -164,9 +164,9 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
                   >
                     <td className="py-3 px-4 text-gray-900 dark:text-white flex items-center gap-2">
                       <span className="text-brand-500 font-mono text-sm">
-                        {isDivExpanded ? "▼" : "▶"}
+                        {isDivExpanded ? "-" : "+"}
                       </span>
-                      🏢 {div.divisionName}
+                       {div.divisionName}
                     </td>
                     <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
                       {formatCurrency(div.net_revenue)}
@@ -196,9 +196,9 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
                           >
                             <td className="py-2.5 px-4 text-gray-800 dark:text-gray-200 flex items-center gap-2 pl-8">
                               <span className="text-gray-400 text-xs">
-                                {isSecExpanded ? "▼" : "▶"}
+                                {isSecExpanded ? "-" : "+"}
                               </span>
-                              📁 {sec.sectionName}
+                               {sec.sectionName}
                             </td>
                             <td className="py-2.5 px-4 font-semibold text-gray-900 dark:text-white">
                               {formatCurrency(sec.net_revenue)}
@@ -218,7 +218,7 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
                                 className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
                               >
                                 <td className="py-2 px-4 text-gray-700 dark:text-gray-300 pl-14 font-medium">
-                                  🏷️ {dept.department}
+                                   {dept.department}
                                 </td>
                                 <td className="py-2 px-4 font-medium text-gray-900 dark:text-white">
                                   {formatCurrency(dept.net_revenue)}

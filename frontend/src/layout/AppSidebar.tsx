@@ -61,19 +61,8 @@ const olapNavGroups: NavGroup[] = [
   },
 ];
 
-/* 
-  --------------------------------------------------------------------------
-  PRESERVED DEMO TEMPLATE ITEMS (Preserved for reference without deletion)
-  --------------------------------------------------------------------------
-  const unusedDemoItems = [
-    { name: "Calendar", icon: <CalenderIcon />, path: "/calendar" },
-    { name: "User Profile", icon: <UserCircleIcon />, path: "/profile" },
-    { name: "Pages", icon: <PageIcon />, path: "/blank" },
-  ];
-*/
-
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isHovered, isMobileOpen, setIsHovered } = useSidebar();
+  const { isExpanded, isHovered, isMobileOpen, toggleSidebar, setIsHovered } = useSidebar();
   const pathname = usePathname();
 
   const isActive = useCallback((path: string) => path === pathname, [pathname]);
@@ -93,33 +82,32 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Brand Logo Header */}
+      {/* Integrated Sidebar Brand Icon & Toggle Button */}
       <div
         className={`py-6 flex items-center ${
           !isExpanded && !isHovered ? "xl:justify-center" : "justify-between"
         }`}
       >
-        <Link href="/" className="flex items-center gap-2">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white font-bold text-lg shadow-xs">
-                MB
-              </div>
-              <div className="flex flex-col">
-                <span className="text-base font-bold text-gray-900 dark:text-white leading-none">
-                  MB-OLAP V2
-                </span>
-                <span className="text-[10px] font-semibold text-brand-500 uppercase tracking-widest mt-1">
-                  Enterprise Platform
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white font-bold text-lg">
-              MB
+        <button
+          onClick={toggleSidebar}
+          className="flex items-center gap-2.5 text-left focus:outline-none group cursor-pointer"
+          title={isExpanded ? "Click icon to collapse sidebar" : "Click icon to expand sidebar"}
+          aria-label="Toggle Sidebar Expansion"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-white font-bold text-lg shadow-xs group-hover:scale-105 transition-transform">
+            MB
+          </div>
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-gray-900 dark:text-white leading-none">
+                MB-OLAP V2
+              </span>
+              <span className="text-[10px] font-semibold text-brand-500 uppercase tracking-widest mt-1">
+                Enterprise Platform
+              </span>
             </div>
           )}
-        </Link>
+        </button>
       </div>
 
       {/* Navigation Group Blocks */}
