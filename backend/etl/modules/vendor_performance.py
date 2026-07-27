@@ -62,21 +62,45 @@ def run_vendor_performance_etl():
     GROUP BY i.PARTYNAME;
     """)
 
-    # 2. View - Composite Vendor Scorecard
-    print("2. Creating view v_vendor_scorecard...")
+    # 2. View - Composite Comparative Vendor Scorecard
+    # Uses relative percentile ranking (PERCENT_RANK) across all suppliers
+    # Weights: Revenue Volume (35%), Sell-Through Rate (35%), Gross Margin % (20%), Low Return Rate (10%)
+    print("2. Creating view v_vendor_scorecard with relative comparative scoring...")
     con.execute("""
     CREATE OR REPLACE VIEW v_vendor_scorecard AS
+    WITH ranked_vendors AS (
+        SELECT
+            *,
+            PERCENT_RANK() OVER (ORDER BY net_revenue ASC) AS rev_rank,
+            PERCENT_RANK() OVER (ORDER BY sell_through_pct ASC) AS st_rank,
+            PERCENT_RANK() OVER (ORDER BY margin_pct ASC) AS margin_rank,
+            PERCENT_RANK() OVER (ORDER BY return_rate_pct DESC) AS return_rank
+        FROM v_vendor_performance_summary
+    )
     SELECT
-        *,
+        vendor_name,
+        total_skus_supplied,
+        receive_units,
+        receive_value,
+        return_units,
+        return_value,
+        sales_units,
+        net_revenue,
+        gross_profit,
+        current_stock_units,
+        current_stock_value,
+        sell_through_pct,
+        margin_pct,
+        return_rate_pct,
         ROUND(
-            GREATEST(0.0, LEAST(
-                (LEAST(sell_through_pct, 100.0) * 0.40) + 
-                (margin_pct * 0.40) + 
-                (GREATEST(0.0, (100.0 - return_rate_pct * 5.0)) * 0.20), 
-                100.0
-            )), 1
+            (
+                (rev_rank * 0.35) + 
+                (st_rank * 0.35) + 
+                (margin_rank * 0.20) + 
+                (return_rank * 0.10)
+            ) * 100.0, 1
         ) AS vendor_score
-    FROM v_vendor_performance_summary;
+    FROM ranked_vendors;
     """)
 
     # 3. Print Verification Statistics

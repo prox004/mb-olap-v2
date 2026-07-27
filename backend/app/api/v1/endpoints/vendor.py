@@ -100,6 +100,15 @@ def get_vendor_scorecard(
             {where_clause}
             GROUP BY i.PARTYNAME
             {having_clause}
+        ),
+        ranked_vendors AS (
+            SELECT
+                *,
+                PERCENT_RANK() OVER (ORDER BY net_revenue ASC) AS rev_rank,
+                PERCENT_RANK() OVER (ORDER BY sell_through_pct ASC) AS st_rank,
+                PERCENT_RANK() OVER (ORDER BY margin_pct ASC) AS margin_rank,
+                PERCENT_RANK() OVER (ORDER BY return_rate_pct DESC) AS return_rank
+            FROM vendor_agg
         )
         SELECT
             vendor_name,
@@ -117,14 +126,14 @@ def get_vendor_scorecard(
             ROUND(margin_pct, 2) AS margin_pct,
             return_rate_pct,
             ROUND(
-                GREATEST(0.0, LEAST(
-                    (LEAST(sell_through_pct, 100.0) * 0.40) + 
-                    (margin_pct * 0.40) + 
-                    (GREATEST(0.0, (100.0 - return_rate_pct * 5.0)) * 0.20), 
-                    100.0
-                )), 1
+                (
+                    (rev_rank * 0.35) + 
+                    (st_rank * 0.35) + 
+                    (margin_rank * 0.20) + 
+                    (return_rank * 0.10)
+                ) * 100.0, 1
             ) AS vendor_score
-        FROM vendor_agg
+        FROM ranked_vendors
         """
     else:
         # Query v_vendor_scorecard view directly

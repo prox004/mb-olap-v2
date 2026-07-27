@@ -223,13 +223,13 @@ def get_monthly_trends(
     db: DuckDBPyConnection = Depends(get_db),
 ):
     """
-    Returns monthly revenue, profit, gross margin %, and inventory trends across April, May, June 2026.
+    Returns monthly revenue, profit, gross margin %, and inventory trends across operational months.
     """
     where_clause, params = build_where_clause(store_ids=store_ids, division=division, department=department, table_prefix="v")
 
     query = f"""
     SELECT
-        COALESCE(strftime(v.START_DATE, '%Y-%m'), '2026-04') AS month_name,
+        strftime(v.START_DATE, '%Y-%m') AS month_name,
         SUM(ABS(v.NET_SALE_AMOUNT)) AS revenue,
         SUM(v.GP_AMOUNT) AS gross_profit,
         CASE 
@@ -240,6 +240,7 @@ def get_monthly_trends(
         SUM(v.CLOSING_STOCK_AMOUNT) AS inventory_value
     FROM v_fact_item_location_monthly v
     {where_clause}
+    {"WHERE v.START_DATE IS NOT NULL" if not where_clause else "AND v.START_DATE IS NOT NULL"}
     GROUP BY month_name
     ORDER BY month_name ASC;
     """

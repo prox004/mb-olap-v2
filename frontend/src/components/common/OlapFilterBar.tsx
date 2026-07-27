@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useOlapFilter } from "@/context/OlapFilterContext";
@@ -130,12 +130,16 @@ export function OlapFilterBar() {
         {/* Period Months Multi-Select */}
         <div>
           <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-            Operational Period (Q2 2026)
+            Operational Period ({selectedMonths.length}/{availableMonths.length} Selected)
           </label>
           <div className="flex flex-wrap gap-1.5">
             {availableMonths.map((m) => {
               const isSelected = selectedMonths.includes(m);
-              const monthLabel = m === "2026-04" ? "April 26" : m === "2026-05" ? "May 26" : "June 26";
+              const [year, month] = m.split("-");
+              const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+              const monthLabel = isNaN(dateObj.getTime())
+                ? m
+                : dateObj.toLocaleString("en-US", { month: "short", year: "2-digit" });
               return (
                 <button
                   key={m}

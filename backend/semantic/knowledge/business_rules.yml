@@ -1,0 +1,26 @@
+# Wren AI Business & Operational Knowledge Rules - MB-OLAP V2
+business_rules:
+  - id: sign_convention_sales
+    category: "Data Storage & Sign Conventions"
+    rule: "NET_SALE_AMOUNT and NET_SALE_QUANTITY are stored in the OLAP database with negative numerical values. ALWAYS apply ABS() when calculating sales volumes, revenue, totals, or averages."
+    example: "Correct: SUM(ABS(NET_SALE_AMOUNT)). Incorrect: SUM(NET_SALE_AMOUNT)."
+
+  - id: site_type_classification
+    category: "Operational Site Types"
+    rule: "ADMSITE_CODE = 1070 represents the CENTRAL WAREHOUSE (Distribution Center DC). All other ADMSITE_CODEs (e.g. 6=VIP, 530=Gariahat, 820=Andul) represent active RETAIL STORES."
+    example: "To query retail store sales only, use WHERE fact_cube_monthly.ADMSITE_CODE != 1070 or join dim_location and filter WHERE dim_location.SITE_TYPE = 'RETAIL_STORE'."
+
+  - id: item_barcode_join
+    category: "Relational Joins"
+    rule: "Join fact_cube_monthly to dim_item using fact_cube_monthly.BARCODE = dim_item.ICODE. Join fact_cube_monthly to dim_location using fact_cube_monthly.ADMSITE_CODE = dim_location.ADMSITE_CODE."
+    example: "FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE"
+
+  - id: store_location_aliases
+    category: "Store Location Aliases & Mapping"
+    rule: "Store names map as follows: 'VIP' / 'VIP Store' / 'Store 6' -> ADMSITE_CODE 6 or dim_location.Name LIKE '%Vip%'. 'Gariahat' / 'Store 530' -> ADMSITE_CODE 530 or dim_location.Name LIKE '%Gariahat%'. 'Andul' / 'Andul Road' / 'Store 820' -> ADMSITE_CODE 820 or dim_location.Name LIKE '%Andul%'. 'Central Warehouse' / 'DC' -> ADMSITE_CODE 1070."
+    example: "WHERE dim_location.Name ILIKE '%Vip%' OR fact_cube_monthly.ADMSITE_CODE = 6"
+
+  - id: date_period_filtering
+    category: "Date & Period Filtering"
+    rule: "REPORT_DATE records period snapshots (e.g., 2026-06-12, 2026-06-13, 2026-07-15). If the user asks for 'this month' or 'sales this month', filter by date e.g. WHERE MONTH(fact_cube_monthly.REPORT_DATE) = 7 AND YEAR(fact_cube_monthly.REPORT_DATE) = 2026 or max available date snapshot."
+    example: "WHERE DATE_TRUNC('month', fact_cube_monthly.REPORT_DATE) = '2026-07-01'"

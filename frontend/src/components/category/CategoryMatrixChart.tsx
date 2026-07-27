@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import dynamic from "next/dynamic";
@@ -14,7 +14,6 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
     );
   }
 
-  // Filter out anomalies or extreme outliers for clean plot visualization
   const winners = matrix
     .filter((m) => m.performance_quadrant === "WINNER")
     .map((m) => ({ x: m.sell_through_pct, y: m.margin_pct, name: m.department }));
@@ -46,23 +45,32 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
       toolbar: { show: true },
     },
     colors: ["#10b981", "#465fff", "#f59e0b", "#ef4444"],
+    markers: {
+      size: 6,
+      hover: {
+        size: 8,
+      },
+    },
     xaxis: {
       title: { text: "Sell-Through Rate %" },
       tickAmount: 10,
-      labels: { formatter: (val) => `${val}%` },
+      labels: { formatter: (val) => `${Number(val).toFixed(1)}%` },
     },
     yaxis: {
       title: { text: "Gross Margin %" },
-      labels: { formatter: (val) => `${val}%` },
+      labels: { formatter: (val) => `${Number(val).toFixed(1)}%` },
     },
     tooltip: {
       custom: function ({ seriesIndex, dataPointIndex, w }) {
-        const item = w.config.series[seriesIndex].data[dataPointIndex];
+        const item = w.config.series[seriesIndex]?.data?.[dataPointIndex];
+        if (!item) return "";
         return `
-          <div className="p-2 text-xs font-sans bg-gray-900 text-white rounded shadow-md">
-            <strong>${item.name}</strong><br/>
-            Sell-Through: <b>${item.x}%</b><br/>
-            Margin: <b>${item.y}%</b>
+          <div className="p-2.5 text-xs font-sans bg-gray-900 text-white rounded-lg shadow-lg border border-gray-700">
+            <strong className="text-brand-400 text-sm">${item.name}</strong>
+            <div className="mt-1">
+              <span>Sell-Through: <b>${item.x}%</b></span><br/>
+              <span>Gross Margin: <b>${item.y}%</b></span>
+            </div>
           </div>
         `;
       },

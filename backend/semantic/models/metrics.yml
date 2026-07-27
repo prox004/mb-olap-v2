@@ -1,0 +1,36 @@
+# Wren AI Business Metrics Definitions - MB-OLAP V2
+metrics:
+  - name: net_revenue
+    model: fact_cube_monthly
+    expression: "SUM(ABS(fact_cube_monthly.NET_SALE_AMOUNT))"
+    description: "Total net monetary revenue generated from retail sales (using ABS due to negative sign storage)."
+
+  - name: net_units_sold
+    model: fact_cube_monthly
+    expression: "SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY))"
+    description: "Total net physical units sold across outlets (using ABS due to negative sign storage)."
+
+  - name: gross_profit
+    model: fact_cube_monthly
+    expression: "SUM(fact_cube_monthly.GP_AMOUNT)"
+    description: "Total monetary gross profit (Net Revenue minus Net COGS)."
+
+  - name: gross_margin_pct
+    model: fact_cube_monthly
+    expression: "(SUM(fact_cube_monthly.GP_AMOUNT) / NULLIF(SUM(ABS(fact_cube_monthly.NET_SALE_AMOUNT)), 0)) * 100"
+    description: "Percentage gross profit margin ratio relative to net sales revenue."
+
+  - name: sell_through_pct
+    model: fact_cube_monthly
+    expression: "(SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY)) / NULLIF(SUM(fact_cube_monthly.OPENING_QUANTITY) + SUM(fact_cube_monthly.GOODS_RECEIVE_QUANTITY) + SUM(fact_cube_monthly.SITE_TRANSFER_IN_QUANTITY), 0)) * 100"
+    description: "Inventory sell-through rate percentage (units sold divided by total incoming stock availability)."
+
+  - name: weeks_of_cover
+    model: fact_cube_monthly
+    expression: "SUM(fact_cube_monthly.CLOSING_STOCK_QUANTITY) / NULLIF(SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY)) / 12.0, 0)"
+    description: "Stock cover expressed in operational weeks (WOC), based on closing stock divided by weekly average sales velocity."
+
+  - name: gmroi
+    model: fact_cube_monthly
+    expression: "SUM(fact_cube_monthly.GP_AMOUNT) / NULLIF((SUM(fact_cube_monthly.OPENING_AMOUNT) + SUM(fact_cube_monthly.CLOSING_STOCK_AMOUNT)) / 2.0, 0)"
+    description: "Gross Margin Return on Investment (GMROI), measuring profit returned per currency unit of average inventory cost."

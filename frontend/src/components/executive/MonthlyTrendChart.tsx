@@ -15,10 +15,13 @@ export function MonthlyTrendChart({ trends, loading }: { trends: MonthlyTrendIte
   }
 
   const categories = trends.map((t) => {
-    if (t.month_name === "2026-04") return "April 2026";
-    if (t.month_name === "2026-05") return "May 2026";
-    if (t.month_name === "2026-06") return "June 2026";
-    return t.month_name;
+    if (!t.month_name) return "";
+    const [year, month] = t.month_name.split("-");
+    if (!year || !month) return t.month_name;
+    const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+    return isNaN(dateObj.getTime())
+      ? t.month_name
+      : dateObj.toLocaleString("en-US", { month: "long", year: "numeric" });
   });
 
   const revenueSeries = trends.map((t) => Number((t.revenue / 1e7).toFixed(2))); // In Crores
@@ -89,7 +92,7 @@ export function MonthlyTrendChart({ trends, loading }: { trends: MonthlyTrendIte
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
-            Monthly Performance Trends (Q2 2026)
+            Monthly Performance Trends
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Net Revenue (₹ Crores) vs Gross Profit Margin % trajectory

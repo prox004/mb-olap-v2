@@ -53,7 +53,7 @@ export function TopBottomSkusWidget({
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-             Top 10 Revenue Generators
+            Top 10 Revenue Generators
           </button>
           <button
             onClick={() => setActiveTab("bottom")}
@@ -63,7 +63,7 @@ export function TopBottomSkusWidget({
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-             Bottom 10 Slow Movers / Dead Stock
+            Bottom 10 Slow Movers / Dead Stock
           </button>
         </div>
       </div>

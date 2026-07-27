@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "question": "What are the top 5 departments by net sales revenue?",
+    "sql": "SELECT i.Department, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.Department ORDER BY Net_Revenue DESC LIMIT 5;"
+  },
+  {
+    "id": 2,
+    "question": "Show revenue and gross profit margin percentage across all retail stores",
+    "sql": "SELECT l.Name AS Store_Name, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue, ROUND((SUM(f.GP_AMOUNT) / NULLIF(SUM(ABS(f.NET_SALE_AMOUNT)), 0)) * 100, 2) AS Gross_Margin_Pct FROM fact_cube_monthly f JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE WHERE f.ADMSITE_CODE != 1070 GROUP BY l.Name ORDER BY Net_Revenue DESC;"
+  },
+  {
+    "id": 3,
+    "question": "Which vendors have the highest GMROI?",
+    "sql": "SELECT i.PARTYNAME AS Vendor_Name, ROUND(SUM(f.GP_AMOUNT), 2) AS Gross_Profit, ROUND(SUM(f.GP_AMOUNT) / NULLIF((SUM(f.OPENING_AMOUNT) + SUM(f.CLOSING_STOCK_AMOUNT)) / 2.0, 0), 2) AS GMROI FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.PARTYNAME HAVING SUM(ABS(f.NET_SALE_AMOUNT)) > 10000 ORDER BY GMROI DESC LIMIT 10;"
+  },
+  {
+    "id": 4,
+    "question": "What is the sell-through percentage by division?",
+    "sql": "SELECT i.Division, ROUND(SUM(ABS(f.NET_SALE_QUANTITY)), 0) AS Net_Units_Sold, ROUND((SUM(ABS(f.NET_SALE_QUANTITY)) / NULLIF(SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY), 0)) * 100, 2) AS Sell_Through_Pct FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.Division ORDER BY Sell_Through_Pct DESC;"
+  },
+  {
+    "id": 5,
+    "question": "What is the closing stock valuation and weeks of cover for Store 6?",
+    "sql": "SELECT l.Name AS Store_Name, ROUND(SUM(f.CLOSING_STOCK_AMOUNT), 2) AS Closing_Stock_Value, ROUND(SUM(f.CLOSING_STOCK_QUANTITY) / NULLIF(SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0, 0), 2) AS Weeks_Of_Cover FROM fact_cube_monthly f JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE WHERE f.ADMSITE_CODE = 6 GROUP BY l.Name;"
+  },
+  {
+    "id": 6,
+    "question": "List top 10 items by sales volume units",
+    "sql": "SELECT f.BARCODE, i.DESC1 AS Item_Description, i.Department, ROUND(SUM(ABS(f.NET_SALE_QUANTITY)), 0) AS Units_Sold FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY f.BARCODE, i.DESC1, i.Department ORDER BY Units_Sold DESC LIMIT 10;"
+  },
+  {
+    "id": 7,
+    "question": "Show total revenue generated in Central Warehouse versus Retail Stores",
+    "sql": "SELECT CASE WHEN f.ADMSITE_CODE = 1070 THEN 'Central Warehouse' ELSE 'Retail Stores' END AS Site_Category, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Total_Revenue FROM fact_cube_monthly f GROUP BY Site_Category;"
+  },
+  {
+    "id": 8,
+    "question": "Show monthly sales trend by report date",
+    "sql": "SELECT f.REPORT_DATE, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue, ROUND(SUM(ABS(f.NET_SALE_QUANTITY)), 0) AS Units_Sold FROM fact_cube_monthly f GROUP BY f.REPORT_DATE ORDER BY f.REPORT_DATE ASC;"
+  },
+  {
+    "id": 9,
+    "question": "What are the bottom 5 departments by Gross Margin Percentage?",
+    "sql": "SELECT i.Department, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue, ROUND((SUM(f.GP_AMOUNT) / NULLIF(SUM(ABS(f.NET_SALE_AMOUNT)), 0)) * 100, 2) AS Gross_Margin_Pct FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.Department HAVING SUM(ABS(f.NET_SALE_AMOUNT)) > 5000 ORDER BY Gross_Margin_Pct ASC LIMIT 5;"
+  },
+  {
+    "id": 10,
+    "question": "What is the total opening stock vs closing stock amount across all stores?",
+    "sql": "SELECT ROUND(SUM(f.OPENING_AMOUNT), 2) AS Total_Opening_Stock_Value, ROUND(SUM(f.CLOSING_STOCK_AMOUNT), 2) AS Total_Closing_Stock_Value FROM fact_cube_monthly f;"
+  },
+  {
+    "id": 11,
+    "question": "Which vendors contribute top 80% of total revenue?",
+    "sql": "SELECT i.PARTYNAME AS Vendor_Name, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.PARTYNAME ORDER BY Net_Revenue DESC LIMIT 10;"
+  },
+  {
+    "id": 12,
+    "question": "Find items with closing stock > 100 units but 0 net sales",
+    "sql": "SELECT f.BARCODE, i.DESC1 AS Item_Description, i.Department, SUM(f.CLOSING_STOCK_QUANTITY) AS Current_Stock, SUM(ABS(f.NET_SALE_QUANTITY)) AS Units_Sold FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY f.BARCODE, i.DESC1, i.Department HAVING SUM(f.CLOSING_STOCK_QUANTITY) > 100 AND SUM(ABS(f.NET_SALE_QUANTITY)) = 0 ORDER BY Current_Stock DESC LIMIT 10;"
+  },
+  {
+    "id": 13,
+    "question": "Show revenue breakdown by Section in MENS division",
+    "sql": "SELECT i.Section, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE i.Division = 'MENS' GROUP BY i.Section ORDER BY Net_Revenue DESC;"
+  },
+  {
+    "id": 14,
+    "question": "Show stores with highest stock cover in weeks",
+    "sql": "SELECT l.Name AS Store_Name, ROUND(SUM(f.CLOSING_STOCK_QUANTITY), 0) AS Closing_Stock_Units, ROUND(SUM(f.CLOSING_STOCK_QUANTITY) / NULLIF(SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0, 0), 1) AS Weeks_Of_Cover FROM fact_cube_monthly f JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE WHERE f.ADMSITE_CODE != 1070 GROUP BY l.Name ORDER BY Weeks_Of_Cover DESC;"
+  },
+  {
+    "id": 15,
+    "question": "What is the average discount percentage by department?",
+    "sql": "SELECT i.Department, ROUND(SUM(f.SALE_DISCOUNT_AMOUNT), 2) AS Total_Discounts, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue, ROUND((SUM(f.SALE_DISCOUNT_AMOUNT) / NULLIF(SUM(ABS(f.NET_SALE_AMOUNT)) + SUM(f.SALE_DISCOUNT_AMOUNT), 0)) * 100, 2) AS Discount_Pct FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.Department HAVING SUM(ABS(f.NET_SALE_AMOUNT)) > 10000 ORDER BY Discount_Pct DESC LIMIT 10;"
+  },
+  {
+    "id": 16,
+    "question": "Show total goods received quantity from vendors per store",
+    "sql": "SELECT l.Name AS Store_Name, ROUND(SUM(f.GOODS_RECEIVE_QUANTITY), 0) AS Goods_Received_Units, ROUND(SUM(f.GOODS_RECEIVE_AMOUNT), 2) AS Goods_Received_Value FROM fact_cube_monthly f JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE GROUP BY l.Name ORDER BY Goods_Received_Value DESC;"
+  },
+  {
+    "id": 17,
+    "question": "Show top 5 departments in Gariahat store",
+    "sql": "SELECT i.Department, ROUND(SUM(ABS(f.NET_SALE_AMOUNT)), 2) AS Net_Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE WHERE l.Name LIKE '%Gariahat%' OR f.ADMSITE_CODE = 530 GROUP BY i.Department ORDER BY Net_Revenue DESC LIMIT 5;"
+  },
+  {
+    "id": 18,
+    "question": "What are total site transfer out amounts between stores?",
+    "sql": "SELECT l.Name AS Origin_Store, ROUND(SUM(f.SITE_TRANSFER_OUT_QUANTITY), 0) AS Transfer_Out_Units, ROUND(SUM(f.SITE_TRANSFER_OUT_AMOUNT), 2) AS Transfer_Out_Value FROM fact_cube_monthly f JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE GROUP BY l.Name ORDER BY Transfer_Out_Value DESC;"
+  },
+  {
+    "id": 19,
+    "question": "Show total promotional discount given per division",
+    "sql": "SELECT i.Division, ROUND(SUM(f.SALE_PROMO_AMOUNT), 2) AS Total_Promo_Discount FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.Division ORDER BY Total_Promo_Discount DESC;"
+  },
+  {
+    "id": 20,
+    "question": "Show total net revenue, gross profit, and total items sold across entire retail chain",
+    "sql": "SELECT ROUND(SUM(ABS(NET_SALE_AMOUNT)), 2) AS Total_Chain_Revenue, ROUND(SUM(GP_AMOUNT), 2) AS Total_Chain_Gross_Profit, ROUND(SUM(ABS(NET_SALE_QUANTITY)), 0) AS Total_Units_Sold FROM fact_cube_monthly WHERE ADMSITE_CODE != 1070;"
+  }
+]

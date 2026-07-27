@@ -1,0 +1,96 @@
+# Wren AI MDL Model Definition - MB-OLAP V2 Sales & Stock Cube
+models:
+  - name: fact_cube_monthly
+    table_reference:
+      catalog: olap_warehouse
+      schema: main
+      table: fact_cube_monthly
+    primary_key: [ADMSITE_CODE, BARCODE]
+    description: "Monthly aggregated OLAP sales cube recording revenue, quantities, inventory, margins, and transfers across retail stores and warehouses."
+    columns:
+      - { name: SEQ, type: BIGINT, description: "Sequence identifier" }
+      - { name: CUBE_CODE, type: VARCHAR, description: "OLAP Cube Code" }
+      - { name: CUBENAME, type: VARCHAR, description: "OLAP Cube Name" }
+      - { name: CREATOR, type: VARCHAR, description: "Cube record creator" }
+      - { name: REPORT_DATE, type: DATE, description: "Report date snapshot" }
+      - { name: START_DATE, type: DATE, description: "Period start date" }
+      - { name: END_DATE, type: DATE, description: "Period end date" }
+      - { name: BARCODE, type: VARCHAR, is_primary_key: true, description: "Unique SKU Barcode / ICODE matching dim_item.ICODE" }
+      - { name: ADMSITE_CODE, type: INTEGER, is_primary_key: true, description: "Store Outlet Code matching dim_location.ADMSITE_CODE (e.g. 6=VIP, 530=Gariahat, 820=Andul, 1070=Central Warehouse)" }
+      - { name: OPENING_QUANTITY, type: DOUBLE, description: "Opening stock units at beginning of period" }
+      - { name: OPENING_AMOUNT, type: DOUBLE, description: "Opening stock monetary value" }
+      - { name: GOODS_RECEIVE_QUANTITY, type: DOUBLE, description: "Goods received quantity from vendors" }
+      - { name: GOODS_RECEIVE_AMOUNT, type: DOUBLE, description: "Goods received monetary value" }
+      - { name: GOODS_RETURN_QUANTITY, type: DOUBLE, description: "Goods returned to vendor quantity" }
+      - { name: GOODS_RETURN_AMOUNT, type: DOUBLE, description: "Goods returned monetary value" }
+      - { name: SITE_TRANSFER_IN_QUANTITY, type: DOUBLE, description: "Store-to-store transfer in quantity" }
+      - { name: SITE_TRANSFER_IN_AMOUNT, type: DOUBLE, description: "Store-to-store transfer in monetary value" }
+      - { name: SITE_TRANSFER_OUT_QUANTITY, type: DOUBLE, description: "Store-to-store transfer out quantity" }
+      - { name: SITE_TRANSFER_OUT_AMOUNT, type: DOUBLE, description: "Store-to-store transfer out monetary value" }
+      - { name: RETAIL_SALE_QUANTITY, type: DOUBLE, description: "Retail sales volume units" }
+      - { name: RETAIL_SALE_AMOUNT, type: DOUBLE, description: "Retail sales monetary value" }
+      - { name: NET_SALE_QUANTITY, type: DOUBLE, description: "Net units sold in period (CRITICAL: stored with negative sign balances; use ABS() for sales volume)" }
+      - { name: NET_SALE_AMOUNT, type: DOUBLE, description: "Net Revenue amount (CRITICAL: stored with negative sign balances; use ABS() for revenue)" }
+      - { name: NET_SALE_COGS_AMOUNT, type: DOUBLE, description: "Cost of Goods Sold (COGS) for net sales" }
+      - { name: CLOSING_STOCK_QUANTITY, type: DOUBLE, description: "Closing inventory on-hand units at end of period" }
+      - { name: CLOSING_STOCK_AMOUNT, type: DOUBLE, description: "Closing inventory monetary valuation" }
+      - { name: GP_AMOUNT, type: DOUBLE, description: "Gross Profit currency amount (Revenue - COGS)" }
+      - { name: ADJUSTED_GP_AMOUNT, type: DOUBLE, description: "Adjusted Gross Profit amount" }
+      - { name: SALE_TAX_AMOUNT, type: DOUBLE, description: "Sales tax monetary amount" }
+      - { name: SALE_PROMO_AMOUNT, type: DOUBLE, description: "Promotional discount amount" }
+      - { name: SALE_DISCOUNT_AMOUNT, type: DOUBLE, description: "Sale discount amount" }
+      - { name: WAREHOUSE_TRANSFER_IN_QUANTITY, type: DOUBLE, description: "DC to store transfer in quantity" }
+      - { name: WAREHOUSE_TRANSFER_IN_AMOUNT, type: DOUBLE, description: "DC to store transfer in monetary value" }
+      - { name: WH_TRANSFER_OUT_QUANTITY, type: DOUBLE, description: "Transfer out to DC quantity" }
+      - { name: WH_TRANSFER_OUT_AMOUNT, type: DOUBLE, description: "Transfer out to DC monetary value" }
+      - { name: PENDING_PO_QUANTITY, type: DOUBLE, description: "Pending Purchase Order quantity" }
+
+  - name: dim_item
+    table_reference:
+      catalog: olap_warehouse
+      schema: main
+      table: dim_item
+    primary_key: ICODE
+    description: "Item Master product hierarchy, vendor details, descriptions, and pricing attributes."
+    columns:
+      - { name: ICODE, type: VARCHAR, is_primary_key: true, description: "Item Barcode matching fact_cube_monthly.BARCODE" }
+      - { name: DESC1, type: VARCHAR, description: "Item description / product name" }
+      - { name: DESC2, type: VARCHAR, description: "Secondary item description / detail" }
+      - { name: DESC3, type: VARCHAR, description: "Tertiary item description / attribute" }
+      - { name: Division, type: VARCHAR, description: "Top-level product division (e.g. MENS, WOMENS, KIDS)" }
+      - { name: Section, type: VARCHAR, description: "Product section" }
+      - { name: Department, type: VARCHAR, description: "Category department name (226 departments)" }
+      - { name: "Department Allias", type: VARCHAR, description: "Department alias / shorthand" }
+      - { name: CNAME1, type: VARCHAR, description: "Category hierarchy level 1 (e.g. Category/Group)" }
+      - { name: CNAME2, type: VARCHAR, description: "Category hierarchy level 2 (e.g. Sub-category)" }
+      - { name: CNAME3, type: VARCHAR, description: "Category hierarchy level 3 (e.g. Fit/Style)" }
+      - { name: CNAME4, type: VARCHAR, description: "Category hierarchy level 4 (e.g. Size)" }
+      - { name: CNAME5, type: VARCHAR, description: "Category hierarchy level 5 (e.g. Colour)" }
+      - { name: CNAME6, type: VARCHAR, description: "Category hierarchy level 6" }
+      - { name: PARTYNAME, type: VARCHAR, description: "Vendor / Supplier name" }
+      - { name: RATE, type: DOUBLE, description: "Purchase cost rate" }
+      - { name: MRP, type: DOUBLE, description: "Maximum Retail Price" }
+      - { name: STOCKINDATE, type: DATE, description: "First stock in date" }
+
+  - name: dim_location
+    table_reference:
+      catalog: olap_warehouse
+      schema: main
+      table: dim_location
+    primary_key: ADMSITE_CODE
+    description: "Location Master detailing store outlets and central warehouse / distribution center."
+    columns:
+      - { name: ADMSITE_CODE, type: BIGINT, is_primary_key: true, description: "Store Site Code (e.g., 6=VIP, 530=Gariahat, 820=Andul, 1070=Central Warehouse)" }
+      - { name: Name, type: VARCHAR, description: "Store name / site designation" }
+      - { name: SITE_TYPE, type: VARCHAR, description: "Site classification: 'RETAIL_STORE' or 'CENTRAL_WAREHOUSE'" }
+
+relationships:
+  - name: cube_to_item
+    models: [fact_cube_monthly, dim_item]
+    join_type: MANY_TO_ONE
+    condition: "fact_cube_monthly.BARCODE = dim_item.ICODE"
+
+  - name: cube_to_location
+    models: [fact_cube_monthly, dim_location]
+    join_type: MANY_TO_ONE
+    condition: "fact_cube_monthly.ADMSITE_CODE = dim_location.ADMSITE_CODE"

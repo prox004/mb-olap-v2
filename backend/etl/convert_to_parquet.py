@@ -1,5 +1,6 @@
 import os
 import time
+import glob
 # pyrefly: ignore [missing-import]
 import duckdb
 import pandas as pd
@@ -29,7 +30,14 @@ def run_parquet_conversion():
     """
 
     # 1. Convert Fact Cube Monthly Data
-    print("1. Converting Fact Cube Monthly CSVs (April, May, June)...")
+    print("1. Discovering and converting Fact Cube Monthly CSVs dynamically...")
+    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data"))
+    fact_csv_files = [
+        f.replace("\\", "/") for f in glob.glob(os.path.join(data_dir, "*.csv"))
+        if not f.endswith("items.csv")
+    ]
+    print(f"   Found {len(fact_csv_files)} monthly data file(s): {[os.path.basename(f) for f in fact_csv_files]}")
+
     fact_parquet_path = os.path.join(output_dir, "fact_cube_monthly.parquet").replace("\\", "/")
     
     fact_sql = f"""
@@ -71,7 +79,7 @@ def run_parquet_conversion():
             COALESCE(TRY_CAST(WH_TRANSFER_OUT_QUANTITY AS DOUBLE), 0.0) AS WH_TRANSFER_OUT_QUANTITY,
             COALESCE(TRY_CAST(WH_TRANSFER_OUT_AMOUNT AS DOUBLE), 0.0) AS WH_TRANSFER_OUT_AMOUNT,
             COALESCE(TRY_CAST(PENDING_PO_QUANTITY AS DOUBLE), 0.0) AS PENDING_PO_QUANTITY
-        FROM read_csv_auto(['data/april.csv', 'data/may.csv', 'data/june.csv'], union_by_name=True, normalize_names=False)
+        FROM read_csv_auto({fact_csv_files}, union_by_name=True, normalize_names=False)
     ) TO '{fact_parquet_path}' (FORMAT PARQUET, COMPRESSION SNAPPY);
     """
     con.execute(fact_sql)

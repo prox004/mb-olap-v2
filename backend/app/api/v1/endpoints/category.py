@@ -145,11 +145,12 @@ def get_category_matrix(
         FROM v_fact_item_location_monthly v
         {where_clause}
         GROUP BY v.Department
+        HAVING SUM(ABS(v.NET_SALE_AMOUNT)) > 1000 AND margin_pct > 0
     ),
     benchmarks AS (
         SELECT 
-            AVG(margin_pct) AS avg_margin,
-            AVG(sell_through_pct) AS avg_sell_through
+            MEDIAN(margin_pct) AS med_margin,
+            MEDIAN(sell_through_pct) AS med_sell_through
         FROM dept_aggregates
     )
     SELECT
@@ -164,9 +165,9 @@ def get_category_matrix(
         d.sell_through_pct,
         d.woc,
         CASE
-            WHEN d.margin_pct >= b.avg_margin AND d.sell_through_pct >= b.avg_sell_through THEN 'WINNER'
-            WHEN d.margin_pct < b.avg_margin AND d.sell_through_pct >= b.avg_sell_through THEN 'VOLUME_DRIVER'
-            WHEN d.margin_pct >= b.avg_margin AND d.sell_through_pct < b.avg_sell_through THEN 'HIGH_MARGIN_SLOW'
+            WHEN d.margin_pct >= b.med_margin AND d.sell_through_pct >= b.med_sell_through THEN 'WINNER'
+            WHEN d.margin_pct < b.med_margin AND d.sell_through_pct >= b.med_sell_through THEN 'VOLUME_DRIVER'
+            WHEN d.margin_pct >= b.med_margin AND d.sell_through_pct < b.med_sell_through THEN 'HIGH_MARGIN_SLOW'
             ELSE 'OVERSTOCKED_UNDERPERFORMER'
         END AS performance_quadrant
     FROM dept_aggregates d, benchmarks b

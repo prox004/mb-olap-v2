@@ -6,6 +6,7 @@ import { OlapFilterBar } from "@/components/common/OlapFilterBar";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
 import Backdrop from "@/layout/Backdrop";
+import { FloatingChatDrawer } from "@/components/chat/FloatingChatDrawer";
 import React from "react";
 import { usePathname } from "next/navigation";
 
@@ -54,12 +55,14 @@ export default function AdminLayout({
           <AppHeader />
           {/* Page Content */}
           <div className={getRouteSpecificStyles()}>
-            <OlapFilterBar />
+            {pathname !== "/olap-assistant" && <OlapFilterBar />}
             {children}
           </div>
         </div>
+
+        {/* Global Floating Wren AI Chat Drawer */}
+        <FloatingChatDrawer />
       </div>
     </OlapFilterProvider>
   );
 }
-

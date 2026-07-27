@@ -49,7 +49,7 @@ import DocsIcon from "./docs.svg";
 import MailIcon from "./mail-line.svg";
 import HorizontaLDots from "./horizontal-dots.svg";
 import ChatIcon from "./chat.svg";
-import MoreDotIcon from "./MoreDotIcon.svg";
+import { MoreDotIcon } from "./MoreDotIcon";
 import AiIcon from "./ai-icon.svg";
 import CartIcon from "./cart-icon.svg";
 import CallIcon from "./call-icon.svg";

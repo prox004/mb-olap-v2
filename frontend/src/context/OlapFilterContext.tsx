@@ -16,6 +16,7 @@ export type OlapFilterState = {
   availableStores: LocationOption[];
   availableMonths: string[];
   isLoadingLocations: boolean;
+  isLoadingMonths: boolean;
 };
 
 export type OlapFilterContextType = OlapFilterState & {
@@ -26,44 +27,55 @@ export type OlapFilterContextType = OlapFilterState & {
   resetFilters: () => void;
 };
 
-const DEFAULT_MONTHS = ["2026-04", "2026-05", "2026-06"];
-
 const OlapFilterContext = createContext<OlapFilterContextType | undefined>(undefined);
 
 export function OlapFilterProvider({ children }: { children: React.ReactNode }) {
   const [selectedStores, setSelectedStores] = useState<number[]>([]);
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(DEFAULT_MONTHS);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
   const [selectedDivision, setSelectedDivision] = useState<string>("All");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("All");
   
   const [availableStores, setAvailableStores] = useState<LocationOption[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState<boolean>(true);
+  const [isLoadingMonths, setIsLoadingMonths] = useState<boolean>(true);
 
   useEffect(() => {
-    async function loadLocations() {
+    async function loadMasterData() {
       try {
         setIsLoadingLocations(true);
-        const response = await apiClient<{ success: boolean; data: LocationOption[] }>("/locations");
-        if (response.success && Array.isArray(response.data)) {
-          setAvailableStores(response.data);
-          // Default to all store IDs
-          const allStoreIds = response.data.map((loc: LocationOption) => loc.admsite_code);
+        setIsLoadingMonths(true);
+        
+        const [locRes, monthRes] = await Promise.all([
+          apiClient<{ success: boolean; data: LocationOption[] }>("/locations"),
+          apiClient<{ success: boolean; data: string[] }>("/months")
+        ]);
+
+        if (locRes.success && Array.isArray(locRes.data)) {
+          setAvailableStores(locRes.data);
+          const allStoreIds = locRes.data.map((loc: LocationOption) => loc.admsite_code);
           setSelectedStores(allStoreIds);
         }
+
+        if (monthRes.success && Array.isArray(monthRes.data)) {
+          setAvailableMonths(monthRes.data);
+          setSelectedMonths(monthRes.data);
+        }
       } catch (err) {
-        console.error("Failed to load store locations:", err);
+        console.error("Failed to load filter metadata:", err);
       } finally {
         setIsLoadingLocations(false);
+        setIsLoadingMonths(false);
       }
     }
 
-    loadLocations();
+    loadMasterData();
   }, []);
 
   const resetFilters = () => {
     const allStoreIds = availableStores.map((loc) => loc.admsite_code);
     setSelectedStores(allStoreIds);
-    setSelectedMonths(DEFAULT_MONTHS);
+    setSelectedMonths(availableMonths);
     setSelectedDivision("All");
     setSelectedDepartment("All");
   };
@@ -76,8 +88,9 @@ export function OlapFilterProvider({ children }: { children: React.ReactNode }) 
         selectedDivision,
         selectedDepartment,
         availableStores,
-        availableMonths: DEFAULT_MONTHS,
+        availableMonths,
         isLoadingLocations,
+        isLoadingMonths,
         setSelectedStores,
         setSelectedMonths,
         setSelectedDivision,

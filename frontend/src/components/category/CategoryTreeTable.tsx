@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useMemo } from "react";
 import { CategoryHierarchyItem } from "@/hooks/useCategoryData";
@@ -51,7 +51,6 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
     setExpandedSections((prev) => ({ ...prev, [secKey]: !prev[secKey] }));
   };
 
-  // Group items hierarchically: Division -> Section -> Departments
   const groupedData = useMemo(() => {
     const divs: Record<string, GroupedDivision> = {};
 
@@ -105,7 +104,6 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
       sec.departments.push(item);
     });
 
-    // Calculate aggregated percentages for Division & Section nodes
     Object.values(divs).forEach((div) => {
       div.margin_pct = div.net_revenue > 0 ? Number(((div.gross_profit / div.net_revenue) * 100).toFixed(2)) : 0;
       div.woc = (div.sales_units / 12.0) > 0 ? Number((div.closing_stock_units / (div.sales_units / 12.0)).toFixed(1)) : 999;
@@ -163,10 +161,13 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
                     className="bg-gray-100/70 dark:bg-gray-800/80 font-bold hover:bg-gray-200/60 dark:hover:bg-gray-700/60 cursor-pointer transition-colors"
                   >
                     <td className="py-3 px-4 text-gray-900 dark:text-white flex items-center gap-2">
-                      <span className="text-brand-500 font-mono text-sm">
-                        {isDivExpanded ? "-" : "+"}
+                      <span className="text-brand-500 font-bold text-xs w-4">
+                        {isDivExpanded ? "−" : "+"}
                       </span>
-                       {div.divisionName}
+                      <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        DIV
+                      </span>
+                      {div.divisionName}
                     </td>
                     <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
                       {formatCurrency(div.net_revenue)}
@@ -192,13 +193,16 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
                         <React.Fragment key={secKey}>
                           <tr
                             onClick={() => toggleSection(secKey)}
-                            className="bg-gray-50/80 dark:bg-gray-800/40 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800/70 cursor-pointer transition-colors pl-6"
+                            className="bg-gray-50/80 dark:bg-gray-800/40 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800/70 cursor-pointer transition-colors"
                           >
                             <td className="py-2.5 px-4 text-gray-800 dark:text-gray-200 flex items-center gap-2 pl-8">
-                              <span className="text-gray-400 text-xs">
-                                {isSecExpanded ? "-" : "+"}
+                              <span className="text-gray-400 text-xs font-bold w-4">
+                                {isSecExpanded ? "−" : "+"}
                               </span>
-                               {sec.sectionName}
+                              <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold rounded bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                                SEC
+                              </span>
+                              {sec.sectionName}
                             </td>
                             <td className="py-2.5 px-4 font-semibold text-gray-900 dark:text-white">
                               {formatCurrency(sec.net_revenue)}
@@ -217,8 +221,9 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
                                 key={dept.department}
                                 className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
                               >
-                                <td className="py-2 px-4 text-gray-700 dark:text-gray-300 pl-14 font-medium">
-                                   {dept.department}
+                                <td className="py-2 px-4 text-gray-700 dark:text-gray-300 pl-14 font-medium flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                                  {dept.department}
                                 </td>
                                 <td className="py-2 px-4 font-medium text-gray-900 dark:text-white">
                                   {formatCurrency(dept.net_revenue)}
