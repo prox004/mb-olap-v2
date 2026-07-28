@@ -63,7 +63,7 @@ const AppHeader: React.FC = () => {
               MB
             </div>
             <span className="text-sm font-bold text-gray-900 dark:text-white">
-              MB-OLAP V2
+              M Baazar Analytics
             </span>
           </Link>
 

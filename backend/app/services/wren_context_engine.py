@@ -103,6 +103,7 @@ class WrenContextEngine:
         context.append("7. Join fact_cube_monthly to dim_item ON fact_cube_monthly.BARCODE = dim_item.ICODE.")
         context.append("8. Join fact_cube_monthly to dim_location ON fact_cube_monthly.ADMSITE_CODE = dim_location.ADMSITE_CODE.")
         context.append("9. Negative stock quantities (OPENING_QUANTITY, CLOSING_STOCK_QUANTITY, SITE_TRANSFER_OUT_QUANTITY) represent physical goods sold or transferred before digital transfer file/GRN posting.")
+        context.append("10. MANDATORY PRODUCT IDENTIFIER RULE: For ANY product or item query, ALWAYS include the product item code (`i.ICODE` or `fact_cube_monthly.BARCODE` as Item_Code / ICODE) in the SELECT list, regardless of whether description or other columns are requested.")
 
         return "\n".join(context)
 

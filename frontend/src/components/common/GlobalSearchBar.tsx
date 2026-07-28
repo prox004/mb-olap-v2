@@ -310,21 +310,21 @@ const SEARCH_INDEX: SearchableItem[] = [
     description: "Predictive inventory replenishment alerts to prevent stockouts in high-velocity SKUs",
   },
 
-  // --- 10. NLP AI ASSISTANT PAGE & COMPONENTS ---
+  // --- 10. AI ASSISTANT PAGE & COMPONENTS ---
   {
-    title: "NLP AI Assistant",
+    title: "Smart AI Assistant",
     category: "Navigation Page",
     path: "/olap-assistant",
-    keywords: ["nlp", "chat", "assistant", "ai", "query", "duckdb"],
-    description: "Natural language query interface for OLAP warehouse",
+    keywords: ["chat", "assistant", "ai", "query", "analytics"],
+    description: "Ask questions in simple English to get instant business insights and reports",
   },
   {
-    title: "Natural Language SQL Query Chat Console",
+    title: "Business Query Assistant",
     category: "Component",
     path: "/olap-assistant",
-    parentPage: "NLP AI Assistant",
-    keywords: ["chat console", "sql query generator", "ask questions", "nl2sql", "duckdb chat"],
-    description: "Conversational BI interface translating plain English questions into live DuckDB queries",
+    parentPage: "Smart AI Assistant",
+    keywords: ["chat console", "ask questions", "business query"],
+    description: "Conversational interface translating plain English questions into live business reports",
   },
 ];
 

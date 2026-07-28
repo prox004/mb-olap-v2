@@ -38,9 +38,8 @@ export default function UserDropdown() {
         </span>
 
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
           width="16"
           height="16"
           viewBox="0 0 18 20"
@@ -64,7 +63,7 @@ export default function UserDropdown() {
       >
         <div className="px-2 py-1.5 border-b border-gray-100 dark:border-gray-800">
           <span className="block font-bold text-xs text-gray-900 dark:text-white">
-            MB-OLAP Operations Lead
+            MB-Analytics Operations Lead
           </span>
           <span className="mt-0.5 block text-[11px] text-gray-500 dark:text-gray-400">
             admin@mbaazar.in

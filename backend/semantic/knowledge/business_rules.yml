@@ -30,3 +30,9 @@ business_rules:
     rule: "Negative values in OPENING_QUANTITY, CLOSING_STOCK_QUANTITY, or SITE_TRANSFER_OUT_QUANTITY represent operational timing lags where physical goods were received and sold/transferred before the digital stock transfer document/GRN was posted in the system. When auditing stock discrepancies or calculating stock balances, consider pending inward digital transfers."
     example: "Physical sales recorded before Transfer In posting cause system stock to go negative. Closing Stock = Opening Stock + Inward Transfers - Outward Sales/Transfers."
 
+  - id: product_itemcode_mandatory
+    category: "Product & Item Query Conventions"
+    rule: "For ANY product or item query, ALWAYS include the product item code (`i.ICODE` or `fact_cube_monthly.BARCODE` as Item_Code / ICODE) in the SELECT list, regardless of whether description or other columns are requested."
+    example: "Correct: SELECT i.ICODE, i.DESC1, SUM(ABS(f.NET_SALE_AMOUNT)) ... Incorrect: SELECT i.DESC1, SUM(ABS(f.NET_SALE_AMOUNT)) ..."
+
+

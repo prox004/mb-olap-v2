@@ -98,5 +98,605 @@
     "id": 20,
     "question": "Show total net revenue, gross profit, and total items sold across entire retail chain",
     "sql": "SELECT ROUND(SUM(ABS(NET_SALE_AMOUNT)), 2) AS Total_Chain_Revenue, ROUND(SUM(GP_AMOUNT), 2) AS Total_Chain_Gross_Profit, ROUND(SUM(ABS(NET_SALE_QUANTITY)), 0) AS Total_Units_Sold FROM fact_cube_monthly WHERE ADMSITE_CODE != 1070;"
+  },
+  {
+    "id": 207,
+    "question": "What is the current inventory value?",
+    "sql": "SELECT SUM(f.CLOSING_STOCK_AMOUNT) AS Inventory_Value FROM fact_cube_monthly f;"
+  },
+  {
+    "id": 208,
+    "question": "How many products are currently in stock?",
+    "sql": "SELECT SUM(f.CLOSING_STOCK_QUANTITY) AS Total_Stock FROM fact_cube_monthly f;"
+  },
+  {
+    "id": 252,
+    "question": "What is the stock-to-sales ratio?",
+    "sql": "SELECT SUM(f.CLOSING_STOCK_QUANTITY)/NULLIF(SUM(ABS(f.NET_SALE_QUANTITY)),0) AS Stock_To_Sales_Ratio FROM fact_cube_monthly f;"
+  },
+  {
+    "id": 260,
+    "question": "Give me this month's business summary.",
+    "sql": "SELECT SUM(ABS(f.NET_SALE_AMOUNT)) Revenue,SUM(f.GP_AMOUNT) Profit,SUM(ABS(f.NET_SALE_QUANTITY)) Qty,SUM(f.CLOSING_STOCK_AMOUNT) Inventory_Value FROM fact_cube_monthly f;"
+  },
+  {
+    "id": 209,
+    "question": "How many unique products are available?",
+    "sql": "SELECT COUNT(DISTINCT BARCODE) AS Total_Products FROM fact_cube_monthly;"
+  },
+  {
+    "id": 101,
+    "question": "Which is the best-selling product?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 102,
+    "question": "Which is the best-selling product in ACCESSORIES 1?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('ACCESSORIES 1') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 103,
+    "question": "Which is the best-selling product in ACCESSORIES 2?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('ACCESSORIES 2') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 104,
+    "question": "Which is the best-selling product in FABRICS & ACCESSORIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('FABRICS & ACCESSORIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 105,
+    "question": "Which is the best-selling product in KIDS WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('KIDS WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 106,
+    "question": "Which is the best-selling product in LADIES WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('LADIES WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 107,
+    "question": "Which is the best-selling product in MENS WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('MENS WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 108,
+    "question": "Which is the best-selling product in NON TRADING DIVISION?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('NON TRADING DIVISION') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 109,
+    "question": "Which is the best-selling product in SALES PROMOTIONAL ITEMS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('SALES PROMOTIONAL ITEMS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 110,
+    "question": "Which is the best-selling product in WINTER GARMENTS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Division) = UPPER('WINTER GARMENTS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 111,
+    "question": "Which is the best-selling product in AD GIFT ITEMS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('AD GIFT ITEMS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 112,
+    "question": "Which is the best-selling product in BOYS WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('BOYS WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 113,
+    "question": "Which is the best-selling product in CARRY BAGS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('CARRY BAGS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 114,
+    "question": "Which is the best-selling product in COSMETICS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('COSMETICS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 115,
+    "question": "Which is the best-selling product in CROCKERIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('CROCKERIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 116,
+    "question": "Which is the best-selling product in ELECTRICAL EQUIPMENT & FITTINGS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('ELECTRICAL EQUIPMENT & FITTINGS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 117,
+    "question": "Which is the best-selling product in FABRICS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('FABRICS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 118,
+    "question": "Which is the best-selling product in FOOTWEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('FOOTWEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 119,
+    "question": "Which is the best-selling product in GIRLS WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('GIRLS WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 120,
+    "question": "Which is the best-selling product in HOME APPLIANCES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('HOME APPLIANCES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 121,
+    "question": "Which is the best-selling product in HOME FURNISHINGS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('HOME FURNISHINGS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 122,
+    "question": "Which is the best-selling product in JEWELLERY?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('JEWELLERY') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 123,
+    "question": "Which is the best-selling product in KIDS ACCESSORIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('KIDS ACCESSORIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 124,
+    "question": "Which is the best-selling product in LADIES ACCESSORIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('LADIES ACCESSORIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 125,
+    "question": "Which is the best-selling product in LADIES ETHNIC?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('LADIES ETHNIC') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 126,
+    "question": "Which is the best-selling product in LADIES WESTERN WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('LADIES WESTERN WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 127,
+    "question": "Which is the best-selling product in LUGGAGE POUCHES & LEATHER ITEMS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('LUGGAGE POUCHES & LEATHER ITEMS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 128,
+    "question": "Which is the best-selling product in MENS ACCESSORIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('MENS ACCESSORIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 129,
+    "question": "Which is the best-selling product in MENS LOWERS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('MENS LOWERS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 130,
+    "question": "Which is the best-selling product in MENS SPORTS WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('MENS SPORTS WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 131,
+    "question": "Which is the best-selling product in MENS UPPER WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('MENS UPPER WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 132,
+    "question": "Which is the best-selling product in MISC. MENS WEAR?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('MISC. MENS WEAR') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 133,
+    "question": "Which is the best-selling product in OTHER NON TRADING ITEMS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('OTHER NON TRADING ITEMS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 134,
+    "question": "Which is the best-selling product in PACKING & DISPLAY MATERIALS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('PACKING & DISPLAY MATERIALS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 135,
+    "question": "Which is the best-selling product in PLASTIC WARE?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('PLASTIC WARE') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 136,
+    "question": "Which is the best-selling product in SAREES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('SAREES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 137,
+    "question": "Which is the best-selling product in STAFF UNIFORMS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('STAFF UNIFORMS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 138,
+    "question": "Which is the best-selling product in STATIONERIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('STATIONERIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 139,
+    "question": "Which is the best-selling product in TOILETORIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('TOILETORIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 140,
+    "question": "Which is the best-selling product in TOYS & GAMES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('TOYS & GAMES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 141,
+    "question": "Which is the best-selling product in WINTERWEAR BOYS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('WINTERWEAR BOYS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 142,
+    "question": "Which is the best-selling product in WINTERWEAR GIRLS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('WINTERWEAR GIRLS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 143,
+    "question": "Which is the best-selling product in WINTERWEAR LADIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('WINTERWEAR LADIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 144,
+    "question": "Which is the best-selling product in WINTERWEAR MENS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Section) = UPPER('WINTERWEAR MENS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 145,
+    "question": "Which is the best-selling product in OTHER ELECTRIC ACCESSORIES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('OTHER ELECTRIC ACCESSORIES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 146,
+    "question": "Which is the best-selling product in BLAZERS (B)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('BLAZERS (B)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 147,
+    "question": "Which is the best-selling product in SKIRTS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SKIRTS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 148,
+    "question": "Which is the best-selling product in ELECTRIC KETTLE?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('ELECTRIC KETTLE') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 149,
+    "question": "Which is the best-selling product in BRA?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('BRA') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 150,
+    "question": "Which is the best-selling product in SKIRT-TOPS (G)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SKIRT-TOPS (G)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 151,
+    "question": "Which is the best-selling product in TEXTILE THAN?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('TEXTILE THAN') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 152,
+    "question": "Which is the best-selling product in PAYJAMA (G)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('PAYJAMA (G)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 153,
+    "question": "Which is the best-selling product in JACKETS [WL]?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('JACKETS [WL]') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 154,
+    "question": "Which is the best-selling product in STAFF JACKETS UF?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('STAFF JACKETS UF') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 155,
+    "question": "Which is the best-selling product in SHORT PANT?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SHORT PANT') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 156,
+    "question": "Which is the best-selling product in LEGGINGS (G)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('LEGGINGS (G)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 157,
+    "question": "Which is the best-selling product in POLY BAGS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('POLY BAGS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 158,
+    "question": "Which is the best-selling product in PENCILS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('PENCILS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 159,
+    "question": "Which is the best-selling product in GIRLS SETS [WG]?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('GIRLS SETS [WG]') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 160,
+    "question": "Which is the best-selling product in CURTAIN & COVER?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('CURTAIN & COVER') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 161,
+    "question": "Which is the best-selling product in T SHIRTS (G)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('T SHIRTS (G)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 162,
+    "question": "Which is the best-selling product in BODY SPRAY?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('BODY SPRAY') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 163,
+    "question": "Which is the best-selling product in TROUSERS (B)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('TROUSERS (B)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 164,
+    "question": "Which is the best-selling product in SOFT TOYS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SOFT TOYS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 165,
+    "question": "Which is the best-selling product in SHOES (L)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SHOES (L)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 166,
+    "question": "Which is the best-selling product in JACKETS [WB]?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('JACKETS [WB]') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 167,
+    "question": "Which is the best-selling product in PARALLEL (G)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('PARALLEL (G)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 168,
+    "question": "Which is the best-selling product in STAFF SHIRTS UF?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('STAFF SHIRTS UF') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 169,
+    "question": "Which is the best-selling product in SANDALS (M)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SANDALS (M)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 170,
+    "question": "Which is the best-selling product in COTTON SAREES?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('COTTON SAREES') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 171,
+    "question": "Which is the best-selling product in HALF PANT (B)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('HALF PANT (B)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 172,
+    "question": "Which is the best-selling product in TUBELIGHT & LED LIGHTS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('TUBELIGHT & LED LIGHTS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 173,
+    "question": "Which is the best-selling product in ROOM FRESHNERS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('ROOM FRESHNERS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 174,
+    "question": "Which is the best-selling product in FROCKS (G)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('FROCKS (G)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 175,
+    "question": "Which is the best-selling product in BLANKETS KIDS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('BLANKETS KIDS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 176,
+    "question": "Which is the best-selling product in SHORT KURTI?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SHORT KURTI') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 177,
+    "question": "Which is the best-selling product in AD REGULAR GIFT ITEMS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('AD REGULAR GIFT ITEMS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 178,
+    "question": "Which is the best-selling product in MASK?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('MASK') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 179,
+    "question": "Which is the best-selling product in SPORTS TOYS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SPORTS TOYS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 180,
+    "question": "Which is the best-selling product in SHORT KURTA?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SHORT KURTA') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 181,
+    "question": "Which is the best-selling product in CAPRI?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('CAPRI') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 182,
+    "question": "Which is the best-selling product in FORMAL SHIRTS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('FORMAL SHIRTS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 183,
+    "question": "Which is the best-selling product in BABA SUITS [WB]?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('BABA SUITS [WB]') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 184,
+    "question": "Which is the best-selling product in KURTA PAYJAMA (B)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('KURTA PAYJAMA (B)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 185,
+    "question": "Which is the best-selling product in T SHIRTS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('T SHIRTS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 186,
+    "question": "Which is the best-selling product in STOCKING?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('STOCKING') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 187,
+    "question": "Which is the best-selling product in WINTER TOPS [WL]?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('WINTER TOPS [WL]') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 188,
+    "question": "Which is the best-selling product in SOAPS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SOAPS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 189,
+    "question": "Which is the best-selling product in MODI & WAIST COAT?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('MODI & WAIST COAT') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 190,
+    "question": "Which is the best-selling product in T SHIRTS (B)?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('T SHIRTS (B)') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 191,
+    "question": "Which is the best-selling product in PAYJAMA [WB]?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('PAYJAMA [WB]') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 192,
+    "question": "Which is the best-selling product in WALKING STICK?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('WALKING STICK') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 193,
+    "question": "Which is the best-selling product in BEDSHEETS?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('BEDSHEETS') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 194,
+    "question": "Which is the best-selling product in SHAWL?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE UPPER(i.Department) = UPPER('SHAWL') GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 195,
+    "question": "Show top 10 best-selling products.",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 10;"
+  },
+  {
+    "id": 196,
+    "question": "Which product generated the highest revenue?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 197,
+    "question": "Which product sold maximum quantity?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_QUANTITY)) AS Qty FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Qty DESC LIMIT 1;"
+  },
+  {
+    "id": 200,
+    "question": "Which new arrival is selling the fastest?",
+    "sql": "SELECT i.ICODE,i.DESC1,f.REPORT_DATE,SUM(ABS(f.NET_SALE_QUANTITY)) AS Qty FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE WHERE f.REPORT_DATE>=CURRENT_DATE-INTERVAL 30 DAY GROUP BY i.ICODE,i.DESC1,f.REPORT_DATE ORDER BY Qty DESC LIMIT 1;"
+  },
+  {
+    "id": 201,
+    "question": "Show top 10 products.",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 10;"
+  },
+  {
+    "id": 202,
+    "question": "Show top 20 selling products.",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) AS Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 20;"
+  },
+  {
+    "id": 203,
+    "question": "Which products haven't sold this month?",
+    "sql": "SELECT i.ICODE,i.DESC1 FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 HAVING SUM(ABS(f.NET_SALE_QUANTITY))=0;"
+  },
+  {
+    "id": 214,
+    "question": "Which inventory is dead stock?",
+    "sql": "SELECT i.ICODE,i.DESC1 FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 HAVING SUM(ABS(f.NET_SALE_QUANTITY))=0;"
+  },
+  {
+    "id": 215,
+    "question": "Which product moved the fastest this month?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_QUANTITY)) Qty FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Qty DESC LIMIT 1;"
+  },
+  {
+    "id": 216,
+    "question": "Which product is not moving?",
+    "sql": "SELECT i.ICODE,i.DESC1 FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 HAVING SUM(ABS(f.NET_SALE_QUANTITY))=0;"
+  },
+  {
+    "id": 218,
+    "question": "Show outgoing stock.",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_QUANTITY)) AS Sold FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Sold DESC;"
+  },
+  {
+    "id": 226,
+    "question": "Which product gives the highest profit?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(f.GP_AMOUNT) Profit FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Profit DESC LIMIT 1;"
+  },
+  {
+    "id": 227,
+    "question": "Which product gives the lowest profit?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(f.GP_AMOUNT) Profit FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Profit ASC LIMIT 1;"
+  },
+  {
+    "id": 233,
+    "question": "Which products are losing money?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(f.GP_AMOUNT) Profit FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 HAVING SUM(f.GP_AMOUNT)<0 ORDER BY Profit;"
+  },
+  {
+    "id": 234,
+    "question": "Which products have high sales but low profit?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) Revenue,SUM(f.GP_AMOUNT) Profit FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 HAVING SUM(ABS(f.NET_SALE_AMOUNT))>50000 AND SUM(f.GP_AMOUNT)<1000;"
+  },
+  {
+    "id": 236,
+    "question": "What do customers buy the most?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_QUANTITY)) Qty FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Qty DESC LIMIT 1;"
+  },
+  {
+    "id": 237,
+    "question": "What sold the most this month?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_QUANTITY)) Qty FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Qty DESC LIMIT 1;"
+  },
+  {
+    "id": 238,
+    "question": "Which day has the highest sales?",
+    "sql": "SELECT f.REPORT_DATE,SUM(ABS(f.NET_SALE_AMOUNT)) Revenue FROM fact_cube_monthly f GROUP BY f.REPORT_DATE ORDER BY Revenue DESC LIMIT 1;"
+  },
+  {
+    "id": 259,
+    "question": "Which products should be displayed at the entrance?",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) Revenue,SUM(f.GP_AMOUNT) Profit FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC,Profit DESC LIMIT 20;"
+  },
+  {
+    "id": 261,
+    "question": "Show my top 10 products.",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue DESC LIMIT 10;"
+  },
+  {
+    "id": 262,
+    "question": "Show my bottom 10 products.",
+    "sql": "SELECT i.ICODE,i.DESC1,SUM(ABS(f.NET_SALE_AMOUNT)) Revenue FROM fact_cube_monthly f JOIN dim_item i ON f.BARCODE = i.ICODE GROUP BY i.ICODE,i.DESC1 ORDER BY Revenue ASC LIMIT 10;"
   }
 ]

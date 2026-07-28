@@ -27,7 +27,7 @@ type NavGroup = {
   items: NavItem[];
 };
 
-// Organized OLAP Enterprise Navigation Groups
+// Organized Enterprise Navigation Groups
 const olapNavGroups: NavGroup[] = [
   {
     groupName: "Overview & Hierarchy",
@@ -56,7 +56,7 @@ const olapNavGroups: NavGroup[] = [
     groupName: "AI & Intelligence",
     items: [
       { name: "AI Recommendations", icon: <AiIcon />, path: "/ai-recommendations" },
-      { name: "NLP AI Assistant", icon: <AiIcon />, path: "/olap-assistant", new: true },
+      { name: "Smart AI Assistant", icon: <AiIcon />, path: "/olap-assistant", new: true },
     ],
   },
 ];
@@ -70,10 +70,9 @@ const AppSidebar: React.FC = () => {
   return (
     <aside
       className={`fixed flex flex-col xl:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-full transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-        ${
-          isExpanded || isMobileOpen
-            ? "w-[290px]"
-            : isHovered
+        ${isExpanded || isMobileOpen
+          ? "w-[290px]"
+          : isHovered
             ? "w-[290px]"
             : "w-[90px]"
         }
@@ -84,9 +83,8 @@ const AppSidebar: React.FC = () => {
     >
       {/* Integrated Sidebar Brand Icon & Toggle Button */}
       <div
-        className={`py-6 flex items-center ${
-          !isExpanded && !isHovered ? "xl:justify-center" : "justify-between"
-        }`}
+        className={`py-6 flex items-center ${!isExpanded && !isHovered ? "xl:justify-center" : "justify-between"
+          }`}
       >
         <button
           onClick={toggleSidebar}
@@ -99,11 +97,8 @@ const AppSidebar: React.FC = () => {
           </div>
           {(isExpanded || isHovered || isMobileOpen) && (
             <div className="flex flex-col">
-              <span className="text-base font-bold text-gray-900 dark:text-white leading-none">
-                MB-OLAP V2
-              </span>
-              <span className="text-[10px] font-semibold text-brand-500 uppercase tracking-widest mt-1">
-                Enterprise Platform
+              <span className="text-lg font-semibold text-gray-900 dark:text-white leading-none">
+                M Baazar Analytics
               </span>
             </div>
           )}
@@ -117,11 +112,10 @@ const AppSidebar: React.FC = () => {
             {olapNavGroups.map((group) => (
               <div key={group.groupName}>
                 <h2
-                  className={`mb-2.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 flex leading-5 ${
-                    !isExpanded && !isHovered
-                      ? "xl:justify-center"
-                      : "justify-start"
-                  }`}
+                  className={`mb-2.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 flex leading-5 ${!isExpanded && !isHovered
+                    ? "xl:justify-center"
+                    : "justify-start"
+                    }`}
                 >
                   {isExpanded || isHovered || isMobileOpen ? (
                     group.groupName
@@ -137,16 +131,14 @@ const AppSidebar: React.FC = () => {
                       <li key={nav.name}>
                         <Link
                           href={nav.path}
-                          className={`menu-item group ${
-                            active ? "menu-item-active" : "menu-item-inactive"
-                          }`}
+                          className={`menu-item group ${active ? "menu-item-active" : "menu-item-inactive"
+                            }`}
                         >
                           <span
-                            className={`${
-                              active
-                                ? "menu-item-icon-active"
-                                : "menu-item-icon-inactive"
-                            }`}
+                            className={`${active
+                              ? "menu-item-icon-active"
+                              : "menu-item-icon-inactive"
+                              }`}
                           >
                             {nav.icon}
                           </span>

@@ -1,8 +1,14 @@
 import os
 import re
+import json
 from typing import Dict, Any, List
+from dotenv import load_dotenv
 from groq import Groq
 from backend.app.services.wren_context_engine import wren_engine
+
+# Load .env file from project root or backend directory
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".env"))
 
 class GroqLLMService:
     """
@@ -69,19 +75,75 @@ class GroqLLMService:
             )
             raw_content = response.choices[0].message.content
             return self.extract_sql_from_response(raw_content)
-        except Exception as e:
-            # Fallback to 8b-instant if 70b hits rate limits or error
-            try:
-                response = self.client.chat.completions.create(
-                    model=self.fallback_model,
-                    messages=messages,
-                    temperature=0.1,
-                    max_tokens=1024
-                )
-                return self.extract_sql_from_response(response.choices[0].message.content)
-            except Exception:
-                matches = wren_engine.find_matching_golden_sql(user_prompt, top_k=1)
-                return matches[0]["sql"] if matches else "SELECT 1;"
+        except Exception:
+            matches = wren_engine.find_matching_golden_sql(user_prompt, top_k=1)
+            return matches[0]["sql"] if matches else "SELECT 1;"
+
+    def fix_union_order_by(self, sql: str) -> str:
+        """
+        DuckDB requires every UNION / UNION ALL branch that contains ORDER BY or LIMIT
+        to be wrapped in parentheses. This function fixes it automatically.
+        """
+        union_pattern = re.compile(r'(?i)(UNION\s+ALL|UNION)\s+(SELECT)')
+        if not union_pattern.search(sql):
+            return sql
+
+        tokens = re.split(r'(?i)(UNION\s+ALL|UNION)', sql)
+        fixed_parts = []
+        for tok in tokens:
+            if re.match(r'(?i)UNION(\s+ALL)?', tok.strip()):
+                fixed_parts.append(tok)
+                continue
+            branch = tok.strip()
+            needs_wrap = re.search(r'(?i)(ORDER\s+BY|LIMIT)', branch)
+            already_wrapped = branch.startswith('(') and branch.endswith(')')
+            if needs_wrap and not already_wrapped:
+                branch = f"({branch})"
+            fixed_parts.append(branch)
+        return '\n'.join(fixed_parts)
+
+    def generate_zero_result_repair_sql(self, raw_query: str, failed_sql: str, entity_phrases: List[str], candidates: List[Dict[str, Any]]) -> str:
+        """
+        Uses entity extraction and fuzzy DB candidates to repair zero-result queries.
+        """
+        if not self.client:
+            return failed_sql
+
+        system_context = wren_engine.build_system_prompt_context(raw_query)
+
+        repair_prompt = f"""The previous SQL returned zero rows. Repair it and return ONLY corrected raw SQL inside a ```sql ... ``` code block.
+
+Original Question: {raw_query}
+Previous SQL: {failed_sql}
+
+Detected Entity Phrases:
+{json.dumps(entity_phrases, ensure_ascii=False)}
+
+Candidate Database Matches (Use these exact names/barcodes in ILIKE / REGEXP_REPLACE):
+{json.dumps(candidates, ensure_ascii=False)}
+
+Repair Rules:
+- Preserve user's original metric (Revenue/Profit/Units) and ranking.
+- Fix entity matching logic using exact candidate values or REGEXP_REPLACE(UPPER(col), '[^A-Z0-9]+', '', 'g').
+"""
+
+        messages = [
+            {"role": "system", "content": system_context},
+            {"role": "user", "content": repair_prompt}
+        ]
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.primary_model,
+                messages=messages,
+                temperature=0.0,
+                max_tokens=1024
+            )
+            raw = response.choices[0].message.content
+            repaired = self.extract_sql_from_response(raw)
+            return self.fix_union_order_by(repaired)
+        except Exception:
+            return failed_sql
 
     def refine_sql_error(self, broken_sql: str, error_trace: str, user_prompt: str) -> str:
         """
@@ -141,7 +203,13 @@ class GroqLLMService:
         messages = [
             {
                 "role": "system",
-                "content": "You are an Executive Retail Intelligence AI. Provide a concise 2-sentence executive insight summarizing the query results for a retail executive."
+                "content": (
+                    "You are an Executive Retail Intelligence AI. Provide a concise 2-sentence executive insight summarizing the query results for a retail executive.\n\n"
+                    "CURRENCY & FORMATTING RULES (MANDATORY):\n"
+                    "- All monetary values are Indian Rupees.\n"
+                    "- ALWAYS use the ₹ symbol. NEVER output $, USD, Dollar, EUR, or Euros.\n"
+                    "- Format numbers using Indian numbering system (e.g. ₹2.29 Cr or ₹2,29,09,200)."
+                )
             },
             {
                 "role": "user",
@@ -149,7 +217,7 @@ class GroqLLMService:
                     f"User Question: \"{user_prompt}\"\n"
                     f"SQL Executed: `{sql}`\n"
                     f"Top Results: {json.dumps(sample_data, default=str)}\n\n"
-                    "Synthesize summary:"
+                    "Synthesize executive summary:"
                 )
             }
         ]
@@ -161,7 +229,11 @@ class GroqLLMService:
                 temperature=0.3,
                 max_tokens=150
             )
-            return response.choices[0].message.content.strip()
+            raw_summary = response.choices[0].message.content.strip()
+            # Sanitize currency symbols to ensure Indian Rupees (₹)
+            clean_summary = re.sub(r"[$€£¥]", "₹", raw_summary)
+            clean_summary = re.sub(r"\bUSD\b", "INR", clean_summary, flags=re.IGNORECASE)
+            return clean_summary
         except Exception:
             return f"Retrieved {len(data)} records for '{user_prompt}'."
 

@@ -19,7 +19,7 @@ export default function CEOExecutivePage() {
             CEO Executive Dashboard
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Enterprise OLAP high-level financial summary, store rankings, and SKU performance
+            Enterprise Analytics high-level financial summary, store rankings, and SKU performance
           </p>
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function CEOExecutivePage() {
       {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
-           Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+          Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
         </div>
       )}
 

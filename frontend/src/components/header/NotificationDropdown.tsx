@@ -67,7 +67,7 @@ export default function NotificationDropdown() {
         liveItems.push({
           id: "chat-1",
           type: "chat",
-          title: "New OLAP Assistant Query",
+          title: "New Analytics Assistant Query",
           message: "NLP Query: 'Show top 5 departments by gross profit margin in Q2 2026'",
           time: "12 min ago",
           link: "/olap-assistant",
@@ -141,7 +141,7 @@ export default function NotificationDropdown() {
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <h5 className="text-base font-bold text-gray-800 dark:text-gray-200">
-              OLAP Notifications
+              Analytics Notifications
             </h5>
             {notifications.filter((n) => n.unread).length > 0 && (
               <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400">
@@ -162,9 +162,8 @@ export default function NotificationDropdown() {
               <DropdownItem
                 onItemClick={closeDropdown}
                 href={item.link}
-                className={`flex gap-3 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${
-                  item.unread ? "bg-brand-50/30 dark:bg-brand-950/20" : ""
-                }`}
+                className={`flex gap-3 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${item.unread ? "bg-brand-50/30 dark:bg-brand-950/20" : ""
+                  }`}
               >
                 <span className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 shrink-0">
                   {item.icon === "alert" ? (
@@ -196,7 +195,7 @@ export default function NotificationDropdown() {
           onClick={closeDropdown}
           className="block px-4 py-2 mt-3 text-xs font-semibold text-center text-brand-600 bg-brand-50 rounded-xl hover:bg-brand-100 dark:bg-brand-950/40 dark:text-brand-400 border border-brand-200 dark:border-brand-900"
         >
-          Open NLP Assistant Chat →
+          Open Smart AI Assistant Chat →
         </Link>
       </Dropdown>
     </div>

@@ -58,7 +58,7 @@ export function OlapFilterBar() {
           >
             <span className="flex h-3 w-3 rounded-full bg-brand-500 animate-pulse"></span>
             <h3 className="text-sm font-semibold text-gray-800 dark:text-white uppercase tracking-wider group-hover:text-brand-500 transition-colors">
-              OLAP Slice & Dice Filters
+              Analytics Slice & Dice Filters
             </h3>
             <svg
               className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
@@ -98,101 +98,99 @@ export function OlapFilterBar() {
       {/* Filter Body - Expandable Dropdown */}
       {isOpen && (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-100 dark:border-gray-800 pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-        {/* Outlets Multi-Select */}
-        <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-            Store Outlets ({selectedStores.length}/{availableStores.length})
-          </label>
-          {isLoadingLocations ? (
-            <div className="h-9 w-full bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse"></div>
-          ) : (
+          {/* Outlets Multi-Select */}
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+              Store Outlets ({selectedStores.length}/{availableStores.length})
+            </label>
+            {isLoadingLocations ? (
+              <div className="h-9 w-full bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse"></div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {availableStores.map((store) => {
+                  const isSelected = selectedStores.includes(store.admsite_code);
+                  return (
+                    <button
+                      key={store.admsite_code}
+                      onClick={() => toggleStore(store.admsite_code)}
+                      className={`px-2.5 py-1 text-xs rounded-md transition-all font-medium ${isSelected
+                          ? "bg-brand-500 text-white shadow-xs"
+                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        }`}
+                    >
+                      {store.name.replace("M Baazar - ", "")}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Period Months Multi-Select */}
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+              Operational Period ({selectedMonths.length}/{availableMonths.length} Selected)
+            </label>
             <div className="flex flex-wrap gap-1.5">
-              {availableStores.map((store) => {
-                const isSelected = selectedStores.includes(store.admsite_code);
+              {availableMonths.map((m) => {
+                const isSelected = selectedMonths.includes(m);
+                const [year, month] = m.split("-");
+                const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+                const monthLabel = isNaN(dateObj.getTime())
+                  ? m
+                  : dateObj.toLocaleString("en-US", { month: "short", year: "2-digit" });
                 return (
                   <button
-                    key={store.admsite_code}
-                    onClick={() => toggleStore(store.admsite_code)}
-                    className={`px-2.5 py-1 text-xs rounded-md transition-all font-medium ${
-                      isSelected
-                        ? "bg-brand-500 text-white shadow-xs"
+                    key={m}
+                    onClick={() => toggleMonth(m)}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-all font-medium ${isSelected
+                        ? "bg-blue-600 text-white shadow-xs"
                         : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-                    }`}
+                      }`}
                   >
-                    {store.name.replace("M Baazar - ", "")}
+                    {monthLabel}
                   </button>
                 );
               })}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Period Months Multi-Select */}
-        <div>
-          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-            Operational Period ({selectedMonths.length}/{availableMonths.length} Selected)
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {availableMonths.map((m) => {
-              const isSelected = selectedMonths.includes(m);
-              const [year, month] = m.split("-");
-              const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
-              const monthLabel = isNaN(dateObj.getTime())
-                ? m
-                : dateObj.toLocaleString("en-US", { month: "short", year: "2-digit" });
-              return (
-                <button
-                  key={m}
-                  onClick={() => toggleMonth(m)}
-                  className={`px-2.5 py-1 text-xs rounded-md transition-all font-medium ${
-                    isSelected
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  {monthLabel}
-                </button>
-              );
-            })}
+          {/* Division & Department Filter */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+                Division
+              </label>
+              <select
+                value={selectedDivision}
+                onChange={(e) => setSelectedDivision(e.target.value)}
+                className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+              >
+                <option value="All">All Divisions</option>
+                <option value="MENS">MENS</option>
+                <option value="LADIES">LADIES</option>
+                <option value="KIDS">KIDS</option>
+                <option value="NON-APPAREL">NON-APPAREL</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+                Department
+              </label>
+              <select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+              >
+                <option value="All">All Departments</option>
+                <option value="MENS SHIRTS">MENS SHIRTS</option>
+                <option value="MENS DENIMS">MENS DENIMS</option>
+                <option value="LADIES TOPS">LADIES TOPS</option>
+                <option value="KIDS WEAR">KIDS WEAR</option>
+              </select>
+            </div>
           </div>
         </div>
-
-        {/* Division & Department Filter */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-              Division
-            </label>
-            <select
-              value={selectedDivision}
-              onChange={(e) => setSelectedDivision(e.target.value)}
-              className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-brand-500"
-            >
-              <option value="All">All Divisions</option>
-              <option value="MENS">MENS</option>
-              <option value="LADIES">LADIES</option>
-              <option value="KIDS">KIDS</option>
-              <option value="NON-APPAREL">NON-APPAREL</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-              Department
-            </label>
-            <select
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-brand-500"
-            >
-              <option value="All">All Departments</option>
-              <option value="MENS SHIRTS">MENS SHIRTS</option>
-              <option value="MENS DENIMS">MENS DENIMS</option>
-              <option value="LADIES TOPS">LADIES TOPS</option>
-              <option value="KIDS WEAR">KIDS WEAR</option>
-            </select>
-          </div>
-        </div>
-      </div>
       )}
     </div>
   );

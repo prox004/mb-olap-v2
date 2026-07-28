@@ -51,6 +51,7 @@ def process_chat_query(
     try:
         # Step 1: Generate SQL from natural language prompt
         initial_sql = groq_service.generate_sql(user_prompt)
+        initial_sql = groq_service.fix_union_order_by(initial_sql)
 
         # Step 2: Validate security, append limits, execute & auto-refine if syntax error occurs
         executed_sql, columns, data = sql_validator.execute_with_auto_refinement(
@@ -58,6 +59,35 @@ def process_chat_query(
             initial_sql=initial_sql,
             user_prompt=user_prompt
         )
+
+        # Step 2b: Self-Healing Zero-Result Repair (from sample_server_v1.py)
+        # If query returns 0 rows and isn't an explicit "zero sales/dead stock" query,
+        # extract entities via LLM, search DuckDB for candidates, and repair SQL.
+        from backend.app.services.entity_extractor import (
+            extract_entities_with_llm,
+            search_entity_candidates,
+            should_attempt_zero_result_repair
+        )
+
+        if not data and should_attempt_zero_result_repair(user_prompt):
+            entity_phrases = extract_entities_with_llm(groq_service, user_prompt)
+            if entity_phrases:
+                candidates = search_entity_candidates(db, entity_phrases)
+                if candidates:
+                    repaired_sql = groq_service.generate_zero_result_repair_sql(
+                        user_prompt, executed_sql, entity_phrases, candidates
+                    )
+                    try:
+                        rep_sql, rep_cols, rep_data = sql_validator.execute_with_auto_refinement(
+                            db=db,
+                            initial_sql=repaired_sql,
+                            user_prompt=user_prompt,
+                            max_attempts=1
+                        )
+                        if rep_data:
+                            executed_sql, columns, data = rep_sql, rep_cols, rep_data
+                    except Exception as rep_err:
+                        print(f"[CHAT_PIPELINE] Zero-result repair attempt failed: {rep_err}")
 
         # Step 3: Classify visualization type
         viz_type = chart_classifier.classify(columns, data)
