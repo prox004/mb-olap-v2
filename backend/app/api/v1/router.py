@@ -96,8 +96,9 @@ def add_location(payload: CreateStoreLocationRequest):
 
         # 2. Persist directly to backend/db/parquet/dim_locations.parquet
         parquet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../db/parquet/dim_locations.parquet"))
+        clean_parquet_path = parquet_path.replace("\\", "/")
         all_locs = rw_conn.execute("SELECT ADMSITE_CODE, Name FROM dim_location ORDER BY ADMSITE_CODE").df()
-        rw_conn.execute(f"COPY all_locs TO '{parquet_path.replace('\\', '/')}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
+        rw_conn.execute(f"COPY all_locs TO '{clean_parquet_path}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
     finally:
         rw_conn.close()
 
@@ -159,8 +160,9 @@ def update_location(admsite_code: int, payload: UpdateStoreLocationRequest):
         )
 
         parquet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../db/parquet/dim_locations.parquet"))
+        clean_parquet_path = parquet_path.replace("\\", "/")
         all_locs = rw_conn.execute("SELECT ADMSITE_CODE, Name FROM dim_location ORDER BY ADMSITE_CODE").df()
-        rw_conn.execute(f"COPY all_locs TO '{parquet_path.replace('\\', '/')}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
+        rw_conn.execute(f"COPY all_locs TO '{clean_parquet_path}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
     finally:
         rw_conn.close()
 
@@ -218,8 +220,9 @@ def delete_location(admsite_code: int):
         rw_conn.execute("DELETE FROM dim_location WHERE ADMSITE_CODE = ?", [admsite_code])
 
         parquet_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../db/parquet/dim_locations.parquet"))
+        clean_parquet_path = parquet_path.replace("\\", "/")
         all_locs = rw_conn.execute("SELECT ADMSITE_CODE, Name FROM dim_location ORDER BY ADMSITE_CODE").df()
-        rw_conn.execute(f"COPY all_locs TO '{parquet_path.replace('\\', '/')}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
+        rw_conn.execute(f"COPY all_locs TO '{clean_parquet_path}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
     finally:
         rw_conn.close()
 
