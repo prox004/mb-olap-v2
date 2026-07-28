@@ -30,7 +30,7 @@ export default function UserInfoCard() {
         return;
       }
 
-      const res = await apiClient<{ success: boolean; message: string; data?: any }>("/locations", {
+      const res = await apiClient<{ success: boolean; message: string; data?: Record<string, unknown> }>("/locations", {
         method: "POST",
         body: JSON.stringify({
           admsite_code: codeNum,
@@ -52,9 +52,10 @@ export default function UserInfoCard() {
       } else {
         setStatusMessage({ type: "error", text: res.message || "Failed to add store location." });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Add store error:", err);
-      setStatusMessage({ type: "error", text: err.message || "An unexpected error occurred while saving store." });
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred while saving store.";
+      setStatusMessage({ type: "error", text: msg });
     } finally {
       setIsSubmitting(false);
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { apiClient } from "@/utils/apiClient";
 import { useOlapFilter } from "@/context/OlapFilterContext";
 
@@ -81,13 +81,13 @@ export function useMerchandiseData() {
     message?: string;
   }
 
-  // Common slice and dice filter params
-  const filterParams = {
+  // Common slice and dice filter params (memoized to avoid creating a new object on every render)
+  const filterParams = useMemo(() => ({
     store_ids: selectedStores,
     months: selectedMonths,
     division: selectedDivision !== "All" ? selectedDivision : undefined,
     department: selectedDepartment !== "All" ? selectedDepartment : undefined,
-  };
+  }), [selectedStores, selectedMonths, selectedDivision, selectedDepartment]);
 
   // Fetch summary breakdown
   const fetchBreakdown = useCallback(async () => {
@@ -101,7 +101,7 @@ export function useMerchandiseData() {
     } catch (err: unknown) {
       console.error("Failed to load velocity breakdown:", err);
     }
-  }, [selectedStores, selectedMonths, selectedDivision, selectedDepartment]);
+  }, [filterParams]);
 
   // Fetch SKU list
   const fetchSkus = useCallback(async () => {
@@ -109,7 +109,7 @@ export function useMerchandiseData() {
       setLoading(true);
       setError(null);
 
-      const params: Record<string, any> = {
+      const params: Record<string, unknown> = {
         ...filterParams,
         page,
         page_size: pageSize,
@@ -132,7 +132,7 @@ export function useMerchandiseData() {
     } finally {
       setLoading(false);
     }
-  }, [selectedStores, selectedMonths, selectedDivision, selectedDepartment, page, pageSize, sortBy, sortOrder, velocityFilter, vendorFilter, searchQuery]);
+  }, [filterParams, page, pageSize, sortBy, sortOrder, velocityFilter, vendorFilter, searchQuery]);
 
   // Fetch Dead Stock
   const fetchDeadStock = useCallback(async () => {
@@ -153,7 +153,7 @@ export function useMerchandiseData() {
     } finally {
       setDeadStockLoading(false);
     }
-  }, [selectedStores, selectedMonths, selectedDivision, selectedDepartment, deadStockPage]);
+  }, [filterParams, deadStockPage]);
 
   useEffect(() => {
     fetchBreakdown();

@@ -85,8 +85,9 @@ export default function AdminStoresTab() {
           setStatusMessage({ type: "error", text: res.message || "Failed to add store." });
         }
       }
-    } catch (err: any) {
-      setStatusMessage({ type: "error", text: err.message || "An error occurred." });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An error occurred.";
+      setStatusMessage({ type: "error", text: msg });
     } finally {
       setIsSubmitting(false);
     }
@@ -114,8 +115,9 @@ export default function AdminStoresTab() {
       } else {
         setStatusMessage({ type: "error", text: res.message || "Failed to delete store." });
       }
-    } catch (err: any) {
-      setStatusMessage({ type: "error", text: err.message || "Failed to delete store." });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to delete store.";
+      setStatusMessage({ type: "error", text: msg });
     } finally {
       setIsSubmitting(false);
     }
