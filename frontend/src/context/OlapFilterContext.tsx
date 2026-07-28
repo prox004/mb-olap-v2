@@ -6,6 +6,7 @@ import { apiClient } from "@/utils/apiClient";
 export type LocationOption = {
   admsite_code: number;
   name: string;
+  site_type?: string;
 };
 
 export type OlapFilterState = {

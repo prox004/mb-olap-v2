@@ -55,7 +55,7 @@ export default function AdminLayout({
           <AppHeader />
           {/* Page Content */}
           <div className={getRouteSpecificStyles()}>
-            {pathname !== "/olap-assistant" && <OlapFilterBar />}
+            {pathname !== "/olap-assistant" && pathname !== "/profile" && <OlapFilterBar />}
             {children}
           </div>
         </div>
