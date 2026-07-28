@@ -16,6 +16,10 @@ def run_merchandise_buying_etl():
     print("1. Creating view v_sku_velocity_summary...")
     con.execute("""
     CREATE OR REPLACE VIEW v_sku_velocity_summary AS
+    WITH period_meta AS (
+        SELECT COUNT(DISTINCT strftime(START_DATE, '%Y-%m')) AS num_months
+        FROM fact_cube_monthly
+    )
     SELECT
         f.BARCODE AS barcode,
         i.DESC1 AS description,
@@ -26,36 +30,39 @@ def run_merchandise_buying_etl():
         i.MRP AS mrp,
         i.RATE AS cost_rate,
         SUM(f.NET_SALE_AMOUNT) AS net_revenue,
-        SUM(f.NET_SALE_QUANTITY) AS sales_units,
+        SUM(ABS(f.NET_SALE_QUANTITY)) AS sales_units,
         SUM(f.GP_AMOUNT) AS gross_profit,
         SUM(f.CLOSING_STOCK_QUANTITY) AS closing_stock_units,
         SUM(f.CLOSING_STOCK_AMOUNT) AS closing_stock_value,
         -- Sell-through %
         CASE 
             WHEN (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY)) > 0 
-            THEN (SUM(f.NET_SALE_QUANTITY) / (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0
+            THEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0
             ELSE 0.0 
         END AS sell_through_pct,
-        -- Weeks of Cover (WOC)
+        -- Weeks of Cover (WOC) = Closing Stock / Weekly Sales Rate
         CASE 
-            WHEN (SUM(f.NET_SALE_QUANTITY) / 12.0) > 0 
-            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / 12.0)
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
+            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))
             ELSE 999.0 
         END AS woc,
-        -- Months of Inventory (MOI) = WOC / 4.33
+        -- Months of Inventory (MOI) = Closing Stock / Monthly Sales Rate
         CASE 
-            WHEN (SUM(f.NET_SALE_QUANTITY) / 3.0) > 0 
-            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / 3.0)
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / MAX(pm.num_months)) > 0 
+            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / MAX(pm.num_months))
             ELSE 999.0 
         END AS moi,
         -- Velocity Classification Tag
         CASE
-            WHEN SUM(f.NET_SALE_QUANTITY) = 0 AND SUM(f.CLOSING_STOCK_QUANTITY) > 0 THEN 'DEAD_STOCK'
-            WHEN (SUM(f.NET_SALE_QUANTITY) / 12.0) > 0 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / 12.0)) < 4.0 THEN 'FAST_MOVER'
-            WHEN (SUM(f.NET_SALE_QUANTITY) / 12.0) > 0 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / 12.0)) BETWEEN 4.0 AND 12.0 THEN 'MEDIUM_MOVER'
+            WHEN SUM(ABS(f.NET_SALE_QUANTITY)) = 0 AND SUM(f.CLOSING_STOCK_QUANTITY) > 0 THEN 'DEAD_STOCK'
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
+                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))) < 4.0 THEN 'FAST_MOVER'
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
+                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))) BETWEEN 4.0 AND 12.0 THEN 'MEDIUM_MOVER'
             ELSE 'SLOW_MOVER'
         END AS velocity_status
     FROM fact_cube_monthly f
+    CROSS JOIN period_meta pm
     LEFT JOIN dim_item i ON f.BARCODE = i.ICODE
     GROUP BY f.BARCODE, i.DESC1, i.Division, i.Section, i.Department, i.PARTYNAME, i.MRP, i.RATE;
     """)

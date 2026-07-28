@@ -5,9 +5,16 @@ import { ArrowDownIcon, ArrowUpIcon, BoltIcon, TimeIcon } from "@/icons";
 interface VelocitySummaryCardsProps {
   breakdown: VelocityBreakdownItem[];
   loading?: boolean;
+  activeFilter?: string;
+  onSelectFilter?: (status: string) => void;
 }
 
-export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ breakdown, loading }) => {
+export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({
+  breakdown,
+  loading,
+  activeFilter = "ALL",
+  onSelectFilter,
+}) => {
   const getStats = (status: string) => {
     const item = breakdown.find((b) => b.velocity_status === status);
     return {
@@ -28,6 +35,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
 
   const cards = [
     {
+      key: "FAST_MOVER",
       title: "Fast Movers",
       tag: "WOC < 4 Wks",
       count: fast.count,
@@ -37,6 +45,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       borderColor: "border-l-emerald-500",
     },
     {
+      key: "MEDIUM_MOVER",
       title: "Medium Movers",
       tag: "WOC 4-12 Wks",
       count: medium.count,
@@ -46,6 +55,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       borderColor: "border-l-blue-500",
     },
     {
+      key: "SLOW_MOVER",
       title: "Slow Movers",
       tag: "WOC > 12 Wks",
       count: slow.count,
@@ -55,6 +65,7 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
       borderColor: "border-l-amber-500",
     },
     {
+      key: "DEAD_STOCK",
       title: "Dead Stock",
       tag: "0 Sales / Stock > 0",
       count: dead.count,
@@ -77,35 +88,43 @@ export const VelocitySummaryCards: React.FC<VelocitySummaryCardsProps> = ({ brea
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((c) => (
-        <div
-          key={c.title}
-          className={`p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 border-l-4 ${c.borderColor} shadow-xs flex flex-col justify-between`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800">
-              {c.icon}
-            </span>
-            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${c.badgeColor}`}>
-              {c.tag}
-            </span>
-          </div>
-
-          <div className="mt-3">
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {c.title}
-            </h3>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-xl font-extrabold text-gray-900 dark:text-white">
-                {c.count.toLocaleString()} <span className="text-xs font-normal text-gray-500">SKUs</span>
+      {cards.map((c) => {
+        const isSelected = activeFilter === c.key;
+        return (
+          <button
+            key={c.title}
+            onClick={() => onSelectFilter && onSelectFilter(isSelected ? "ALL" : c.key)}
+            className={`p-4 text-left rounded-2xl bg-white dark:bg-gray-900 border border-l-4 ${c.borderColor} shadow-xs flex flex-col justify-between cursor-pointer transition-all hover:scale-[1.02] ${
+              isSelected
+                ? "ring-2 ring-brand-500 border-brand-500 shadow-md"
+                : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800">
+                {c.icon}
               </span>
-              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                {c.stockValue}
+              <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${c.badgeColor}`}>
+                {c.tag}
               </span>
             </div>
-          </div>
-        </div>
-      ))}
+
+            <div className="mt-3">
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                {c.title}
+              </h3>
+              <div className="flex items-baseline justify-between mt-1">
+                <span className="text-xl font-extrabold text-gray-900 dark:text-white">
+                  {c.count.toLocaleString()} <span className="text-xs font-normal text-gray-500">SKUs</span>
+                </span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                  {c.stockValue}
+                </span>
+              </div>
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 };

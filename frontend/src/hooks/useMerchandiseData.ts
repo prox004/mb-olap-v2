@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { apiClient } from "@/utils/apiClient";
+import { useOlapFilter } from "@/context/OlapFilterContext";
 
 export type SkuVelocityItem = {
   barcode: string;
@@ -43,6 +44,8 @@ export type VelocityBreakdownItem = {
 };
 
 export function useMerchandiseData() {
+  const { selectedStores, selectedMonths, selectedDivision, selectedDepartment } = useOlapFilter();
+
   const [breakdown, setBreakdown] = useState<VelocityBreakdownItem[]>([]);
   const [skuResponse, setSkuResponse] = useState<SkuVelocityResponse>({
     total_records: 0,
@@ -62,7 +65,6 @@ export function useMerchandiseData() {
 
   // Filters & Pagination state for SKU Table
   const [velocityFilter, setVelocityFilter] = useState<string>("ALL");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("ALL");
   const [vendorFilter, setVendorFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
@@ -74,22 +76,32 @@ export function useMerchandiseData() {
   const [deadStockPage, setDeadStockPage] = useState<number>(1);
 
   interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-}
+    success: boolean;
+    data?: T;
+    message?: string;
+  }
 
-// Fetch summary breakdown
+  // Common slice and dice filter params
+  const filterParams = {
+    store_ids: selectedStores,
+    months: selectedMonths,
+    division: selectedDivision !== "All" ? selectedDivision : undefined,
+    department: selectedDepartment !== "All" ? selectedDepartment : undefined,
+  };
+
+  // Fetch summary breakdown
   const fetchBreakdown = useCallback(async () => {
     try {
-      const res = await apiClient<ApiResponse<VelocityBreakdownItem[]>>("/merchandise/velocity-breakdown");
+      const res = await apiClient<ApiResponse<VelocityBreakdownItem[]>>("/merchandise/velocity-breakdown", {
+        params: filterParams,
+      });
       if (res.success && res.data) {
         setBreakdown(res.data);
       }
     } catch (err: unknown) {
       console.error("Failed to load velocity breakdown:", err);
     }
-  }, []);
+  }, [selectedStores, selectedMonths, selectedDivision, selectedDepartment]);
 
   // Fetch SKU list
   const fetchSkus = useCallback(async () => {
@@ -97,7 +109,8 @@ export function useMerchandiseData() {
       setLoading(true);
       setError(null);
 
-      const params: Record<string, string | number> = {
+      const params: Record<string, any> = {
+        ...filterParams,
         page,
         page_size: pageSize,
         sort_by: sortBy,
@@ -105,9 +118,8 @@ export function useMerchandiseData() {
       };
 
       if (velocityFilter !== "ALL") params.velocity_status = velocityFilter;
-      if (departmentFilter !== "ALL") params.department = departmentFilter;
       if (vendorFilter !== "ALL") params.vendor = vendorFilter;
-      if (searchQuery.trim()) params.department = searchQuery.trim(); // search applied to text filters
+      if (searchQuery.trim()) params.search = searchQuery.trim();
 
       const res = await apiClient<ApiResponse<SkuVelocityResponse>>("/merchandise/skus", { params });
       if (res.success && res.data) {
@@ -120,14 +132,18 @@ export function useMerchandiseData() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, sortBy, sortOrder, velocityFilter, departmentFilter, vendorFilter, searchQuery]);
+  }, [selectedStores, selectedMonths, selectedDivision, selectedDepartment, page, pageSize, sortBy, sortOrder, velocityFilter, vendorFilter, searchQuery]);
 
   // Fetch Dead Stock
   const fetchDeadStock = useCallback(async () => {
     try {
       setDeadStockLoading(true);
       const res = await apiClient<ApiResponse<DeadStockSummary>>("/merchandise/dead-stock", {
-        params: { page: deadStockPage, page_size: 50 },
+        params: {
+          ...filterParams,
+          page: deadStockPage,
+          page_size: 50,
+        },
       });
       if (res.success && res.data) {
         setDeadStockSummary(res.data);
@@ -137,7 +153,7 @@ export function useMerchandiseData() {
     } finally {
       setDeadStockLoading(false);
     }
-  }, [deadStockPage]);
+  }, [selectedStores, selectedMonths, selectedDivision, selectedDepartment, deadStockPage]);
 
   useEffect(() => {
     fetchBreakdown();
@@ -169,8 +185,6 @@ export function useMerchandiseData() {
     setSortOrder,
     velocityFilter,
     setVelocityFilter,
-    departmentFilter,
-    setDepartmentFilter,
     vendorFilter,
     setVendorFilter,
     searchQuery,

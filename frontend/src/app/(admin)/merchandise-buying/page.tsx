@@ -86,7 +86,12 @@ export default function MerchandiseBuyingPage() {
       )}
 
       {/* Inventory Velocity Summary Cards */}
-      <VelocitySummaryCards breakdown={breakdown} loading={loading} />
+      <VelocitySummaryCards
+        breakdown={breakdown}
+        loading={loading}
+        activeFilter={velocityFilter}
+        onSelectFilter={setVelocityFilter}
+      />
 
       {/* Main Tab Content */}
       {activeTab === "explorer" ? (

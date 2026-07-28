@@ -10,6 +10,7 @@ from backend.app.schemas.merchandise import (
     DeadStockSummary,
     VelocityBreakdownItem,
 )
+from backend.app.utils.query_builder import build_where_clause
 
 router = APIRouter()
 
@@ -54,11 +55,84 @@ def map_sku_row(row) -> SkuVelocityItem:
         velocity_status=row[16] or "UNKNOWN",
     )
 
+
+def _build_sku_base_query(where_clause: str) -> str:
+    return f"""
+    WITH filtered_fact AS (
+        SELECT 
+            f.BARCODE,
+            f.ADMSITE_CODE,
+            f.START_DATE,
+            f.NET_SALE_AMOUNT,
+            f.NET_SALE_QUANTITY,
+            f.GP_AMOUNT,
+            f.CLOSING_STOCK_QUANTITY,
+            f.CLOSING_STOCK_AMOUNT,
+            f.OPENING_QUANTITY,
+            f.GOODS_RECEIVE_QUANTITY,
+            f.SITE_TRANSFER_IN_QUANTITY
+        FROM fact_cube_monthly f
+        {where_clause}
+    ),
+    period_meta AS (
+        SELECT COUNT(DISTINCT strftime(START_DATE, '%Y-%m')) AS num_months
+        FROM filtered_fact
+    )
+    SELECT
+        f.BARCODE AS barcode,
+        i.DESC1 AS description,
+        i.Division AS division,
+        i.Section AS section,
+        i.Department AS department,
+        i.PARTYNAME AS vendor,
+        i.MRP AS mrp,
+        i.RATE AS cost_rate,
+        SUM(f.NET_SALE_AMOUNT) AS net_revenue,
+        SUM(ABS(f.NET_SALE_QUANTITY)) AS sales_units,
+        SUM(f.GP_AMOUNT) AS gross_profit,
+        SUM(f.CLOSING_STOCK_QUANTITY) AS closing_stock_units,
+        SUM(f.CLOSING_STOCK_AMOUNT) AS closing_stock_value,
+        CASE 
+            WHEN (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY)) > 0 
+            THEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0
+            ELSE 0.0 
+        END AS sell_through_pct,
+        -- Weeks of Cover (WOC) = Closing Stock / Weekly Sales Rate
+        CASE 
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
+            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))
+            ELSE 999.0 
+        END AS woc,
+        -- Months of Inventory (MOI) = Closing Stock / Monthly Sales Rate
+        CASE 
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / MAX(pm.num_months)) > 0 
+            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / MAX(pm.num_months))
+            ELSE 999.0 
+        END AS moi,
+        CASE
+            WHEN SUM(ABS(f.NET_SALE_QUANTITY)) = 0 AND SUM(f.CLOSING_STOCK_QUANTITY) > 0 THEN 'DEAD_STOCK'
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
+                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))) < 4.0 THEN 'FAST_MOVER'
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
+                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))) BETWEEN 4.0 AND 12.0 THEN 'MEDIUM_MOVER'
+            ELSE 'SLOW_MOVER'
+        END AS velocity_status
+    FROM filtered_fact f
+    CROSS JOIN period_meta pm
+    LEFT JOIN dim_item i ON f.BARCODE = i.ICODE
+    GROUP BY f.BARCODE, i.DESC1, i.Division, i.Section, i.Department, i.PARTYNAME, i.MRP, i.RATE
+    """
+
+
 @router.get("/skus", response_model=StandardResponse[SkuVelocityResponse])
 def get_sku_velocity_list(
     velocity_status: Optional[str] = Query(None),
     department: Optional[str] = Query(None),
     vendor: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    store_ids: Optional[List[int]] = Query(None),
+    months: Optional[List[str]] = Query(None),
+    division: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=500),
     sort_by: str = Query("net_revenue"),
@@ -66,34 +140,44 @@ def get_sku_velocity_list(
     db: DuckDBPyConnection = Depends(get_db),
 ):
     """
-    Returns paginated list of SKU inventory velocity performance metrics with filtering and sorting.
+    Returns paginated list of SKU inventory velocity performance metrics with dynamic slice and dice filters.
     """
-    conditions = []
-    params = []
+    where_clause, params = build_where_clause(
+        store_ids=store_ids,
+        months=months,
+        division=division,
+        department=department,
+        table_prefix="f"
+    )
 
+    base_query = _build_sku_base_query(where_clause)
+
+    # Post-filtering for velocity_status, vendor, & search
+    post_conditions = []
     if velocity_status and velocity_status.upper() != "ALL":
-        conditions.append("velocity_status = ?")
+        post_conditions.append("velocity_status = ?")
         params.append(velocity_status.upper().strip())
 
-    if department and department.lower() != "all":
-        conditions.append("UPPER(department) LIKE ?")
-        params.append(f"%{department.strip().upper()}%")
-
     if vendor and vendor.lower() != "all":
-        conditions.append("UPPER(vendor) LIKE ?")
+        post_conditions.append("UPPER(vendor) LIKE ?")
         params.append(f"%{vendor.strip().upper()}%")
 
-    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    if search and search.strip():
+        term = f"%{search.strip().upper()}%"
+        post_conditions.append("(UPPER(description) LIKE ? OR UPPER(barcode) LIKE ? OR UPPER(department) LIKE ? OR UPPER(vendor) LIKE ?)")
+        params.extend([term, term, term, term])
 
-    # Validate sort field & direction
+    having_clause = f"HAVING {' AND '.join(post_conditions)}" if post_conditions else ""
+
+    # Sort & pagination
     sort_column = ALLOWED_SORT_FIELDS.get(sort_by.lower(), "net_revenue")
     sort_order = "ASC" if order.lower() == "asc" else "DESC"
 
-    # Total count query
-    count_query = f"SELECT COUNT(*) FROM v_sku_velocity_summary {where_clause}"
+    # Count query
+    count_query = f"SELECT COUNT(*) FROM ({base_query} {having_clause}) sub"
     total_records = db.execute(count_query, params).fetchone()[0]
 
-    # Data query with pagination
+    # Data query
     offset = (page - 1) * page_size
     data_query = f"""
     SELECT
@@ -101,8 +185,7 @@ def get_sku_velocity_list(
         mrp, cost_rate, net_revenue, sales_units, gross_profit,
         closing_stock_units, closing_stock_value, sell_through_pct,
         woc, moi, velocity_status
-    FROM v_sku_velocity_summary
-    {where_clause}
+    FROM ({base_query} {having_clause}) sub
     ORDER BY {sort_column} {sort_order}
     LIMIT {page_size} OFFSET {offset}
     """
@@ -123,16 +206,33 @@ def get_sku_velocity_list(
 
 @router.get("/dead-stock", response_model=StandardResponse[DeadStockSummary])
 def get_dead_stock_candidates(
+    store_ids: Optional[List[int]] = Query(None),
+    months: Optional[List[str]] = Query(None),
+    division: Optional[str] = Query(None),
+    department: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=500),
     db: DuckDBPyConnection = Depends(get_db),
 ):
     """
-    Returns summary and paginated list of 90-day Dead Stock liquidation candidates.
+    Returns summary and paginated list of 90-day Dead Stock liquidation candidates matching slice and dice filters.
     """
+    where_clause, params = build_where_clause(
+        store_ids=store_ids,
+        months=months,
+        division=division,
+        department=department,
+        table_prefix="f"
+    )
+
+    base_query = _build_sku_base_query(where_clause)
+    dead_query = f"SELECT * FROM ({base_query} HAVING velocity_status = 'DEAD_STOCK') sub"
+
     # Total stats query
-    stats_query = "SELECT COUNT(*), COALESCE(SUM(closing_stock_value), 0.0) FROM v_dead_stock_candidates"
-    total_dead_skus, total_locked_capital = db.execute(stats_query).fetchone()
+    stats_query = f"SELECT COUNT(*), COALESCE(SUM(closing_stock_value), 0.0) FROM ({dead_query}) ds"
+    stats_res = db.execute(stats_query, params).fetchone()
+    total_dead_skus = stats_res[0] if stats_res else 0
+    total_locked_capital = float(stats_res[1]) if stats_res else 0.0
 
     # Data query
     offset = (page - 1) * page_size
@@ -142,17 +242,17 @@ def get_dead_stock_candidates(
         mrp, cost_rate, net_revenue, sales_units, gross_profit,
         closing_stock_units, closing_stock_value, sell_through_pct,
         woc, moi, velocity_status
-    FROM v_dead_stock_candidates
+    FROM ({dead_query}) ds
     ORDER BY closing_stock_value DESC
     LIMIT {page_size} OFFSET {offset}
     """
 
-    rows = db.execute(data_query).fetchall()
+    rows = db.execute(data_query, params).fetchall()
     items = [map_sku_row(r) for r in rows]
 
     summary = DeadStockSummary(
         total_dead_skus=total_dead_skus,
-        total_locked_capital=float(total_locked_capital),
+        total_locked_capital=total_locked_capital,
         items=items,
     )
 
@@ -162,21 +262,34 @@ def get_dead_stock_candidates(
 
 @router.get("/velocity-breakdown", response_model=StandardResponse[List[VelocityBreakdownItem]])
 def get_velocity_breakdown(
+    store_ids: Optional[List[int]] = Query(None),
+    months: Optional[List[str]] = Query(None),
+    division: Optional[str] = Query(None),
+    department: Optional[str] = Query(None),
     db: DuckDBPyConnection = Depends(get_db),
 ):
     """
-    Returns velocity status breakdown (SKU counts and total closing stock values) for donut/pie charts.
+    Returns velocity status breakdown for slice and dice filter selections.
     """
-    query = """
+    where_clause, params = build_where_clause(
+        store_ids=store_ids,
+        months=months,
+        division=division,
+        department=department,
+        table_prefix="f"
+    )
+
+    base_query = _build_sku_base_query(where_clause)
+    query = f"""
     SELECT 
         velocity_status,
         COUNT(*) AS sku_count,
         COALESCE(SUM(closing_stock_value), 0.0) AS closing_stock_value
-    FROM v_sku_velocity_summary
+    FROM ({base_query}) sub
     GROUP BY velocity_status
     ORDER BY sku_count DESC;
     """
-    rows = db.execute(query).fetchall()
+    rows = db.execute(query, params).fetchall()
     breakdown = [
         VelocityBreakdownItem(
             velocity_status=row[0],
