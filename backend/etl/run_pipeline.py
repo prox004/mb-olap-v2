@@ -14,6 +14,7 @@ from backend.etl.modules.colour_analytics import run_colour_analytics_etl
 from backend.etl.modules.size_price_analytics import run_size_price_analytics_etl
 from backend.etl.modules.store_allocation import run_store_allocation_etl
 from backend.etl.modules.financial_gmroi import run_financial_gmroi_etl
+from backend.etl.modules.ai_recommendations import run_ai_recommendations_etl
 
 def main():
     pipeline_start = time.time()
@@ -36,6 +37,7 @@ def main():
     run_size_price_analytics_etl()
     run_store_allocation_etl()
     run_financial_gmroi_etl()
+    run_ai_recommendations_etl()
 
     total_elapsed = time.time() - pipeline_start
     print("==================================================")
