@@ -29,11 +29,11 @@ def run_merchandise_buying_etl():
         i.PARTYNAME AS vendor,
         i.MRP AS mrp,
         i.RATE AS cost_rate,
-        SUM(f.NET_SALE_AMOUNT) AS net_revenue,
+        SUM(ABS(f.NET_SALE_AMOUNT)) AS net_revenue,
         SUM(ABS(f.NET_SALE_QUANTITY)) AS sales_units,
         SUM(f.GP_AMOUNT) AS gross_profit,
-        SUM(f.CLOSING_STOCK_QUANTITY) AS closing_stock_units,
-        SUM(f.CLOSING_STOCK_AMOUNT) AS closing_stock_value,
+        SUM(GREATEST(0.0, f.CLOSING_STOCK_QUANTITY)) AS closing_stock_units,
+        SUM(GREATEST(0.0, f.CLOSING_STOCK_AMOUNT)) AS closing_stock_value,
         -- Sell-through %
         CASE 
             WHEN (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY)) > 0 
