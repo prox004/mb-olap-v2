@@ -27,16 +27,16 @@ def run_ceo_dashboard_etl():
         END AS gross_margin_pct,
         SUM(CLOSING_STOCK_AMOUNT) AS total_inventory_value,
         SUM(CLOSING_STOCK_QUANTITY) AS total_inventory_units,
-        -- Sell-through % = ABS(NET_SALE_QUANTITY) / (OPENING_QUANTITY + GOODS_RECEIVE_QUANTITY + SITE_TRANSFER_IN_QUANTITY)
+        -- Sell-through % = ABS(NET_SALE_QUANTITY) / (GREATEST(0, OPENING_QUANTITY) + GOODS_RECEIVE_QUANTITY + SITE_TRANSFER_IN_QUANTITY)
         CASE 
-            WHEN (SUM(OPENING_QUANTITY) + SUM(GOODS_RECEIVE_QUANTITY) + SUM(SITE_TRANSFER_IN_QUANTITY)) > 0 
-            THEN ROUND((SUM(ABS(NET_SALE_QUANTITY)) / (SUM(OPENING_QUANTITY) + SUM(GOODS_RECEIVE_QUANTITY) + SUM(SITE_TRANSFER_IN_QUANTITY))) * 100.0, 2)
+            WHEN (GREATEST(0.0, SUM(OPENING_QUANTITY)) + SUM(GOODS_RECEIVE_QUANTITY) + SUM(SITE_TRANSFER_IN_QUANTITY)) > 0 
+            THEN ROUND((SUM(ABS(NET_SALE_QUANTITY)) / (GREATEST(0.0, SUM(OPENING_QUANTITY)) + SUM(GOODS_RECEIVE_QUANTITY) + SUM(SITE_TRANSFER_IN_QUANTITY))) * 100.0, 2)
             ELSE 0.0 
         END AS sell_through_pct,
-        -- Average WOC = Total Closing Stock Units / (Total Sales Units / 12.0)
+        -- Average WOC = Total Closing Stock Units (floored at 0) / (Total Sales Units / 12.0)
         CASE 
             WHEN (SUM(ABS(NET_SALE_QUANTITY)) / 12.0) > 0 
-            THEN ROUND(SUM(CLOSING_STOCK_QUANTITY) / (SUM(ABS(NET_SALE_QUANTITY)) / 12.0), 1)
+            THEN ROUND(GREATEST(0.0, SUM(CLOSING_STOCK_QUANTITY)) / (SUM(ABS(NET_SALE_QUANTITY)) / 12.0), 1)
             ELSE 999.0 
         END AS average_woc
     FROM fact_cube_monthly;

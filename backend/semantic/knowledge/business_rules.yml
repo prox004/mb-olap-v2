@@ -24,3 +24,9 @@ business_rules:
     category: "Date & Period Filtering"
     rule: "REPORT_DATE records period snapshots (e.g., 2026-06-12, 2026-06-13, 2026-07-15). If the user asks for 'this month' or 'sales this month', filter by date e.g. WHERE MONTH(fact_cube_monthly.REPORT_DATE) = 7 AND YEAR(fact_cube_monthly.REPORT_DATE) = 2026 or max available date snapshot."
     example: "WHERE DATE_TRUNC('month', fact_cube_monthly.REPORT_DATE) = '2026-07-01'"
+
+  - id: negative_stock_inventory
+    category: "Inventory & Stock Logic"
+    rule: "Negative values in OPENING_QUANTITY, CLOSING_STOCK_QUANTITY, or SITE_TRANSFER_OUT_QUANTITY represent operational timing lags where physical goods were received and sold/transferred before the digital stock transfer document/GRN was posted in the system. When auditing stock discrepancies or calculating stock balances, consider pending inward digital transfers."
+    example: "Physical sales recorded before Transfer In posting cause system stock to go negative. Closing Stock = Opening Stock + Inward Transfers - Outward Sales/Transfers."
+

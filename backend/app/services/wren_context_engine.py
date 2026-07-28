@@ -102,6 +102,7 @@ class WrenContextEngine:
         context.append("6. Date Filtering: When user asks for 'this month' or 'sales this month', filter by date snapshot (e.g., WHERE MONTH(fact_cube_monthly.REPORT_DATE) = 7 AND YEAR(fact_cube_monthly.REPORT_DATE) = 2026, or max available date).")
         context.append("7. Join fact_cube_monthly to dim_item ON fact_cube_monthly.BARCODE = dim_item.ICODE.")
         context.append("8. Join fact_cube_monthly to dim_location ON fact_cube_monthly.ADMSITE_CODE = dim_location.ADMSITE_CODE.")
+        context.append("9. Negative stock quantities (OPENING_QUANTITY, CLOSING_STOCK_QUANTITY, SITE_TRANSFER_OUT_QUANTITY) represent physical goods sold or transferred before digital transfer file/GRN posting.")
 
         return "\n".join(context)
 

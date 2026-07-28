@@ -22,15 +22,15 @@ metrics:
 
   - name: sell_through_pct
     model: fact_cube_monthly
-    expression: "(SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY)) / NULLIF(SUM(fact_cube_monthly.OPENING_QUANTITY) + SUM(fact_cube_monthly.GOODS_RECEIVE_QUANTITY) + SUM(fact_cube_monthly.SITE_TRANSFER_IN_QUANTITY), 0)) * 100"
-    description: "Inventory sell-through rate percentage (units sold divided by total incoming stock availability)."
+    expression: "(SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY)) / NULLIF(GREATEST(0.0, SUM(fact_cube_monthly.OPENING_QUANTITY)) + SUM(fact_cube_monthly.GOODS_RECEIVE_QUANTITY) + SUM(fact_cube_monthly.SITE_TRANSFER_IN_QUANTITY), 0)) * 100"
+    description: "Inventory sell-through rate percentage (units sold divided by total incoming stock availability, floored against negative opening stock)."
 
   - name: weeks_of_cover
     model: fact_cube_monthly
-    expression: "SUM(fact_cube_monthly.CLOSING_STOCK_QUANTITY) / NULLIF(SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY)) / 12.0, 0)"
-    description: "Stock cover expressed in operational weeks (WOC), based on closing stock divided by weekly average sales velocity."
+    expression: "GREATEST(0.0, SUM(fact_cube_monthly.CLOSING_STOCK_QUANTITY)) / NULLIF(SUM(ABS(fact_cube_monthly.NET_SALE_QUANTITY)) / 12.0, 0)"
+    description: "Stock cover expressed in operational weeks (WOC), based on closing stock (floored at 0) divided by weekly average sales velocity."
 
   - name: gmroi
     model: fact_cube_monthly
-    expression: "SUM(fact_cube_monthly.GP_AMOUNT) / NULLIF((SUM(fact_cube_monthly.OPENING_AMOUNT) + SUM(fact_cube_monthly.CLOSING_STOCK_AMOUNT)) / 2.0, 0)"
+    expression: "SUM(fact_cube_monthly.GP_AMOUNT) / NULLIF((GREATEST(0.0, SUM(fact_cube_monthly.OPENING_AMOUNT)) + GREATEST(0.0, SUM(fact_cube_monthly.CLOSING_STOCK_AMOUNT))) / 2.0, 0)"
     description: "Gross Margin Return on Investment (GMROI), measuring profit returned per currency unit of average inventory cost."

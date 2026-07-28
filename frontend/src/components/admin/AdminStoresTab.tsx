@@ -138,7 +138,7 @@ export default function AdminStoresTab() {
                 {editingCode !== null ? `Edit Store #${editingCode}` : "Add New Store Outlet"}
               </h4>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Scalable up to 250+ store outlets. Saves directly to `dim_locations.parquet` & DuckDB with automated ETL re-indexing.
+                Add or modify store outlet entries. All operational changes are saved automatically.
               </p>
             </div>
             {editingCode !== null && (
@@ -153,11 +153,10 @@ export default function AdminStoresTab() {
 
           {statusMessage && (
             <div
-              className={`p-3 rounded-lg text-xs font-medium border ${
-                statusMessage.type === "success"
+              className={`p-3 rounded-lg text-xs font-medium border ${statusMessage.type === "success"
                   ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
                   : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800"
-              }`}
+                }`}
             >
               {statusMessage.text}
             </div>
@@ -214,8 +213,8 @@ export default function AdminStoresTab() {
                   {isSubmitting
                     ? "Saving..."
                     : editingCode !== null
-                    ? "Update Store"
-                    : "Save Store Data"}
+                      ? "Update Store"
+                      : "Save Store Data"}
                 </button>
               </div>
             </div>
@@ -229,9 +228,6 @@ export default function AdminStoresTab() {
             <h4 className="text-base font-bold text-gray-900 dark:text-white">
               Managed Store Outlets (<span className="text-brand-600 dark:text-brand-400">{filteredLocations.length}</span>)
             </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Real-time store directory scalable up to 250+ locations.
-            </p>
           </div>
 
           <input
@@ -267,11 +263,10 @@ export default function AdminStoresTab() {
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                          cell.site_type === "CENTRAL_WAREHOUSE" || cell.admsite_code === 1070
+                        className={`px-2 py-0.5 rounded text-xs font-semibold ${cell.site_type === "CENTRAL_WAREHOUSE" || cell.admsite_code === 1070
                             ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300"
                             : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        }`}
+                          }`}
                       >
                         {cell.site_type || "RETAIL_STORE"}
                       </span>

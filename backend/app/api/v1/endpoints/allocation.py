@@ -17,7 +17,7 @@ router = APIRouter()
 def get_store_stock_cover(
     store_ids: Optional[List[int]] = Query(None),
     department: Optional[str] = Query(None),
-    health_status: Optional[str] = Query(None, enum=["HIGH_RISK_STOCKOUT", "OVERSTOCKED", "BALANCED"]),
+    health_status: Optional[str] = Query(None, enum=["HIGH_RISK_STOCKOUT", "OVERSTOCKED", "BALANCED", "NEGATIVE_TRANSFER_LAG"]),
     db: DuckDBPyConnection = Depends(get_db),
 ):
     """

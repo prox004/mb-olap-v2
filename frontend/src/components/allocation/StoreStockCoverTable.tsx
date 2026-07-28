@@ -51,6 +51,16 @@ export function StoreStockCoverTable({ items, loading }: { items: StoreStockCove
             All Outlets
           </button>
           <button
+            onClick={() => setFilterStatus("NEGATIVE_TRANSFER_LAG")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              filterStatus === "NEGATIVE_TRANSFER_LAG"
+                ? "bg-white text-purple-600 shadow-xs dark:bg-gray-700 dark:text-purple-400"
+                : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            }`}
+          >
+            Pending Transfer Lag
+          </button>
+          <button
             onClick={() => setFilterStatus("HIGH_RISK_STOCKOUT")}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               filterStatus === "HIGH_RISK_STOCKOUT"
@@ -109,7 +119,9 @@ export function StoreStockCoverTable({ items, loading }: { items: StoreStockCove
                 <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
                   {formatCurrency(item.revenue)}
                 </td>
-                <td className="py-3 px-4">{item.stock_units.toLocaleString()}</td>
+                <td className={`py-3 px-4 font-semibold ${item.stock_units < 0 ? "text-purple-600 dark:text-purple-400" : ""}`}>
+                  {item.stock_units.toLocaleString()} {item.stock_units < 0 ? "(Pending Lag)" : ""}
+                </td>
                 <td className="py-3 px-4">{formatCurrency(item.stock_value)}</td>
                 <td className="py-3 px-4 font-semibold">
                   <span
@@ -127,14 +139,16 @@ export function StoreStockCoverTable({ items, loading }: { items: StoreStockCove
                 <td className="py-3 px-4">
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      item.stock_health_status === "HIGH_RISK_STOCKOUT"
+                      item.stock_health_status === "NEGATIVE_TRANSFER_LAG"
+                        ? "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-900"
+                        : item.stock_health_status === "HIGH_RISK_STOCKOUT"
                         ? "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-900"
                         : item.stock_health_status === "OVERSTOCKED"
                         ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
                         : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900"
                     }`}
                   >
-                    {item.stock_health_status.replace("_", " ")}
+                    {item.stock_health_status.replace(/_/g, " ")}
                   </span>
                 </td>
               </tr>

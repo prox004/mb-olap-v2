@@ -31,16 +31,16 @@ def run_category_performance_etl():
         END AS margin_pct,
         SUM(f.CLOSING_STOCK_AMOUNT) AS closing_stock_value,
         SUM(f.CLOSING_STOCK_QUANTITY) AS closing_stock_units,
-        -- Sell-through % = ABS(NET_SALE_QUANTITY) / (OPENING + RECEIVE + TRANSFER_IN)
+        -- Sell-through % = ABS(NET_SALE_QUANTITY) / (GREATEST(0, OPENING) + RECEIVE + TRANSFER_IN)
         CASE 
-            WHEN (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY)) > 0 
-            THEN ROUND((SUM(ABS(f.NET_SALE_QUANTITY)) / (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0, 2)
+            WHEN (GREATEST(0.0, SUM(f.OPENING_QUANTITY)) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY)) > 0 
+            THEN ROUND((SUM(ABS(f.NET_SALE_QUANTITY)) / (GREATEST(0.0, SUM(f.OPENING_QUANTITY)) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0, 2)
             ELSE 0.0 
         END AS sell_through_pct,
         -- Weeks of Cover (WOC)
         CASE 
             WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 
-            THEN ROUND(SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0), 1)
+            THEN ROUND(GREATEST(0.0, SUM(f.CLOSING_STOCK_QUANTITY)) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0), 1)
             ELSE 999.0 
         END AS woc
     FROM fact_cube_monthly f

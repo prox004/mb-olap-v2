@@ -17,7 +17,7 @@ export type StoreStockCoverItem = {
   transfer_out_units: number;
   wh_transfer_in_units: number;
   store_woc: number;
-  stock_health_status: "HIGH_RISK_STOCKOUT" | "OVERSTOCKED" | "BALANCED";
+  stock_health_status: "HIGH_RISK_STOCKOUT" | "OVERSTOCKED" | "BALANCED" | "NEGATIVE_TRANSFER_LAG";
 };
 
 export type RebalanceRecommendationItem = {

@@ -128,8 +128,8 @@ export function RebalanceTable({
                   </td>
                   <td className="py-3.5 px-4">
                     <div className="font-semibold text-gray-900 dark:text-white">{item.target_store_name}</div>
-                    <div className="text-[11px] text-rose-600 dark:text-rose-400">
-                      Stock: {item.target_stock} ({item.target_woc} Wks)
+                    <div className={`text-[11px] ${item.target_stock < 0 ? "text-purple-600 dark:text-purple-400 font-bold" : "text-rose-600 dark:text-rose-400"}`}>
+                      Stock: {item.target_stock} {item.target_stock < 0 ? "(Negative Lag)" : `(${item.target_woc} Wks)`}
                     </div>
                   </td>
                   <td className="py-3.5 px-4">

@@ -24,19 +24,21 @@ def run_store_allocation_etl():
         SUM(ABS(f.NET_SALE_QUANTITY)) AS sales_units,
         SUM(ABS(f.NET_SALE_AMOUNT)) AS revenue,
         SUM(f.CLOSING_STOCK_QUANTITY) AS stock_units,
+        GREATEST(0.0, SUM(f.CLOSING_STOCK_QUANTITY)) AS effective_stock_units,
         SUM(f.CLOSING_STOCK_AMOUNT) AS stock_value,
         SUM(f.SITE_TRANSFER_IN_QUANTITY) AS transfer_in_units,
         SUM(f.SITE_TRANSFER_OUT_QUANTITY) AS transfer_out_units,
         SUM(f.WAREHOUSE_TRANSFER_IN_QUANTITY) AS wh_transfer_in_units,
-        -- Weeks of Cover per store/department = Stock Units / (Sales Units / 12.0)
+        -- Weeks of Cover per store/department = Effective Stock Units (floored at 0) / (Sales Units / 12.0)
         CASE 
             WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 
-            THEN ROUND(SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0), 1)
+            THEN ROUND(GREATEST(0.0, SUM(f.CLOSING_STOCK_QUANTITY)) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0), 1)
             ELSE 999.0 
         END AS store_woc,
-        -- Stock-Out Risk Flag (< 2.5 weeks cover)
+        -- Stock Health & Timing Discrepancy Classification
         CASE 
-            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0)) < 2.5 THEN 'HIGH_RISK_STOCKOUT'
+            WHEN SUM(f.CLOSING_STOCK_QUANTITY) < 0 AND (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 THEN 'NEGATIVE_TRANSFER_LAG'
+            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 AND (GREATEST(0.0, SUM(f.CLOSING_STOCK_QUANTITY)) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0)) < 2.5 THEN 'HIGH_RISK_STOCKOUT'
             WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0)) > 12.0 THEN 'OVERSTOCKED'
             ELSE 'BALANCED'
         END AS stock_health_status
@@ -60,10 +62,11 @@ def run_store_allocation_etl():
             COALESCE(l.SITE_TYPE, CASE WHEN f.ADMSITE_CODE = 1070 THEN 'CENTRAL_WAREHOUSE' ELSE 'RETAIL_STORE' END) AS site_type,
             SUM(ABS(f.NET_SALE_QUANTITY)) AS sales_units,
             SUM(f.CLOSING_STOCK_QUANTITY) AS stock_units,
+            GREATEST(0.0, SUM(f.CLOSING_STOCK_QUANTITY)) AS effective_stock_units,
             (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) AS weekly_run_rate,
             CASE 
                 WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0) > 0 
-                THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0)
+                THEN GREATEST(0.0, SUM(f.CLOSING_STOCK_QUANTITY)) / (SUM(ABS(f.NET_SALE_QUANTITY)) / 12.0)
                 ELSE 999.0 
             END AS woc
         FROM fact_cube_monthly f
@@ -72,7 +75,7 @@ def run_store_allocation_etl():
         GROUP BY f.BARCODE, i.DESC1, i.Department, f.ADMSITE_CODE, l.Name, l.SITE_TYPE
     ),
     surplus AS (
-        -- Source node has overstocked inventory (WOC > 8.0 or DC inventory > 10 units)
+        -- Source node must have positive physical stock available to transfer (stock_units >= 5)
         SELECT 
             *,
             GREATEST(CAST(stock_units - (weekly_run_rate * 6.0) AS INT), 1) AS surplus_units
@@ -80,12 +83,12 @@ def run_store_allocation_etl():
         WHERE (woc > 8.0 OR site_type = 'CENTRAL_WAREHOUSE') AND stock_units >= 5
     ),
     deficit AS (
-        -- Target node has critical stockout risk (WOC < 3.0 with active sales demand)
+        -- Target node has stockout risk or negative stock due to physical sales prior to STN posting
         SELECT 
             *,
             GREATEST(CAST((weekly_run_rate * 6.0) - stock_units AS INT), 1) AS deficit_units
         FROM item_store_woc 
-        WHERE woc < 3.0 AND sales_units > 0
+        WHERE (woc < 3.0 OR stock_units < 0) AND (sales_units > 0 OR stock_units < 0)
     )
     SELECT
         s.barcode,
@@ -105,6 +108,7 @@ def run_store_allocation_etl():
             ELSE 'LATERAL_REBALANCE'
         END AS transfer_type,
         CASE
+            WHEN d.stock_units < 0 THEN 'CRITICAL'
             WHEN d.woc < 1.0 THEN 'CRITICAL'
             WHEN d.woc < 2.0 THEN 'HIGH'
             ELSE 'MEDIUM'
