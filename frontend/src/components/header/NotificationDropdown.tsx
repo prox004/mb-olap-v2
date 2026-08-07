@@ -33,6 +33,8 @@ export default function NotificationDropdown() {
         try {
           const res = await apiClient<{ success: boolean; data: Record<string, unknown>[] }>("/vendor/returns", {
             params: { min_return_rate: 5.0 },
+            quiet: true,
+            retries: 2,
           });
           if (res.success && res.data && res.data.length > 0) {
             const topRisk = res.data[0] as { vendor_name: string; return_rate_pct: number; return_value: number };

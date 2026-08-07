@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { CategoryHierarchyItem } from "@/hooks/useCategoryData";
+import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 
 function formatCurrency(val: number): string {
   if (val >= 1e7) {
@@ -134,6 +135,21 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
             Expand Division & Section rows to drill down into Department performance
           </p>
         </div>
+        <ExportCsvButton
+          columns={[
+            { key: "division", header: "Division" },
+            { key: "section", header: "Section" },
+            { key: "department", header: "Department" },
+            { key: "net_revenue", header: "Net Revenue" },
+            { key: "sales_units", header: "Sales Units" },
+            { key: "margin_pct", header: "Margin %" },
+            { key: "closing_stock_value", header: "Stock Value" },
+            { key: "sell_through_pct", header: "Sell-Through %" },
+            { key: "woc", header: "WOC" },
+          ]}
+          rows={items as unknown as Record<string, unknown>[]}
+          filenameParts={["Category_Hierarchy"]}
+        />
       </div>
 
       <div className="overflow-x-auto">

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { apiClient } from "@/utils/apiClient";
 import { useOlapFilter } from "@/context/OlapFilterContext";
 import { GmroiItem } from "./GmroiCards";
+import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 
 export default function GmroiTable() {
   const { selectedStores, selectedDepartment } = useOlapFilter();
@@ -70,6 +71,24 @@ export default function GmroiTable() {
         </div>
 
         {/* Dimension Toggles */}
+        <div className="flex items-center gap-2">
+          <ExportCsvButton
+            columns={[
+              { key: "dimension", header: "Dimension" },
+              { key: "total_revenue", header: "Revenue" },
+              { key: "total_gross_profit", header: "Gross Profit" },
+              { key: "avg_inventory_value", header: "Avg Inventory" },
+              { key: "gmroi_ratio", header: "GMROI" },
+            ]}
+            rows={data.map((item) => ({
+              dimension: getDimensionName(item),
+              total_revenue: item.total_revenue,
+              total_gross_profit: item.total_gross_profit,
+              avg_inventory_value: item.avg_inventory_value,
+              gmroi_ratio: item.gmroi_ratio,
+            }))}
+            filenameParts={["GMROI", groupBy]}
+          />
         <div className="flex items-center p-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg w-fit">
           {(["store", "department", "vendor", "sku"] as const).map((dim) => (
             <button
@@ -84,6 +103,7 @@ export default function GmroiTable() {
               By {dim}
             </button>
           ))}
+        </div>
         </div>
       </div>
 

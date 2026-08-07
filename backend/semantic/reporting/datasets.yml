@@ -1,0 +1,212 @@
+# Curated reporting datasets for self-service BI
+datasets:
+  - id: sales_inventory
+    label: Sales & Inventory
+    description: Monthly sales, stock, and margin data joined across stores and products.
+    base_table: v_fact_item_location_monthly
+    alias: v
+    default_limit: 500
+    dimensions:
+      - id: store_name
+        label: Store Name
+        column: STORE_NAME
+        data_type: string
+        category: location
+      - id: site_type
+        label: Site Type
+        column: SITE_TYPE
+        data_type: string
+        category: location
+      - id: admsite_code
+        label: Store Code
+        column: ADMSITE_CODE
+        data_type: integer
+        category: location
+        hidden: true
+      - id: month
+        label: Month
+        expression: "strftime(v.START_DATE, '%Y-%m')"
+        data_type: string
+        category: time
+      - id: report_date
+        label: Report Date
+        column: REPORT_DATE
+        data_type: date
+        category: time
+      - id: division
+        label: Division
+        column: Division
+        data_type: string
+        category: product
+      - id: section
+        label: Section
+        column: Section
+        data_type: string
+        category: product
+      - id: department
+        label: Department
+        column: Department
+        data_type: string
+        category: product
+      - id: vendor
+        label: Vendor
+        column: PARTYNAME
+        data_type: string
+        category: product
+      - id: category_l1
+        label: Category L1
+        column: CNAME1
+        data_type: string
+        category: product
+      - id: category_l2
+        label: Category L2
+        column: CNAME2
+        data_type: string
+        category: product
+      - id: colour
+        label: Colour
+        column: CNAME5
+        data_type: string
+        category: product
+      - id: size
+        label: Size
+        column: CNAME4
+        data_type: string
+        category: product
+      - id: sku
+        label: SKU / Item Code
+        column: BARCODE
+        data_type: string
+        category: product
+        high_cardinality: true
+      - id: item_description
+        label: Item Description
+        column: DESC1
+        data_type: string
+        category: product
+    measures:
+      - id: net_revenue
+        label: Net Revenue
+        expression: "SUM(ABS(v.NET_SALE_AMOUNT))"
+        format: currency
+        description: Total net sales revenue (ABS applied)
+      - id: net_units_sold
+        label: Net Units Sold
+        expression: "SUM(ABS(v.NET_SALE_QUANTITY))"
+        format: integer
+        description: Total units sold (ABS applied)
+      - id: gross_profit
+        label: Gross Profit
+        expression: "SUM(v.GP_AMOUNT)"
+        format: currency
+      - id: gross_margin_pct
+        label: Gross Margin %
+        expression: "ROUND((SUM(v.GP_AMOUNT) / NULLIF(SUM(ABS(v.NET_SALE_AMOUNT)), 0)) * 100.0, 2)"
+        format: percent
+      - id: closing_stock_value
+        label: Closing Stock Value
+        expression: "SUM(v.CLOSING_STOCK_AMOUNT)"
+        format: currency
+      - id: closing_stock_units
+        label: Closing Stock Units
+        expression: "SUM(v.CLOSING_STOCK_QUANTITY)"
+        format: integer
+      - id: opening_stock_value
+        label: Opening Stock Value
+        expression: "SUM(v.OPENING_AMOUNT)"
+        format: currency
+      - id: goods_received_value
+        label: Goods Received Value
+        expression: "SUM(v.GOODS_RECEIVE_AMOUNT)"
+        format: currency
+      - id: cogs
+        label: Cost of Goods Sold
+        expression: "SUM(v.NET_SALE_COGS_AMOUNT)"
+        format: currency
+        roles: [finance]
+      - id: record_count
+        label: Record Count
+        expression: "COUNT(*)"
+        format: integer
+
+  - id: category_performance
+    label: Category Performance
+    description: Pre-aggregated category hierarchy with sell-through and weeks of cover.
+    base_table: v_category_hierarchy_summary
+    alias: c
+    default_limit: 500
+    dimensions:
+      - id: division
+        label: Division
+        column: division
+        data_type: string
+        category: product
+      - id: section
+        label: Section
+        column: section
+        data_type: string
+        category: product
+      - id: department
+        label: Department
+        column: department
+        data_type: string
+        category: product
+    measures:
+      - id: net_revenue
+        label: Net Revenue
+        expression: "SUM(c.net_revenue)"
+        format: currency
+      - id: sales_units
+        label: Sales Units
+        expression: "SUM(c.sales_units)"
+        format: integer
+      - id: gross_profit
+        label: Gross Profit
+        expression: "SUM(c.gross_profit)"
+        format: currency
+      - id: margin_pct
+        label: Margin %
+        expression: "ROUND(AVG(c.margin_pct), 2)"
+        format: percent
+      - id: sell_through_pct
+        label: Sell-Through %
+        expression: "ROUND(AVG(c.sell_through_pct), 2)"
+        format: percent
+      - id: woc
+        label: Weeks of Cover
+        expression: "ROUND(AVG(c.woc), 1)"
+        format: decimal
+
+  - id: vendor_scorecard
+    label: Vendor Scorecard
+    description: Vendor performance metrics including returns and margins.
+    base_table: v_vendor_scorecard
+    alias: vs
+    default_limit: 500
+    dimensions:
+      - id: vendor_name
+        label: Vendor Name
+        column: vendor_name
+        data_type: string
+        category: vendor
+    measures:
+      - id: net_revenue
+        label: Net Revenue
+        expression: "SUM(vs.net_revenue)"
+        format: currency
+      - id: gross_profit
+        label: Gross Profit
+        expression: "SUM(vs.gross_profit)"
+        format: currency
+      - id: margin_pct
+        label: Margin %
+        expression: "ROUND(AVG(vs.margin_pct), 2)"
+        format: percent
+      - id: return_rate_pct
+        label: Return Rate %
+        expression: "ROUND(AVG(vs.return_rate_pct), 2)"
+        format: percent
+      - id: total_skus_supplied
+        label: SKUs Supplied
+        expression: "SUM(vs.total_skus_supplied)"
+        format: integer

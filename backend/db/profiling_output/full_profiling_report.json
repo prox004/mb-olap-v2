@@ -1,0 +1,6945 @@
+{
+  "generated_at": "2026-08-07 00:13:41.827743",
+  "database_path": "D:\\ANTI REPO\\M-Baazar Olap\\db\\olap_warehouse.duckdb",
+  "tables": [
+    "ai_recommendations_feed",
+    "dim_item",
+    "dim_location",
+    "fact_cube_monthly"
+  ],
+  "views": [
+    "v_ai_recommendations_feed",
+    "v_buying_accuracy_summary",
+    "v_category_hierarchy_summary",
+    "v_category_matrix",
+    "v_colour_performance_summary",
+    "v_dead_stock_candidates",
+    "v_dim_item_colour",
+    "v_fact_item_location_monthly",
+    "v_gmroi_analysis",
+    "v_price_ladder_performance",
+    "v_rebalance_recommendations",
+    "v_size_curve_distribution",
+    "v_sku_velocity_summary",
+    "v_store_stock_cover",
+    "v_vendor_performance_summary",
+    "v_vendor_scorecard"
+  ],
+  "schema": {
+    "ai_recommendations_feed": [
+      {
+        "name": "id",
+        "type": "VARCHAR",
+        "nullable": "NO",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "category",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "priority",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "confidence_score",
+        "type": "FLOAT",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "barcode",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "title",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "message",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "action_quantity",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "recommended_discount_pct",
+        "type": "FLOAT",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "estimated_financial_impact",
+        "type": "FLOAT",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "source_store_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "source_store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "target_store_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "target_store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "nullable": "YES",
+        "default": "CURRENT_TIMESTAMP",
+        "position": 17
+      }
+    ],
+    "dim_item": [
+      {
+        "name": "Division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "Section",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "Department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "Department Allias",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "CNAME1",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "CNAME2",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "CNAME3",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "CNAME4",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "CNAME5",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "CNAME6",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "DESC1",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "DESC2",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "DESC3",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "PARTYNAME",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "ICODE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "RATE",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "MRP",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      },
+      {
+        "name": "STOCKINDATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 18
+      }
+    ],
+    "dim_location": [
+      {
+        "name": "ADMSITE_CODE",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "Name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "SITE_TYPE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      }
+    ],
+    "fact_cube_monthly": [
+      {
+        "name": "SEQ",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "CUBE_CODE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "CUBENAME",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "CREATOR",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "REPORT_DATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "START_DATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "END_DATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "BARCODE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "ADMSITE_CODE",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "OPENING_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "OPENING_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "GOODS_RECEIVE_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "GOODS_RECEIVE_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "GOODS_RETURN_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "GOODS_RETURN_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "SITE_TRANSFER_IN_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "SITE_TRANSFER_IN_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      },
+      {
+        "name": "SITE_TRANSFER_OUT_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 18
+      },
+      {
+        "name": "SITE_TRANSFER_OUT_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 19
+      },
+      {
+        "name": "RETAIL_SALE_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 20
+      },
+      {
+        "name": "RETAIL_SALE_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 21
+      },
+      {
+        "name": "NET_SALE_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 22
+      },
+      {
+        "name": "NET_SALE_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 23
+      },
+      {
+        "name": "NET_SALE_COGS_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 24
+      },
+      {
+        "name": "CLOSING_STOCK_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 25
+      },
+      {
+        "name": "CLOSING_STOCK_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 26
+      },
+      {
+        "name": "GP_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 27
+      },
+      {
+        "name": "ADJUSTED_GP_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 28
+      },
+      {
+        "name": "SALE_TAX_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 29
+      },
+      {
+        "name": "SALE_PROMO_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 30
+      },
+      {
+        "name": "SALE_DISCOUNT_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 31
+      },
+      {
+        "name": "WAREHOUSE_TRANSFER_IN_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 32
+      },
+      {
+        "name": "WAREHOUSE_TRANSFER_IN_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 33
+      },
+      {
+        "name": "WH_TRANSFER_OUT_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 34
+      },
+      {
+        "name": "WH_TRANSFER_OUT_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 35
+      },
+      {
+        "name": "PENDING_PO_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 36
+      }
+    ],
+    "v_ai_recommendations_feed": [
+      {
+        "name": "id",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "category",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "priority",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "confidence_score",
+        "type": "FLOAT",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "barcode",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "title",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "message",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "action_quantity",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "recommended_discount_pct",
+        "type": "FLOAT",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "estimated_financial_impact",
+        "type": "FLOAT",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "source_store_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "source_store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "target_store_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "target_store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      }
+    ],
+    "v_buying_accuracy_summary": [
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "total_bought_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "total_bought_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "total_sold_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "total_sold_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "unsold_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "unsold_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "total_discount_amount",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "total_promo_amount",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "buying_accuracy_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      }
+    ],
+    "v_category_hierarchy_summary": [
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "section",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "department_alias",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "margin_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "closing_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "closing_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      }
+    ],
+    "v_category_matrix": [
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "margin_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "closing_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "closing_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "performance_quadrant",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      }
+    ],
+    "v_colour_performance_summary": [
+      {
+        "name": "extracted_colour",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "total_skus",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "margin_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "current_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "current_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      }
+    ],
+    "v_dead_stock_candidates": [
+      {
+        "name": "barcode",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "section",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "vendor",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "mrp",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "cost_rate",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "closing_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "closing_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "moi",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "velocity_status",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      }
+    ],
+    "v_dim_item_colour": [
+      {
+        "name": "Division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "Section",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "Department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "Department Allias",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "CNAME1",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "CNAME2",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "CNAME3",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "CNAME4",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "CNAME5",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "CNAME6",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "DESC1",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "DESC2",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "DESC3",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "PARTYNAME",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "ICODE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "RATE",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "MRP",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      },
+      {
+        "name": "STOCKINDATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 18
+      },
+      {
+        "name": "extracted_colour",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 19
+      }
+    ],
+    "v_fact_item_location_monthly": [
+      {
+        "name": "SEQ",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "CUBE_CODE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "CUBENAME",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "CREATOR",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "REPORT_DATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "START_DATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "END_DATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "BARCODE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "ADMSITE_CODE",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "OPENING_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "OPENING_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "GOODS_RECEIVE_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "GOODS_RECEIVE_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "GOODS_RETURN_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "GOODS_RETURN_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "SITE_TRANSFER_IN_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "SITE_TRANSFER_IN_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      },
+      {
+        "name": "SITE_TRANSFER_OUT_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 18
+      },
+      {
+        "name": "SITE_TRANSFER_OUT_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 19
+      },
+      {
+        "name": "RETAIL_SALE_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 20
+      },
+      {
+        "name": "RETAIL_SALE_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 21
+      },
+      {
+        "name": "NET_SALE_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 22
+      },
+      {
+        "name": "NET_SALE_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 23
+      },
+      {
+        "name": "NET_SALE_COGS_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 24
+      },
+      {
+        "name": "CLOSING_STOCK_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 25
+      },
+      {
+        "name": "CLOSING_STOCK_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 26
+      },
+      {
+        "name": "GP_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 27
+      },
+      {
+        "name": "ADJUSTED_GP_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 28
+      },
+      {
+        "name": "SALE_TAX_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 29
+      },
+      {
+        "name": "SALE_PROMO_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 30
+      },
+      {
+        "name": "SALE_DISCOUNT_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 31
+      },
+      {
+        "name": "WAREHOUSE_TRANSFER_IN_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 32
+      },
+      {
+        "name": "WAREHOUSE_TRANSFER_IN_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 33
+      },
+      {
+        "name": "WH_TRANSFER_OUT_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 34
+      },
+      {
+        "name": "WH_TRANSFER_OUT_AMOUNT",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 35
+      },
+      {
+        "name": "PENDING_PO_QUANTITY",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 36
+      },
+      {
+        "name": "Division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 37
+      },
+      {
+        "name": "Section",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 38
+      },
+      {
+        "name": "Department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 39
+      },
+      {
+        "name": "Department Allias",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 40
+      },
+      {
+        "name": "PARTYNAME",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 41
+      },
+      {
+        "name": "CNAME1",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 42
+      },
+      {
+        "name": "CNAME2",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 43
+      },
+      {
+        "name": "CNAME3",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 44
+      },
+      {
+        "name": "CNAME4",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 45
+      },
+      {
+        "name": "CNAME5",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 46
+      },
+      {
+        "name": "CNAME6",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 47
+      },
+      {
+        "name": "DESC1",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 48
+      },
+      {
+        "name": "DESC2",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 49
+      },
+      {
+        "name": "DESC3",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 50
+      },
+      {
+        "name": "RATE",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 51
+      },
+      {
+        "name": "MRP",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 52
+      },
+      {
+        "name": "STOCKINDATE",
+        "type": "DATE",
+        "nullable": "YES",
+        "default": null,
+        "position": 53
+      },
+      {
+        "name": "STORE_NAME",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 54
+      },
+      {
+        "name": "SITE_TYPE",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 55
+      }
+    ],
+    "v_gmroi_analysis": [
+      {
+        "name": "admsite_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "vendor_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "barcode",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "item_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "total_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "total_gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "avg_inventory_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "gmroi_ratio",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      }
+    ],
+    "v_price_ladder_performance": [
+      {
+        "name": "price_band",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "total_skus",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "total_sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "total_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "total_gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "margin_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      }
+    ],
+    "v_rebalance_recommendations": [
+      {
+        "name": "barcode",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "source_store_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "source_store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "source_stock",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "source_woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "target_store_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "target_store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "target_stock",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "target_woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "recommended_transfer_qty",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "transfer_type",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "urgency_level",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      }
+    ],
+    "v_size_curve_distribution": [
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "size_code",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "total_bought_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "total_sold_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "current_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "size_contribution_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      }
+    ],
+    "v_sku_velocity_summary": [
+      {
+        "name": "barcode",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "division",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "section",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "vendor",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "mrp",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "cost_rate",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "closing_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "closing_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      },
+      {
+        "name": "moi",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 16
+      },
+      {
+        "name": "velocity_status",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 17
+      }
+    ],
+    "v_store_stock_cover": [
+      {
+        "name": "admsite_code",
+        "type": "INTEGER",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "store_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "site_type",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "effective_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "transfer_in_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "transfer_out_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "wh_transfer_in_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "store_woc",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "stock_health_status",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      }
+    ],
+    "v_vendor_performance_summary": [
+      {
+        "name": "vendor_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "total_skus_supplied",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "receive_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "receive_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "return_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "return_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "current_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "current_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "margin_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "return_rate_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      }
+    ],
+    "v_vendor_scorecard": [
+      {
+        "name": "vendor_name",
+        "type": "VARCHAR",
+        "nullable": "YES",
+        "default": null,
+        "position": 1
+      },
+      {
+        "name": "total_skus_supplied",
+        "type": "BIGINT",
+        "nullable": "YES",
+        "default": null,
+        "position": 2
+      },
+      {
+        "name": "receive_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 3
+      },
+      {
+        "name": "receive_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 4
+      },
+      {
+        "name": "return_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 5
+      },
+      {
+        "name": "return_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 6
+      },
+      {
+        "name": "sales_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 7
+      },
+      {
+        "name": "net_revenue",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 8
+      },
+      {
+        "name": "gross_profit",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 9
+      },
+      {
+        "name": "current_stock_units",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 10
+      },
+      {
+        "name": "current_stock_value",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 11
+      },
+      {
+        "name": "sell_through_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 12
+      },
+      {
+        "name": "margin_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 13
+      },
+      {
+        "name": "return_rate_pct",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 14
+      },
+      {
+        "name": "vendor_score",
+        "type": "DOUBLE",
+        "nullable": "YES",
+        "default": null,
+        "position": 15
+      }
+    ]
+  },
+  "row_counts": {
+    "ai_recommendations_feed": 120,
+    "dim_item": 979297,
+    "dim_location": 4,
+    "fact_cube_monthly": 3279190,
+    "v_ai_recommendations_feed": 120,
+    "v_buying_accuracy_summary": 226,
+    "v_category_hierarchy_summary": 226,
+    "v_category_matrix": 226,
+    "v_colour_performance_summary": 1488,
+    "v_dead_stock_candidates": 38985,
+    "v_dim_item_colour": 979297,
+    "v_fact_item_location_monthly": 3279190,
+    "v_gmroi_analysis": 1118694,
+    "v_price_ladder_performance": 621,
+    "v_rebalance_recommendations": 16333,
+    "v_size_curve_distribution": 2807,
+    "v_sku_velocity_summary": 571894,
+    "v_store_stock_cover": 834,
+    "v_vendor_performance_summary": 3473,
+    "v_vendor_scorecard": 3473
+  },
+  "profiling": {
+    "ai_recommendations_feed": [
+      {
+        "column": "id",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 120,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 1.0,
+        "sample_values": [
+          "REORDER-R206073-530",
+          "REORDER-R350936-1070",
+          "REORDER-R208200-820",
+          "TRANSFER-R300140-1070-530",
+          "TRANSFER-R303722-1070-530"
+        ]
+      },
+      {
+        "column": "category",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.025,
+        "sample_values": [
+          "MARKDOWN",
+          "TRANSFER",
+          "REORDER"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "MARKDOWN",
+            "count": 40
+          },
+          {
+            "value": "TRANSFER",
+            "count": 40
+          },
+          {
+            "value": "REORDER",
+            "count": 40
+          }
+        ]
+      },
+      {
+        "column": "priority",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.025,
+        "sample_values": [
+          "HIGH",
+          "CRITICAL",
+          "MEDIUM"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "CRITICAL",
+            "count": 66
+          },
+          {
+            "value": "HIGH",
+            "count": 52
+          },
+          {
+            "value": "MEDIUM",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "column": "confidence_score",
+        "data_type": "FLOAT",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 82,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.6833,
+        "sample_values": [
+          "96.80000305175781",
+          "94.19999694824219",
+          "96.5",
+          "89.30000305175781",
+          "91.4000015258789"
+        ],
+        "min": "85.5",
+        "max": "98.4000015258789"
+      },
+      {
+        "column": "barcode",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 120,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 1.0,
+        "sample_values": [
+          "R300140",
+          "R303637",
+          "R245506",
+          "R354745",
+          "R313902"
+        ]
+      },
+      {
+        "column": "title",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 35,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.2917,
+        "sample_values": [
+          "M761422",
+          "GREY",
+          "BLACK",
+          "SKIN",
+          "R378975"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "NA",
+            "count": 36
+          },
+          {
+            "value": "BLACK",
+            "count": 11
+          },
+          {
+            "value": "WHITE",
+            "count": 8
+          },
+          {
+            "value": "MULTI",
+            "count": 6
+          },
+          {
+            "value": "LIGHT GREEN",
+            "count": 5
+          },
+          {
+            "value": "BLUE",
+            "count": 5
+          },
+          {
+            "value": "GREY",
+            "count": 4
+          },
+          {
+            "value": "GREEN",
+            "count": 4
+          },
+          {
+            "value": "PEACH",
+            "count": 4
+          },
+          {
+            "value": "BEIGE",
+            "count": 3
+          },
+          {
+            "value": "DARK GREEN",
+            "count": 3
+          },
+          {
+            "value": "SKY BLUE",
+            "count": 2
+          },
+          {
+            "value": "NAVY BLUE",
+            "count": 2
+          },
+          {
+            "value": "PURPLE",
+            "count": 2
+          },
+          {
+            "value": "PINK",
+            "count": 2
+          },
+          {
+            "value": "KHAKI",
+            "count": 2
+          },
+          {
+            "value": "CREAM",
+            "count": 2
+          },
+          {
+            "value": "OLIVE",
+            "count": 2
+          },
+          {
+            "value": "OFF WHITE",
+            "count": 1
+          },
+          {
+            "value": "M762874",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "column": "department",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 60,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.5,
+        "sample_values": [
+          "Stocking",
+          "Melamine",
+          "Formal Shirts",
+          "Knitted Fabric",
+          "Kurti Plazo Set"
+        ]
+      },
+      {
+        "column": "division",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 8,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0667,
+        "sample_values": [
+          "Apparel & Retail",
+          "Ladies Wear",
+          "Kids Wear",
+          "Sales Promotional Items",
+          "Mens Wear"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "Apparel & Retail",
+            "count": 40
+          },
+          {
+            "value": "Mens Wear",
+            "count": 26
+          },
+          {
+            "value": "Ladies Wear",
+            "count": 19
+          },
+          {
+            "value": "Kids Wear",
+            "count": 14
+          },
+          {
+            "value": "Accessories 2",
+            "count": 12
+          },
+          {
+            "value": "Accessories 1",
+            "count": 6
+          },
+          {
+            "value": "Sales Promotional Items",
+            "count": 2
+          },
+          {
+            "value": "Fabrics & Accessories",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "column": "message",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 94,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.7833,
+        "sample_values": [
+          "ML Demand Forecast predicts stockout risk at M Baazar - Vip within 7 days. Recommended PO: 6 units.",
+          "Network Optimizer recommends transferring 1 units from M Baazar - Andul Road (WOC 999.0) to M Baazar - Gariahat (WOC 0.0).",
+          "Price Elasticity Model suggests a 35% clearance discount to liquidate 26 units of dead stock and recover \u20b99718.0 capital.",
+          "Price Elasticity Model suggests a 35% clearance discount to liquidate 27 units of dead stock and recover \u20b92931.0 capital.",
+          "Price Elasticity Model suggests a 35% clearance discount to liquidate 283 units of dead stock and recover \u20b933295.0 capital."
+        ]
+      },
+      {
+        "column": "action_quantity",
+        "data_type": "INTEGER",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 52,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.4333,
+        "sample_values": [
+          "1",
+          "27",
+          "84",
+          "33",
+          "164"
+        ],
+        "min": "1",
+        "max": "840"
+      },
+      {
+        "column": "recommended_discount_pct",
+        "data_type": "FLOAT",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 2,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0167,
+        "sample_values": [
+          "0.0",
+          "35.0"
+        ],
+        "min": "0.0",
+        "max": "35.0",
+        "frequency_distribution": [
+          {
+            "value": "0.0",
+            "count": 80
+          },
+          {
+            "value": "35.0",
+            "count": 40
+          }
+        ]
+      },
+      {
+        "column": "estimated_financial_impact",
+        "data_type": "FLOAT",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 81,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.675,
+        "sample_values": [
+          "1033.3299560546875",
+          "5772.0",
+          "3990.0",
+          "656.0",
+          "506.6700134277344"
+        ],
+        "min": "0.0",
+        "max": "311220.0"
+      },
+      {
+        "column": "source_store_code",
+        "data_type": "INTEGER",
+        "total_rows": 120,
+        "non_null_count": 40,
+        "null_count": 80,
+        "null_pct": 66.67,
+        "distinct_count": 4,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0333,
+        "sample_values": [
+          "530",
+          "820",
+          "6",
+          "1070"
+        ],
+        "min": "6",
+        "max": "1070",
+        "frequency_distribution": [
+          {
+            "value": "1070",
+            "count": 18
+          },
+          {
+            "value": "6",
+            "count": 12
+          },
+          {
+            "value": "820",
+            "count": 6
+          },
+          {
+            "value": "530",
+            "count": 4
+          }
+        ]
+      },
+      {
+        "column": "source_store_name",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 40,
+        "null_count": 80,
+        "null_pct": 66.67,
+        "distinct_count": 4,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0333,
+        "sample_values": [
+          "M Baazar - Vip",
+          "M Baazar - Andul Road",
+          "Metro Retail Private Limited-PRO",
+          "M Baazar - Gariahat"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "Metro Retail Private Limited-PRO",
+            "count": 18
+          },
+          {
+            "value": "M Baazar - Vip",
+            "count": 12
+          },
+          {
+            "value": "M Baazar - Andul Road",
+            "count": 6
+          },
+          {
+            "value": "M Baazar - Gariahat",
+            "count": 4
+          }
+        ]
+      },
+      {
+        "column": "target_store_code",
+        "data_type": "INTEGER",
+        "total_rows": 120,
+        "non_null_count": 80,
+        "null_count": 40,
+        "null_pct": 33.33,
+        "distinct_count": 4,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0333,
+        "sample_values": [
+          "530",
+          "820",
+          "1070",
+          "6"
+        ],
+        "min": "6",
+        "max": "1070",
+        "frequency_distribution": [
+          {
+            "value": "530",
+            "count": 40
+          },
+          {
+            "value": "6",
+            "count": 20
+          },
+          {
+            "value": "820",
+            "count": 19
+          },
+          {
+            "value": "1070",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "column": "target_store_name",
+        "data_type": "VARCHAR",
+        "total_rows": 120,
+        "non_null_count": 80,
+        "null_count": 40,
+        "null_pct": 33.33,
+        "distinct_count": 4,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0333,
+        "sample_values": [
+          "M Baazar - Vip",
+          "Metro Retail Private Limited-PRO",
+          "M Baazar - Gariahat",
+          "M Baazar - Andul Road"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "M Baazar - Gariahat",
+            "count": 40
+          },
+          {
+            "value": "M Baazar - Vip",
+            "count": 20
+          },
+          {
+            "value": "M Baazar - Andul Road",
+            "count": 19
+          },
+          {
+            "value": "Metro Retail Private Limited-PRO",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "column": "created_at",
+        "data_type": "TIMESTAMP",
+        "total_rows": 120,
+        "non_null_count": 120,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.025,
+        "sample_values": [
+          "2026-07-28 09:53:01.752587",
+          "2026-07-28 09:52:59.373392",
+          "2026-07-28 09:53:03.332580"
+        ],
+        "min": "2026-07-28 09:52:59.373392",
+        "max": "2026-07-28 09:53:03.332580",
+        "frequency_distribution": [
+          {
+            "value": "2026-07-28 09:53:03.332580",
+            "count": 40
+          },
+          {
+            "value": "2026-07-28 09:52:59.373392",
+            "count": 40
+          },
+          {
+            "value": "2026-07-28 09:53:01.752587",
+            "count": 40
+          }
+        ]
+      }
+    ],
+    "dim_item": [
+      {
+        "column": "Division",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979297,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 10,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "Mens Wear",
+          "Sales Promotional Items",
+          "Ladies Wear",
+          "Kids Wear",
+          "Accessories 2"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "Mens Wear",
+            "count": 347169
+          },
+          {
+            "value": "Ladies Wear",
+            "count": 258257
+          },
+          {
+            "value": "Kids Wear",
+            "count": 201560
+          },
+          {
+            "value": "Accessories 2",
+            "count": 64893
+          },
+          {
+            "value": "Winter Garments",
+            "count": 54568
+          },
+          {
+            "value": "Accessories 1",
+            "count": 47172
+          },
+          {
+            "value": "Fabrics & Accessories",
+            "count": 4257
+          },
+          {
+            "value": "Sales Promotional Items",
+            "count": 874
+          },
+          {
+            "value": "Old Electronics Items",
+            "count": 451
+          },
+          {
+            "value": "Non Trading Division",
+            "count": 96
+          }
+        ]
+      },
+      {
+        "column": "Section",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979297,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 52,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0001,
+        "sample_values": [
+          "Ladies Western Wear",
+          "Mens Upper Wear",
+          "Furniture & Fixture",
+          "Refrigrator",
+          "Girls Wear"
+        ]
+      },
+      {
+        "column": "Department",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979297,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 274,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0003,
+        "sample_values": [
+          "Skirts (G)",
+          "Pencil Box",
+          "Long Dress",
+          "Home Theater",
+          "Winter Tops [WG]"
+        ]
+      },
+      {
+        "column": "Department Allias",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 978846,
+        "null_count": 451,
+        "null_pct": 0.05,
+        "distinct_count": 20,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "Acc 2",
+          "Casual",
+          "Western",
+          "FABRICS",
+          "Acc 1"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "Lowers",
+            "count": 139510
+          },
+          {
+            "value": "Boys",
+            "count": 117258
+          },
+          {
+            "value": "Western",
+            "count": 104935
+          },
+          {
+            "value": "Girls",
+            "count": 100880
+          },
+          {
+            "value": "Ethnic",
+            "count": 88042
+          },
+          {
+            "value": "Saree",
+            "count": 78972
+          },
+          {
+            "value": "Acc 2",
+            "count": 65298
+          },
+          {
+            "value": "Sports",
+            "count": 60276
+          },
+          {
+            "value": "T Shirts",
+            "count": 60129
+          },
+          {
+            "value": "Casual",
+            "count": 54701
+          },
+          {
+            "value": "Formal",
+            "count": 53335
+          },
+          {
+            "value": "Acc 1",
+            "count": 50283
+          },
+          {
+            "value": "FABRICS",
+            "count": 4257
+          },
+          {
+            "value": "SPI ADGIFT",
+            "count": 472
+          },
+          {
+            "value": "SPI GIFT",
+            "count": 268
+          },
+          {
+            "value": "SPI UNIFOM",
+            "count": 78
+          },
+          {
+            "value": "NT",
+            "count": 77
+          },
+          {
+            "value": "SPI C BAG",
+            "count": 56
+          },
+          {
+            "value": "NT COMPUTR",
+            "count": 12
+          },
+          {
+            "value": "NT AD",
+            "count": 7
+          }
+        ]
+      },
+      {
+        "column": "CNAME1",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979238,
+        "null_count": 59,
+        "null_pct": 0.01,
+        "distinct_count": 759,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0008,
+        "sample_values": [
+          "H MPJ",
+          "H BPJ",
+          "H LUGG",
+          "H MPM",
+          "H WMK"
+        ]
+      },
+      {
+        "column": "CNAME2",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979286,
+        "null_count": 11,
+        "null_pct": 0.0,
+        "distinct_count": 2717,
+        "nullable": true,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0028,
+        "sample_values": [
+          "MONDAY CLOSED",
+          "A KIDS",
+          "OKANE",
+          "MEE",
+          "KIDS CREW"
+        ]
+      },
+      {
+        "column": "CNAME3",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 951970,
+        "null_count": 27327,
+        "null_pct": 2.79,
+        "distinct_count": 17959,
+        "nullable": true,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0183,
+        "sample_values": [
+          "ENIGMA",
+          "BLACK",
+          "PLAZO",
+          "EXQUIZITE DERBY",
+          "CRAZY MOMENTS RED"
+        ]
+      },
+      {
+        "column": "CNAME4",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 974328,
+        "null_count": 4969,
+        "null_pct": 0.51,
+        "distinct_count": 913,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0009,
+        "sample_values": [
+          "MINK",
+          "TANT",
+          "WELSPUN STRIPE",
+          "W6L WINDOW",
+          "SAMRAY"
+        ]
+      },
+      {
+        "column": "CNAME5",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 968340,
+        "null_count": 10957,
+        "null_pct": 1.12,
+        "distinct_count": 1179,
+        "nullable": true,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0012,
+        "sample_values": [
+          "32\"",
+          "38\"",
+          "FREE",
+          "90",
+          "16*16"
+        ]
+      },
+      {
+        "column": "CNAME6",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979295,
+        "null_count": 2,
+        "null_pct": 0.0,
+        "distinct_count": 21,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "BG 26",
+          "2026",
+          "P 24",
+          "P 26",
+          "6.30 MTR"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "OLD AGE",
+            "count": 629637
+          },
+          {
+            "value": "AGE",
+            "count": 55653
+          },
+          {
+            "value": "S 24",
+            "count": 49969
+          },
+          {
+            "value": "P 25",
+            "count": 44483
+          },
+          {
+            "value": "S 26",
+            "count": 44476
+          },
+          {
+            "value": "S 25",
+            "count": 42218
+          },
+          {
+            "value": "P 24",
+            "count": 36224
+          },
+          {
+            "value": "P 26",
+            "count": 18379
+          },
+          {
+            "value": "W 25",
+            "count": 13138
+          },
+          {
+            "value": "W 24",
+            "count": 12470
+          },
+          {
+            "value": "BG 24",
+            "count": 6133
+          },
+          {
+            "value": "BG 25",
+            "count": 5298
+          },
+          {
+            "value": "2026",
+            "count": 5274
+          },
+          {
+            "value": "BG 26",
+            "count": 4422
+          },
+          {
+            "value": "2024",
+            "count": 3370
+          },
+          {
+            "value": "W 26",
+            "count": 3264
+          },
+          {
+            "value": "BB 24",
+            "count": 1575
+          },
+          {
+            "value": "2025",
+            "count": 1572
+          },
+          {
+            "value": "BB 25",
+            "count": 944
+          },
+          {
+            "value": "BB 26",
+            "count": 795
+          }
+        ]
+      },
+      {
+        "column": "DESC1",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 338829,
+        "null_count": 640468,
+        "null_pct": 65.4,
+        "distinct_count": 45,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "GREY",
+          "BLACK",
+          "SKIN",
+          "PURPLE",
+          "RUST"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "NA",
+            "count": 48656
+          },
+          {
+            "value": "BLACK",
+            "count": 30853
+          },
+          {
+            "value": "NAVY BLUE",
+            "count": 23617
+          },
+          {
+            "value": "BLUE",
+            "count": 23191
+          },
+          {
+            "value": "GREY",
+            "count": 15536
+          },
+          {
+            "value": "WHITE",
+            "count": 15368
+          },
+          {
+            "value": "MULTI",
+            "count": 15337
+          },
+          {
+            "value": "SKY BLUE",
+            "count": 13970
+          },
+          {
+            "value": "GREEN",
+            "count": 12234
+          },
+          {
+            "value": "PINK",
+            "count": 10823
+          },
+          {
+            "value": "OLIVE",
+            "count": 10315
+          },
+          {
+            "value": "BEIGE",
+            "count": 10168
+          },
+          {
+            "value": "DARK GREY",
+            "count": 9355
+          },
+          {
+            "value": "LIGHT GREEN",
+            "count": 8460
+          },
+          {
+            "value": "PEACH",
+            "count": 7918
+          },
+          {
+            "value": "BROWN",
+            "count": 7016
+          },
+          {
+            "value": "MAROON",
+            "count": 6744
+          },
+          {
+            "value": "CREAM",
+            "count": 6110
+          },
+          {
+            "value": "LIGHT GREY",
+            "count": 5239
+          },
+          {
+            "value": "RED",
+            "count": 4984
+          }
+        ]
+      },
+      {
+        "column": "DESC2",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 80540,
+        "null_count": 898757,
+        "null_pct": 91.78,
+        "distinct_count": 516,
+        "nullable": true,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0005,
+        "sample_values": [
+          "SUPARAS INTERNATIONAL",
+          "POOJAN CREATION",
+          "AMAAN MFGS. & TRADERS",
+          "AKKI ENTERPRISES",
+          "NEERAJ JAIN HOSIERY"
+        ]
+      },
+      {
+        "column": "DESC3",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 274684,
+        "null_count": 704613,
+        "null_pct": 71.95,
+        "distinct_count": 37568,
+        "nullable": true,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0384,
+        "sample_values": [
+          "MK 1951",
+          "13",
+          "B 101",
+          "17 DESIGN",
+          "17438"
+        ]
+      },
+      {
+        "column": "PARTYNAME",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 978715,
+        "null_count": 582,
+        "null_pct": 0.06,
+        "distinct_count": 4696,
+        "nullable": true,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0048,
+        "sample_values": [
+          "Converson : SC00008",
+          "Narsaria Textile Commosales LLP. (0736) : SN00318",
+          "Nanda Apparels. (0125) : SN00070",
+          "Handa Apparels. (5018) : SH00033",
+          "Satish Oswal Hosiery. (5088) : SS00318"
+        ]
+      },
+      {
+        "column": "ICODE",
+        "data_type": "VARCHAR",
+        "total_rows": 979297,
+        "non_null_count": 979297,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 976146,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.9968,
+        "sample_values": [
+          "W885006",
+          "M416112",
+          "W946960",
+          "W945717",
+          "W946864"
+        ]
+      },
+      {
+        "column": "RATE",
+        "data_type": "DOUBLE",
+        "total_rows": 979297,
+        "non_null_count": 979297,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 68872,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0703,
+        "sample_values": [
+          "240.0",
+          "130.9",
+          "168.0",
+          "610.0",
+          "73.73"
+        ],
+        "min": "0.0",
+        "max": "23194040.0"
+      },
+      {
+        "column": "MRP",
+        "data_type": "DOUBLE",
+        "total_rows": 979297,
+        "non_null_count": 979297,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 2232,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0023,
+        "sample_values": [
+          "60.0",
+          "130.0",
+          "1285.0",
+          "375.0",
+          "545.0"
+        ],
+        "min": "0.0",
+        "max": "354148.0"
+      },
+      {
+        "column": "STOCKINDATE",
+        "data_type": "DATE",
+        "total_rows": 979297,
+        "non_null_count": 904851,
+        "null_count": 74446,
+        "null_pct": 7.6,
+        "distinct_count": 4894,
+        "nullable": true,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.005,
+        "sample_values": [
+          "2021-01-30",
+          "2021-07-21",
+          "2020-03-06",
+          "2021-04-22",
+          "2023-06-01"
+        ],
+        "min": "1930-06-27",
+        "max": "2049-03-18"
+      }
+    ],
+    "dim_location": [
+      {
+        "column": "ADMSITE_CODE",
+        "data_type": "BIGINT",
+        "total_rows": 4,
+        "non_null_count": 4,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 4,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 1.0,
+        "sample_values": [
+          "820",
+          "1070",
+          "6",
+          "530"
+        ],
+        "min": "6",
+        "max": "1070",
+        "frequency_distribution": [
+          {
+            "value": "6",
+            "count": 1
+          },
+          {
+            "value": "530",
+            "count": 1
+          },
+          {
+            "value": "820",
+            "count": 1
+          },
+          {
+            "value": "1070",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "column": "Name",
+        "data_type": "VARCHAR",
+        "total_rows": 4,
+        "non_null_count": 4,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 4,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 1.0,
+        "sample_values": [
+          "M Baazar - Vip",
+          "M Baazar - Gariahat",
+          "M Baazar - Andul Road",
+          "Metro Retail Private Limited-PRO"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "M Baazar - Gariahat",
+            "count": 1
+          },
+          {
+            "value": "M Baazar - Andul Road",
+            "count": 1
+          },
+          {
+            "value": "Metro Retail Private Limited-PRO",
+            "count": 1
+          },
+          {
+            "value": "M Baazar - Vip",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "column": "SITE_TYPE",
+        "data_type": "VARCHAR",
+        "total_rows": 4,
+        "non_null_count": 4,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 2,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.5,
+        "sample_values": [
+          "RETAIL_STORE",
+          "CENTRAL_WAREHOUSE"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "RETAIL_STORE",
+            "count": 3
+          },
+          {
+            "value": "CENTRAL_WAREHOUSE",
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "fact_cube_monthly": [
+      {
+        "column": "SEQ",
+        "data_type": "BIGINT",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "1915",
+          "1848",
+          "1904"
+        ],
+        "min": "1848",
+        "max": "1915",
+        "frequency_distribution": [
+          {
+            "value": "1848",
+            "count": 1108074
+          },
+          {
+            "value": "1915",
+            "count": 1094390
+          },
+          {
+            "value": "1904",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "CUBE_CODE",
+        "data_type": "VARCHAR",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "1848",
+          "1904",
+          "1915"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "1848",
+            "count": 1108074
+          },
+          {
+            "value": "1915",
+            "count": 1094390
+          },
+          {
+            "value": "1904",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "CUBENAME",
+        "data_type": "VARCHAR",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "MAY 26",
+          "APRIL 2026",
+          "JUNE 2026"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "JUNE 2026",
+            "count": 1108074
+          },
+          {
+            "value": "MAY 26",
+            "count": 1094390
+          },
+          {
+            "value": "APRIL 2026",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "CREATOR",
+        "data_type": "VARCHAR",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 2,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "Ramesh Roy",
+          "Bappaditya Chakraborty"
+        ],
+        "frequency_distribution": [
+          {
+            "value": "Bappaditya Chakraborty",
+            "count": 2202464
+          },
+          {
+            "value": "Ramesh Roy",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "REPORT_DATE",
+        "data_type": "DATE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "2026-06-13",
+          "2026-07-15",
+          "2026-06-12"
+        ],
+        "min": "2026-06-12",
+        "max": "2026-07-15",
+        "frequency_distribution": [
+          {
+            "value": "2026-07-15",
+            "count": 1108074
+          },
+          {
+            "value": "2026-06-12",
+            "count": 1094390
+          },
+          {
+            "value": "2026-06-13",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "START_DATE",
+        "data_type": "DATE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "2026-06-01",
+          "2026-05-01",
+          "2026-04-01"
+        ],
+        "min": "2026-04-01",
+        "max": "2026-06-01",
+        "frequency_distribution": [
+          {
+            "value": "2026-06-01",
+            "count": 1108074
+          },
+          {
+            "value": "2026-05-01",
+            "count": 1094390
+          },
+          {
+            "value": "2026-04-01",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "END_DATE",
+        "data_type": "DATE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "2026-06-30",
+          "2026-05-31",
+          "2026-04-30"
+        ],
+        "min": "2026-04-30",
+        "max": "2026-06-30",
+        "frequency_distribution": [
+          {
+            "value": "2026-06-30",
+            "count": 1108074
+          },
+          {
+            "value": "2026-05-31",
+            "count": 1094390
+          },
+          {
+            "value": "2026-04-30",
+            "count": 1076726
+          }
+        ]
+      },
+      {
+        "column": "BARCODE",
+        "data_type": "VARCHAR",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 571894,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.1744,
+        "sample_values": [
+          "R249956",
+          "R254690",
+          "R254526",
+          "R255254",
+          "R254743"
+        ]
+      },
+      {
+        "column": "ADMSITE_CODE",
+        "data_type": "INTEGER",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 4,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "6",
+          "1070",
+          "820",
+          "530"
+        ],
+        "min": "6",
+        "max": "1070",
+        "frequency_distribution": [
+          {
+            "value": "530",
+            "count": 1237011
+          },
+          {
+            "value": "6",
+            "count": 1081492
+          },
+          {
+            "value": "1070",
+            "count": 537383
+          },
+          {
+            "value": "820",
+            "count": 423304
+          }
+        ]
+      },
+      {
+        "column": "OPENING_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1173,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0004,
+        "sample_values": [
+          "89.0",
+          "-2.0",
+          "47.0",
+          "792.0",
+          "2136.0"
+        ],
+        "min": "-375.0",
+        "max": "100000.0"
+      },
+      {
+        "column": "OPENING_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 18145,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0055,
+        "sample_values": [
+          "748.0",
+          "37.72",
+          "558.0",
+          "1272.0",
+          "78.72"
+        ],
+        "min": "-52800.0",
+        "max": "2962080.0"
+      },
+      {
+        "column": "GOODS_RECEIVE_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1426,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0004,
+        "sample_values": [
+          "1248.0",
+          "568.0",
+          "1400.0",
+          "483.0",
+          "1042.0"
+        ],
+        "min": "0.0",
+        "max": "460700.0"
+      },
+      {
+        "column": "GOODS_RECEIVE_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 6920,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0021,
+        "sample_values": [
+          "170000.0",
+          "901800.0",
+          "165000.0",
+          "104650.0",
+          "64512.0"
+        ],
+        "min": "0.0",
+        "max": "6723000.0"
+      },
+      {
+        "column": "GOODS_RETURN_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 83,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "0.0",
+          "-113.0",
+          "-8.0",
+          "-31.0",
+          "-155.0"
+        ],
+        "min": "-28860.0",
+        "max": "0.0"
+      },
+      {
+        "column": "GOODS_RETURN_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 163,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "-180.0",
+          "-473.0",
+          "-424.0",
+          "-9540.0",
+          "-91540.0"
+        ],
+        "min": "-403889.0",
+        "max": "0.0"
+      },
+      {
+        "column": "SITE_TRANSFER_IN_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 246,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0001,
+        "sample_values": [
+          "9.0",
+          "73.0",
+          "76.0",
+          "61.0",
+          "129.0"
+        ],
+        "min": "0.0",
+        "max": "6290.0"
+      },
+      {
+        "column": "SITE_TRANSFER_IN_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 7971,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0024,
+        "sample_values": [
+          "374.95",
+          "331.17",
+          "480.96",
+          "1150.0",
+          "175.0"
+        ],
+        "min": "0.0",
+        "max": "360930.0"
+      },
+      {
+        "column": "SITE_TRANSFER_OUT_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1699,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0005,
+        "sample_values": [
+          "0.0",
+          "-31.0",
+          "-3384.0",
+          "-52.0",
+          "-8.0"
+        ],
+        "min": "-414664.0",
+        "max": "0.0"
+      },
+      {
+        "column": "SITE_TRANSFER_OUT_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 15246,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0046,
+        "sample_values": [
+          "-422.75",
+          "-65.0",
+          "-151.0",
+          "-249.0",
+          "-415.0"
+        ],
+        "min": "-2981661.4",
+        "max": "0.0"
+      },
+      {
+        "column": "RETAIL_SALE_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 176,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0001,
+        "sample_values": [
+          "-109.0",
+          "-98.0",
+          "-198.0",
+          "-107.0",
+          "-74.0"
+        ],
+        "min": "-5616.0",
+        "max": "0.0"
+      },
+      {
+        "column": "RETAIL_SALE_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3899,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0012,
+        "sample_values": [
+          "0.0",
+          "-1100.0",
+          "-550.0",
+          "-1300.0",
+          "-598.0"
+        ],
+        "min": "-117778.754",
+        "max": "0.0"
+      },
+      {
+        "column": "NET_SALE_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 191,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0001,
+        "sample_values": [
+          "-77.0",
+          "-63.0",
+          "-43.0",
+          "-45.0",
+          "-120.0"
+        ],
+        "min": "-12491.0",
+        "max": "1.0"
+      },
+      {
+        "column": "NET_SALE_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 3895,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0012,
+        "sample_values": [
+          "0.0",
+          "-2660.0",
+          "-49.5",
+          "-62.5",
+          "-130.0"
+        ],
+        "min": "-2267817.3",
+        "max": "1499.0"
+      },
+      {
+        "column": "NET_SALE_COGS_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 5996,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0018,
+        "sample_values": [
+          "-260.0",
+          "-605.0",
+          "-63.0",
+          "-310.0",
+          "-105.0"
+        ],
+        "min": "-2060942.4",
+        "max": "810.0"
+      },
+      {
+        "column": "CLOSING_STOCK_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1160,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0004,
+        "sample_values": [
+          "22.0",
+          "24.0",
+          "37.0",
+          "210.0",
+          "220.0"
+        ],
+        "min": "-375.0",
+        "max": "100000.0"
+      },
+      {
+        "column": "CLOSING_STOCK_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 18872,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0058,
+        "sample_values": [
+          "1056.0",
+          "54.0",
+          "388.0",
+          "232.0",
+          "3850.0"
+        ],
+        "min": "-52800.0",
+        "max": "5636800.0"
+      },
+      {
+        "column": "GP_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 9359,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0029,
+        "sample_values": [
+          "0.0",
+          "240.0",
+          "94.0",
+          "415.0",
+          "616.0"
+        ],
+        "min": "-35898.0",
+        "max": "206874.9"
+      },
+      {
+        "column": "ADJUSTED_GP_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 9378,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0029,
+        "sample_values": [
+          "2.5",
+          "-15.5",
+          "-37.5",
+          "-91.5",
+          "-61.5"
+        ],
+        "min": "-35898.0",
+        "max": "206874.9"
+      },
+      {
+        "column": "SALE_TAX_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 4877,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0015,
+        "sample_values": [
+          "57.0",
+          "128.16",
+          "68.12",
+          "63.22",
+          "33.28"
+        ],
+        "min": "-71.38",
+        "max": "17964.26"
+      },
+      {
+        "column": "SALE_PROMO_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1115,
+        "nullable": false,
+        "high_cardinality": true,
+        "cardinality_ratio": 0.0003,
+        "sample_values": [
+          "175.0",
+          "164.5",
+          "499.0",
+          "275.0",
+          "118.0"
+        ],
+        "min": "-525.0",
+        "max": "366700.0"
+      },
+      {
+        "column": "SALE_DISCOUNT_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 287,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0001,
+        "sample_values": [
+          "0.0",
+          "40.0",
+          "14.0",
+          "240.0",
+          "449.0"
+        ],
+        "min": "-280.0",
+        "max": "70320.0"
+      },
+      {
+        "column": "WAREHOUSE_TRANSFER_IN_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "0.0"
+        ],
+        "min": "0.0",
+        "max": "0.0",
+        "frequency_distribution": [
+          {
+            "value": "0.0",
+            "count": 3279190
+          }
+        ]
+      },
+      {
+        "column": "WAREHOUSE_TRANSFER_IN_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "0.0"
+        ],
+        "min": "0.0",
+        "max": "0.0",
+        "frequency_distribution": [
+          {
+            "value": "0.0",
+            "count": 3279190
+          }
+        ]
+      },
+      {
+        "column": "WH_TRANSFER_OUT_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "0.0"
+        ],
+        "min": "0.0",
+        "max": "0.0",
+        "frequency_distribution": [
+          {
+            "value": "0.0",
+            "count": 3279190
+          }
+        ]
+      },
+      {
+        "column": "WH_TRANSFER_OUT_AMOUNT",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 1,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0,
+        "sample_values": [
+          "0.0"
+        ],
+        "min": "0.0",
+        "max": "0.0",
+        "frequency_distribution": [
+          {
+            "value": "0.0",
+            "count": 3279190
+          }
+        ]
+      },
+      {
+        "column": "PENDING_PO_QUANTITY",
+        "data_type": "DOUBLE",
+        "total_rows": 3279190,
+        "non_null_count": 3279190,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "distinct_count": 898,
+        "nullable": false,
+        "high_cardinality": false,
+        "cardinality_ratio": 0.0003,
+        "sample_values": [
+          "4000.0",
+          "700.0",
+          "816.0",
+          "2250.0",
+          "393.0"
+        ],
+        "min": "0.0",
+        "max": "200000.0"
+      }
+    ],
+    "v_ai_recommendations_feed": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "id",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "category",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "priority",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "confidence_score",
+          "type": "FLOAT",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "barcode",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "message",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "action_quantity",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "recommended_discount_pct",
+          "type": "FLOAT",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "estimated_financial_impact",
+          "type": "FLOAT",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "source_store_code",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "source_store_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        },
+        {
+          "name": "target_store_code",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 15
+        },
+        {
+          "name": "target_store_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 16
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP",
+          "nullable": "YES",
+          "default": null,
+          "position": 17
+        }
+      ]
+    },
+    "v_buying_accuracy_summary": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "total_bought_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "total_bought_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "total_sold_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "total_sold_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "unsold_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "unsold_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "total_discount_amount",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "total_promo_amount",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "buying_accuracy_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        }
+      ]
+    },
+    "v_category_hierarchy_summary": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "section",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "department_alias",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "margin_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "closing_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "closing_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        }
+      ]
+    },
+    "v_category_matrix": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "margin_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "closing_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "closing_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "performance_quadrant",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        }
+      ]
+    },
+    "v_colour_performance_summary": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "extracted_colour",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "total_skus",
+          "type": "BIGINT",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "margin_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "current_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "current_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        }
+      ]
+    },
+    "v_dead_stock_candidates": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "barcode",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "section",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "vendor",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "mrp",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "cost_rate",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "closing_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "closing_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        },
+        {
+          "name": "woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 15
+        },
+        {
+          "name": "moi",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 16
+        },
+        {
+          "name": "velocity_status",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 17
+        }
+      ]
+    },
+    "v_dim_item_colour": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "Division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "Section",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "Department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "Department Allias",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "CNAME1",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "CNAME2",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "CNAME3",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "CNAME4",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "CNAME5",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "CNAME6",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "DESC1",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "DESC2",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "DESC3",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "PARTYNAME",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        },
+        {
+          "name": "ICODE",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 15
+        },
+        {
+          "name": "RATE",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 16
+        },
+        {
+          "name": "MRP",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 17
+        },
+        {
+          "name": "STOCKINDATE",
+          "type": "DATE",
+          "nullable": "YES",
+          "default": null,
+          "position": 18
+        },
+        {
+          "name": "extracted_colour",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 19
+        }
+      ]
+    },
+    "v_fact_item_location_monthly": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "SEQ",
+          "type": "BIGINT",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "CUBE_CODE",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "CUBENAME",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "CREATOR",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "REPORT_DATE",
+          "type": "DATE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "START_DATE",
+          "type": "DATE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "END_DATE",
+          "type": "DATE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "BARCODE",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "ADMSITE_CODE",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "OPENING_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "OPENING_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "GOODS_RECEIVE_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "GOODS_RECEIVE_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "GOODS_RETURN_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        },
+        {
+          "name": "GOODS_RETURN_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 15
+        },
+        {
+          "name": "SITE_TRANSFER_IN_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 16
+        },
+        {
+          "name": "SITE_TRANSFER_IN_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 17
+        },
+        {
+          "name": "SITE_TRANSFER_OUT_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 18
+        },
+        {
+          "name": "SITE_TRANSFER_OUT_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 19
+        },
+        {
+          "name": "RETAIL_SALE_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 20
+        },
+        {
+          "name": "RETAIL_SALE_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 21
+        },
+        {
+          "name": "NET_SALE_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 22
+        },
+        {
+          "name": "NET_SALE_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 23
+        },
+        {
+          "name": "NET_SALE_COGS_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 24
+        },
+        {
+          "name": "CLOSING_STOCK_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 25
+        },
+        {
+          "name": "CLOSING_STOCK_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 26
+        },
+        {
+          "name": "GP_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 27
+        },
+        {
+          "name": "ADJUSTED_GP_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 28
+        },
+        {
+          "name": "SALE_TAX_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 29
+        },
+        {
+          "name": "SALE_PROMO_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 30
+        },
+        {
+          "name": "SALE_DISCOUNT_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 31
+        },
+        {
+          "name": "WAREHOUSE_TRANSFER_IN_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 32
+        },
+        {
+          "name": "WAREHOUSE_TRANSFER_IN_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 33
+        },
+        {
+          "name": "WH_TRANSFER_OUT_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 34
+        },
+        {
+          "name": "WH_TRANSFER_OUT_AMOUNT",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 35
+        },
+        {
+          "name": "PENDING_PO_QUANTITY",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 36
+        },
+        {
+          "name": "Division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 37
+        },
+        {
+          "name": "Section",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 38
+        },
+        {
+          "name": "Department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 39
+        },
+        {
+          "name": "Department Allias",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 40
+        },
+        {
+          "name": "PARTYNAME",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 41
+        },
+        {
+          "name": "CNAME1",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 42
+        },
+        {
+          "name": "CNAME2",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 43
+        },
+        {
+          "name": "CNAME3",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 44
+        },
+        {
+          "name": "CNAME4",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 45
+        },
+        {
+          "name": "CNAME5",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 46
+        },
+        {
+          "name": "CNAME6",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 47
+        },
+        {
+          "name": "DESC1",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 48
+        },
+        {
+          "name": "DESC2",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 49
+        },
+        {
+          "name": "DESC3",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 50
+        },
+        {
+          "name": "RATE",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 51
+        },
+        {
+          "name": "MRP",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 52
+        },
+        {
+          "name": "STOCKINDATE",
+          "type": "DATE",
+          "nullable": "YES",
+          "default": null,
+          "position": 53
+        },
+        {
+          "name": "STORE_NAME",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 54
+        },
+        {
+          "name": "SITE_TYPE",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 55
+        }
+      ]
+    },
+    "v_gmroi_analysis": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "admsite_code",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "store_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "vendor_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "barcode",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "item_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "total_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "total_gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "avg_inventory_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "gmroi_ratio",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        }
+      ]
+    },
+    "v_price_ladder_performance": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "price_band",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "total_skus",
+          "type": "BIGINT",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "total_sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "total_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "total_gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "margin_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        }
+      ]
+    },
+    "v_rebalance_recommendations": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "barcode",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "source_store_code",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "source_store_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "source_stock",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "source_woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "target_store_code",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "target_store_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "target_stock",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "target_woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "recommended_transfer_qty",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "transfer_type",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "urgency_level",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        }
+      ]
+    },
+    "v_size_curve_distribution": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "size_code",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "total_bought_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "total_sold_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "current_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "size_contribution_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        }
+      ]
+    },
+    "v_sku_velocity_summary": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "barcode",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "division",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "section",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "vendor",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "mrp",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "cost_rate",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "closing_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "closing_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        },
+        {
+          "name": "woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 15
+        },
+        {
+          "name": "moi",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 16
+        },
+        {
+          "name": "velocity_status",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 17
+        }
+      ]
+    },
+    "v_store_stock_cover": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "admsite_code",
+          "type": "INTEGER",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "store_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "site_type",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "effective_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "transfer_in_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "transfer_out_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "wh_transfer_in_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "store_woc",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "stock_health_status",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        }
+      ]
+    },
+    "v_vendor_performance_summary": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "vendor_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "total_skus_supplied",
+          "type": "BIGINT",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "receive_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "receive_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "return_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "return_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "current_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "current_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "margin_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "return_rate_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        }
+      ]
+    },
+    "v_vendor_scorecard": {
+      "note": "View - schema captured, full profiling deferred",
+      "columns": [
+        {
+          "name": "vendor_name",
+          "type": "VARCHAR",
+          "nullable": "YES",
+          "default": null,
+          "position": 1
+        },
+        {
+          "name": "total_skus_supplied",
+          "type": "BIGINT",
+          "nullable": "YES",
+          "default": null,
+          "position": 2
+        },
+        {
+          "name": "receive_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 3
+        },
+        {
+          "name": "receive_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 4
+        },
+        {
+          "name": "return_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 5
+        },
+        {
+          "name": "return_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 6
+        },
+        {
+          "name": "sales_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 7
+        },
+        {
+          "name": "net_revenue",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 8
+        },
+        {
+          "name": "gross_profit",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 9
+        },
+        {
+          "name": "current_stock_units",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 10
+        },
+        {
+          "name": "current_stock_value",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 11
+        },
+        {
+          "name": "sell_through_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 12
+        },
+        {
+          "name": "margin_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 13
+        },
+        {
+          "name": "return_rate_pct",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 14
+        },
+        {
+          "name": "vendor_score",
+          "type": "DOUBLE",
+          "nullable": "YES",
+          "default": null,
+          "position": 15
+        }
+      ]
+    }
+  },
+  "indexes": {
+    "ai_recommendations_feed": [],
+    "dim_item": [],
+    "dim_location": [],
+    "fact_cube_monthly": []
+  },
+  "view_definitions": {
+    "v_ai_recommendations_feed": "CREATE VIEW v_ai_recommendations_feed AS SELECT * FROM ai_recommendations_feed ORDER BY confidence_score DESC, estimated_financial_impact DESC;",
+    "v_buying_accuracy_summary": "CREATE VIEW v_buying_accuracy_summary AS SELECT COALESCE(i.Department, 'UNKNOWN') AS department, sum(f.GOODS_RECEIVE_QUANTITY) AS total_bought_units, sum(f.GOODS_RECEIVE_AMOUNT) AS total_bought_value, sum(abs(f.NET_SALE_QUANTITY)) AS total_sold_units, sum(abs(f.NET_SALE_AMOUNT)) AS total_sold_value, sum(f.CLOSING_STOCK_QUANTITY) AS unsold_units, sum(f.CLOSING_STOCK_AMOUNT) AS unsold_value, sum(f.SALE_DISCOUNT_AMOUNT) AS total_discount_amount, sum(f.SALE_PROMO_AMOUNT) AS total_promo_amount, CASE  WHEN ((sum(f.GOODS_RECEIVE_QUANTITY) > 0)) THEN (round(((sum(abs(f.NET_SALE_QUANTITY)) / sum(f.GOODS_RECEIVE_QUANTITY)) * 100.0), 2)) ELSE 0.0 END AS buying_accuracy_pct FROM fact_cube_monthly AS f LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY i.Department;",
+    "v_category_hierarchy_summary": "CREATE VIEW v_category_hierarchy_summary AS SELECT COALESCE(i.Division, 'UNKNOWN') AS division, COALESCE(i.Section, 'UNKNOWN') AS section, COALESCE(i.Department, 'UNKNOWN') AS department, COALESCE(i.\"Department Allias\", 'UNKNOWN') AS department_alias, sum(abs(f.NET_SALE_AMOUNT)) AS net_revenue, sum(abs(f.NET_SALE_QUANTITY)) AS sales_units, sum(f.GP_AMOUNT) AS gross_profit, CASE  WHEN ((sum(abs(f.NET_SALE_AMOUNT)) > 0)) THEN (round(((sum(f.GP_AMOUNT) / sum(abs(f.NET_SALE_AMOUNT))) * 100.0), 2)) ELSE 0.0 END AS margin_pct, sum(f.CLOSING_STOCK_AMOUNT) AS closing_stock_value, sum(f.CLOSING_STOCK_QUANTITY) AS closing_stock_units, CASE  WHEN ((((sum(f.OPENING_QUANTITY) + sum(f.GOODS_RECEIVE_QUANTITY)) + sum(f.SITE_TRANSFER_IN_QUANTITY)) > 0)) THEN (round(((sum(abs(f.NET_SALE_QUANTITY)) / ((sum(f.OPENING_QUANTITY) + sum(f.GOODS_RECEIVE_QUANTITY)) + sum(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0), 2)) ELSE 0.0 END AS sell_through_pct, CASE  WHEN (((sum(abs(f.NET_SALE_QUANTITY)) / 12.0) > 0)) THEN (round((sum(f.CLOSING_STOCK_QUANTITY) / (sum(abs(f.NET_SALE_QUANTITY)) / 12.0)), 1)) ELSE 999.0 END AS woc FROM fact_cube_monthly AS f LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY i.Division, i.Section, i.Department, i.\"Department Allias\";",
+    "v_category_matrix": "CREATE VIEW v_category_matrix AS WITH dept_aggregates AS (SELECT department, max(division) AS division, sum(net_revenue) AS net_revenue, sum(sales_units) AS sales_units, sum(gross_profit) AS gross_profit, CASE  WHEN ((sum(net_revenue) > 0)) THEN (round(((sum(gross_profit) / sum(net_revenue)) * 100.0), 2)) ELSE 0.0 END AS margin_pct, sum(closing_stock_value) AS closing_stock_value, sum(closing_stock_units) AS closing_stock_units, avg(sell_through_pct) AS sell_through_pct, avg(woc) AS woc FROM v_category_hierarchy_summary GROUP BY department), benchmarks AS (SELECT avg(margin_pct) AS avg_margin, avg(sell_through_pct) AS avg_sell_through FROM dept_aggregates)SELECT d.department, d.division, d.net_revenue, d.sales_units, d.gross_profit, d.margin_pct, d.closing_stock_value, d.closing_stock_units, round(d.sell_through_pct, 2) AS sell_through_pct, round(d.woc, 1) AS woc, CASE  WHEN (((d.margin_pct >= b.avg_margin) AND (d.sell_through_pct >= b.avg_sell_through))) THEN ('WINNER') WHEN (((d.margin_pct < b.avg_margin) AND (d.sell_through_pct >= b.avg_sell_through))) THEN ('VOLUME_DRIVER') WHEN (((d.margin_pct >= b.avg_margin) AND (d.sell_through_pct < b.avg_sell_through))) THEN ('HIGH_MARGIN_SLOW') ELSE 'OVERSTOCKED_UNDERPERFORMER' END AS performance_quadrant FROM dept_aggregates AS d , benchmarks AS b;",
+    "v_colour_performance_summary": "CREATE VIEW v_colour_performance_summary AS SELECT i.extracted_colour, COALESCE(i.Division, 'UNKNOWN') AS division, COALESCE(i.Department, 'UNKNOWN') AS department, count(DISTINCT f.BARCODE) AS total_skus, sum(f.NET_SALE_QUANTITY) AS sales_units, sum(f.NET_SALE_AMOUNT) AS net_revenue, sum(f.GP_AMOUNT) AS gross_profit, CASE  WHEN ((sum(f.NET_SALE_AMOUNT) > 0)) THEN (((sum(f.GP_AMOUNT) / sum(f.NET_SALE_AMOUNT)) * 100)) ELSE 0.0 END AS margin_pct, sum(f.CLOSING_STOCK_QUANTITY) AS current_stock_units, sum(f.CLOSING_STOCK_AMOUNT) AS current_stock_value, CASE  WHEN ((((sum(f.OPENING_QUANTITY) + sum(f.GOODS_RECEIVE_QUANTITY)) + sum(f.SITE_TRANSFER_IN_QUANTITY)) > 0)) THEN (((sum(f.NET_SALE_QUANTITY) / ((sum(f.OPENING_QUANTITY) + sum(f.GOODS_RECEIVE_QUANTITY)) + sum(f.SITE_TRANSFER_IN_QUANTITY))) * 100)) ELSE 0.0 END AS sell_through_pct FROM fact_cube_monthly AS f LEFT JOIN v_dim_item_colour AS i ON ((f.BARCODE = i.ICODE)) GROUP BY i.extracted_colour, i.Division, i.Department;",
+    "v_dead_stock_candidates": "CREATE VIEW v_dead_stock_candidates AS SELECT * FROM v_sku_velocity_summary WHERE (velocity_status = 'DEAD_STOCK') ORDER BY closing_stock_value DESC;",
+    "v_dim_item_colour": "CREATE VIEW v_dim_item_colour AS SELECT *, CASE  WHEN ((contains(upper(COALESCE(DESC1, '')), 'BLACK') OR contains(upper(COALESCE(DESC1, '')), 'BLK'))) THEN ('BLACK') WHEN ((contains(upper(COALESCE(DESC1, '')), 'WHITE') OR contains(upper(COALESCE(DESC1, '')), 'WHT'))) THEN ('WHITE') WHEN (contains(upper(COALESCE(DESC1, '')), 'NAVY')) THEN ('NAVY') WHEN ((contains(upper(COALESCE(DESC1, '')), 'BLUE') OR contains(upper(COALESCE(DESC1, '')), 'BLU'))) THEN ('BLUE') WHEN (contains(upper(COALESCE(DESC1, '')), 'RED')) THEN ('RED') WHEN ((contains(upper(COALESCE(DESC1, '')), 'GREEN') OR contains(upper(COALESCE(DESC1, '')), 'GRN'))) THEN ('GREEN') WHEN ((contains(upper(COALESCE(DESC1, '')), 'YELLOW') OR contains(upper(COALESCE(DESC1, '')), 'YEL'))) THEN ('YELLOW') WHEN ((contains(upper(COALESCE(DESC1, '')), 'PINK') OR contains(upper(COALESCE(DESC1, '')), 'PNK'))) THEN ('PINK') WHEN ((contains(upper(COALESCE(DESC1, '')), 'BEIGE') OR contains(upper(COALESCE(DESC1, '')), 'CREAM') OR contains(upper(COALESCE(DESC1, '')), 'BGE'))) THEN ('BEIGE') WHEN ((contains(upper(COALESCE(DESC1, '')), 'GREY') OR contains(upper(COALESCE(DESC1, '')), 'GRAY') OR contains(upper(COALESCE(DESC1, '')), 'GRY'))) THEN ('GREY') WHEN ((contains(upper(COALESCE(DESC1, '')), 'MAROON') OR contains(upper(COALESCE(DESC1, '')), 'WINE') OR contains(upper(COALESCE(DESC1, '')), 'MRN'))) THEN ('MAROON') WHEN ((contains(upper(COALESCE(DESC1, '')), 'OLIVE') OR contains(upper(COALESCE(DESC1, '')), 'OLV'))) THEN ('OLIVE') WHEN ((contains(upper(COALESCE(DESC1, '')), 'MULTI') OR contains(upper(COALESCE(DESC1, '')), 'PRINTED') OR contains(upper(COALESCE(DESC1, '')), 'PRINT'))) THEN ('MULTICOLOR') ELSE 'OTHER' END AS extracted_colour FROM dim_item;",
+    "v_fact_item_location_monthly": "CREATE VIEW v_fact_item_location_monthly AS SELECT f.*, i.Division, i.Section, i.Department, i.\"Department Allias\", i.PARTYNAME, i.CNAME1, i.CNAME2, i.CNAME3, i.CNAME4, i.CNAME5, i.CNAME6, i.DESC1, i.DESC2, i.DESC3, i.RATE, i.MRP, i.STOCKINDATE, l.\"Name\" AS STORE_NAME, COALESCE(l.SITE_TYPE, CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN ('CENTRAL_WAREHOUSE') ELSE 'RETAIL_STORE' END) AS SITE_TYPE FROM fact_cube_monthly AS f LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) LEFT JOIN dim_location AS l ON ((f.ADMSITE_CODE = l.ADMSITE_CODE));",
+    "v_gmroi_analysis": "CREATE VIEW v_gmroi_analysis AS SELECT f.ADMSITE_CODE AS admsite_code, l.\"Name\" AS store_name, COALESCE(i.Division, 'UNKNOWN') AS division, COALESCE(i.Department, 'UNKNOWN') AS department, COALESCE(i.PARTYNAME, 'UNKNOWN') AS vendor_name, f.BARCODE AS barcode, COALESCE(i.DESC1, 'UNKNOWN') AS item_name, sum(abs(f.NET_SALE_AMOUNT)) AS total_revenue, sum(f.GP_AMOUNT) AS total_gross_profit, (sum(f.CLOSING_STOCK_AMOUNT) / 3.0) AS avg_inventory_value, CASE  WHEN (((sum(f.CLOSING_STOCK_AMOUNT) / 3.0) > 0)) THEN (round(((4.0 * sum(f.GP_AMOUNT)) / (sum(f.CLOSING_STOCK_AMOUNT) / 3.0)), 2)) ELSE 0.0 END AS gmroi_ratio FROM fact_cube_monthly AS f LEFT JOIN dim_location AS l ON ((f.ADMSITE_CODE = l.ADMSITE_CODE)) LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY f.ADMSITE_CODE, l.\"Name\", i.Division, i.Department, i.PARTYNAME, f.BARCODE, i.DESC1;",
+    "v_price_ladder_performance": "CREATE VIEW v_price_ladder_performance AS WITH price_bucketed AS (SELECT f.BARCODE, i.Department AS department, COALESCE(i.MRP, i.RATE, 0.0) AS price_point, CASE  WHEN ((COALESCE(i.MRP, i.RATE, 0.0) < 300)) THEN ('< 300') WHEN ((COALESCE(i.MRP, i.RATE, 0.0) BETWEEN 300 AND 500)) THEN ('300 - 500') WHEN ((COALESCE(i.MRP, i.RATE, 0.0) BETWEEN 500 AND 1000)) THEN ('500 - 1000') ELSE '> 1000' END AS price_band, abs(f.NET_SALE_QUANTITY) AS NET_SALE_QUANTITY, abs(f.NET_SALE_AMOUNT) AS NET_SALE_AMOUNT, f.GP_AMOUNT, f.CLOSING_STOCK_QUANTITY FROM fact_cube_monthly AS f LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)))SELECT price_band, department, count(DISTINCT BARCODE) AS total_skus, sum(NET_SALE_QUANTITY) AS total_sales_units, sum(NET_SALE_AMOUNT) AS total_revenue, sum(GP_AMOUNT) AS total_gross_profit, CASE  WHEN ((sum(NET_SALE_AMOUNT) > 0)) THEN (((sum(GP_AMOUNT) / sum(NET_SALE_AMOUNT)) * 100.0)) ELSE 0.0 END AS margin_pct, sum(CLOSING_STOCK_QUANTITY) AS stock_units FROM price_bucketed GROUP BY price_band, department;",
+    "v_rebalance_recommendations": "CREATE VIEW v_rebalance_recommendations AS WITH item_store_woc AS (SELECT f.BARCODE AS barcode, COALESCE(i.DESC1, f.BARCODE) AS description, COALESCE(i.Department, 'UNKNOWN') AS department, f.ADMSITE_CODE AS admsite_code, COALESCE(l.\"Name\", ('Store ' || CAST(f.ADMSITE_CODE AS VARCHAR))) AS store_name, COALESCE(l.SITE_TYPE, CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN ('CENTRAL_WAREHOUSE') ELSE 'RETAIL_STORE' END) AS site_type, sum(abs(f.NET_SALE_QUANTITY)) AS sales_units, sum(f.CLOSING_STOCK_QUANTITY) AS stock_units, greatest(0.0, sum(f.CLOSING_STOCK_QUANTITY)) AS effective_stock_units, (sum(abs(f.NET_SALE_QUANTITY)) / 12.0) AS weekly_run_rate, CASE  WHEN (((sum(abs(f.NET_SALE_QUANTITY)) / 12.0) > 0)) THEN ((greatest(0.0, sum(f.CLOSING_STOCK_QUANTITY)) / (sum(abs(f.NET_SALE_QUANTITY)) / 12.0))) ELSE 999.0 END AS woc FROM fact_cube_monthly AS f LEFT JOIN dim_location AS l ON ((f.ADMSITE_CODE = l.ADMSITE_CODE)) LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY f.BARCODE, i.DESC1, i.Department, f.ADMSITE_CODE, l.\"Name\", l.SITE_TYPE), surplus AS (SELECT *, greatest(CAST((stock_units - (weekly_run_rate * 6.0)) AS INTEGER), 1) AS surplus_units FROM item_store_woc WHERE (((woc > 8.0) OR (site_type = 'CENTRAL_WAREHOUSE')) AND (stock_units >= 5))), deficit AS (SELECT *, greatest(CAST(((weekly_run_rate * 6.0) - stock_units) AS INTEGER), 1) AS deficit_units FROM item_store_woc WHERE (((woc < 3.0) OR (stock_units < 0)) AND ((sales_units > 0) OR (stock_units < 0))))SELECT s.barcode, s.description, s.department, s.admsite_code AS source_store_code, s.store_name AS source_store_name, s.stock_units AS source_stock, round(s.woc, 1) AS source_woc, d.admsite_code AS target_store_code, d.store_name AS target_store_name, d.stock_units AS target_stock, round(d.woc, 1) AS target_woc, least(s.surplus_units, d.deficit_units, 50) AS recommended_transfer_qty, CASE  WHEN ((s.site_type = 'CENTRAL_WAREHOUSE')) THEN ('DC_REPLENISHMENT') ELSE 'LATERAL_REBALANCE' END AS transfer_type, CASE  WHEN ((d.stock_units < 0)) THEN ('CRITICAL') WHEN ((d.woc < 1.0)) THEN ('CRITICAL') WHEN ((d.woc < 2.0)) THEN ('HIGH') ELSE 'MEDIUM' END AS urgency_level FROM surplus AS s INNER JOIN deficit AS d ON (((s.barcode = d.barcode) AND (s.admsite_code != d.admsite_code))) WHERE (least(s.surplus_units, d.deficit_units, 50) >= 1);",
+    "v_size_curve_distribution": "CREATE VIEW v_size_curve_distribution AS WITH size_sales AS (SELECT COALESCE(i.Division, 'UNKNOWN') AS division, COALESCE(i.Department, 'UNKNOWN') AS department, COALESCE(\"nullif\"(main.\"trim\"(i.CNAME5), ''), 'FREE_SIZE') AS size_code, sum(f.GOODS_RECEIVE_QUANTITY) AS total_bought_units, sum(abs(f.NET_SALE_QUANTITY)) AS total_sold_units, sum(f.CLOSING_STOCK_QUANTITY) AS current_stock_units, sum(abs(f.NET_SALE_AMOUNT)) AS net_revenue FROM fact_cube_monthly AS f LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY i.Division, i.Department, i.CNAME5), dept_totals AS (SELECT department, sum(total_sold_units) AS dept_sold_units FROM size_sales GROUP BY department)SELECT s.division, s.department, s.size_code, s.total_bought_units, s.total_sold_units, s.current_stock_units, s.net_revenue, CASE  WHEN ((d.dept_sold_units > 0)) THEN (round(((s.total_sold_units / d.dept_sold_units) * 100.0), 2)) ELSE 0.0 END AS size_contribution_pct FROM size_sales AS s LEFT JOIN dept_totals AS d ON ((s.department = d.department));",
+    "v_sku_velocity_summary": "CREATE VIEW v_sku_velocity_summary AS WITH period_meta AS (SELECT count(DISTINCT strftime(START_DATE, '%Y-%m')) AS num_months FROM fact_cube_monthly)SELECT f.BARCODE AS barcode, i.DESC1 AS description, i.Division AS division, i.Section AS section, i.Department AS department, i.PARTYNAME AS vendor, i.MRP AS mrp, i.RATE AS cost_rate, sum(abs(f.NET_SALE_AMOUNT)) AS net_revenue, sum(abs(f.NET_SALE_QUANTITY)) AS sales_units, sum(f.GP_AMOUNT) AS gross_profit, sum(greatest(0.0, f.CLOSING_STOCK_QUANTITY)) AS closing_stock_units, sum(greatest(0.0, f.CLOSING_STOCK_AMOUNT)) AS closing_stock_value, CASE  WHEN ((((sum(f.OPENING_QUANTITY) + sum(f.GOODS_RECEIVE_QUANTITY)) + sum(f.SITE_TRANSFER_IN_QUANTITY)) > 0)) THEN (((sum(abs(f.NET_SALE_QUANTITY)) / ((sum(f.OPENING_QUANTITY) + sum(f.GOODS_RECEIVE_QUANTITY)) + sum(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0)) ELSE 0.0 END AS sell_through_pct, CASE  WHEN (((sum(abs(f.NET_SALE_QUANTITY)) / (max(pm.num_months) * 4.33)) > 0)) THEN ((sum(f.CLOSING_STOCK_QUANTITY) / (sum(abs(f.NET_SALE_QUANTITY)) / (max(pm.num_months) * 4.33)))) ELSE 999.0 END AS woc, CASE  WHEN (((sum(abs(f.NET_SALE_QUANTITY)) / max(pm.num_months)) > 0)) THEN ((sum(f.CLOSING_STOCK_QUANTITY) / (sum(abs(f.NET_SALE_QUANTITY)) / max(pm.num_months)))) ELSE 999.0 END AS moi, CASE  WHEN (((sum(abs(f.NET_SALE_QUANTITY)) = 0) AND (sum(f.CLOSING_STOCK_QUANTITY) > 0))) THEN ('DEAD_STOCK') WHEN ((((sum(abs(f.NET_SALE_QUANTITY)) / (max(pm.num_months) * 4.33)) > 0) AND ((sum(f.CLOSING_STOCK_QUANTITY) / (sum(abs(f.NET_SALE_QUANTITY)) / (max(pm.num_months) * 4.33))) < 4.0))) THEN ('FAST_MOVER') WHEN ((((sum(abs(f.NET_SALE_QUANTITY)) / (max(pm.num_months) * 4.33)) > 0) AND ((sum(f.CLOSING_STOCK_QUANTITY) / (sum(abs(f.NET_SALE_QUANTITY)) / (max(pm.num_months) * 4.33))) BETWEEN 4.0 AND 12.0))) THEN ('MEDIUM_MOVER') ELSE 'SLOW_MOVER' END AS velocity_status FROM fact_cube_monthly AS f , period_meta AS pm LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY f.BARCODE, i.DESC1, i.Division, i.Section, i.Department, i.PARTYNAME, i.MRP, i.RATE;",
+    "v_store_stock_cover": "CREATE VIEW v_store_stock_cover AS SELECT f.ADMSITE_CODE AS admsite_code, COALESCE(l.\"Name\", ('Store ' || CAST(f.ADMSITE_CODE AS VARCHAR))) AS store_name, COALESCE(l.SITE_TYPE, CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN ('CENTRAL_WAREHOUSE') ELSE 'RETAIL_STORE' END) AS site_type, COALESCE(i.Department, 'UNKNOWN') AS department, sum(abs(f.NET_SALE_QUANTITY)) AS sales_units, sum(abs(f.NET_SALE_AMOUNT)) AS revenue, sum(f.CLOSING_STOCK_QUANTITY) AS stock_units, greatest(0.0, sum(f.CLOSING_STOCK_QUANTITY)) AS effective_stock_units, sum(f.CLOSING_STOCK_AMOUNT) AS stock_value, sum(f.SITE_TRANSFER_IN_QUANTITY) AS transfer_in_units, sum(f.SITE_TRANSFER_OUT_QUANTITY) AS transfer_out_units, sum(f.WAREHOUSE_TRANSFER_IN_QUANTITY) AS wh_transfer_in_units, CASE  WHEN (((sum(abs(f.NET_SALE_QUANTITY)) / 12.0) > 0)) THEN (round((greatest(0.0, sum(f.CLOSING_STOCK_QUANTITY)) / (sum(abs(f.NET_SALE_QUANTITY)) / 12.0)), 1)) ELSE 999.0 END AS store_woc, CASE  WHEN (((sum(f.CLOSING_STOCK_QUANTITY) < 0) AND ((sum(abs(f.NET_SALE_QUANTITY)) / 12.0) > 0))) THEN ('NEGATIVE_TRANSFER_LAG') WHEN ((((sum(abs(f.NET_SALE_QUANTITY)) / 12.0) > 0) AND ((greatest(0.0, sum(f.CLOSING_STOCK_QUANTITY)) / (sum(abs(f.NET_SALE_QUANTITY)) / 12.0)) < 2.5))) THEN ('HIGH_RISK_STOCKOUT') WHEN ((((sum(abs(f.NET_SALE_QUANTITY)) / 12.0) > 0) AND ((sum(f.CLOSING_STOCK_QUANTITY) / (sum(abs(f.NET_SALE_QUANTITY)) / 12.0)) > 12.0))) THEN ('OVERSTOCKED') ELSE 'BALANCED' END AS stock_health_status FROM fact_cube_monthly AS f LEFT JOIN dim_location AS l ON ((f.ADMSITE_CODE = l.ADMSITE_CODE)) LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY f.ADMSITE_CODE, l.\"Name\", l.SITE_TYPE, i.Department;",
+    "v_vendor_performance_summary": "CREATE VIEW v_vendor_performance_summary AS SELECT COALESCE(i.PARTYNAME, 'UNKNOWN_VENDOR') AS vendor_name, count(DISTINCT f.BARCODE) AS total_skus_supplied, sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (f.GOODS_RECEIVE_QUANTITY) ELSE 0 END) AS receive_units, sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (f.GOODS_RECEIVE_AMOUNT) ELSE 0 END) AS receive_value, sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (abs(f.GOODS_RETURN_QUANTITY)) ELSE 0 END) AS return_units, sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (abs(f.GOODS_RETURN_AMOUNT)) ELSE 0 END) AS return_value, sum(abs(f.NET_SALE_QUANTITY)) AS sales_units, sum(abs(f.NET_SALE_AMOUNT)) AS net_revenue, sum(f.GP_AMOUNT) AS gross_profit, sum(f.CLOSING_STOCK_QUANTITY) AS current_stock_units, sum(f.CLOSING_STOCK_AMOUNT) AS current_stock_value, CASE  WHEN ((sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (f.GOODS_RECEIVE_QUANTITY) ELSE 0 END) > 0)) THEN (round(((sum(abs(f.NET_SALE_QUANTITY)) / sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (f.GOODS_RECEIVE_QUANTITY) ELSE 0 END)) * 100.0), 2)) ELSE 0.0 END AS sell_through_pct, CASE  WHEN ((sum(abs(f.NET_SALE_AMOUNT)) > 0)) THEN (round(((sum(f.GP_AMOUNT) / sum(abs(f.NET_SALE_AMOUNT))) * 100.0), 2)) ELSE 0.0 END AS margin_pct, CASE  WHEN ((sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (f.GOODS_RECEIVE_QUANTITY) ELSE 0 END) > 0)) THEN (round(((sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (abs(f.GOODS_RETURN_QUANTITY)) ELSE 0 END) / sum(CASE  WHEN ((f.ADMSITE_CODE = 1070)) THEN (f.GOODS_RECEIVE_QUANTITY) ELSE 0 END)) * 100.0), 2)) ELSE 0.0 END AS return_rate_pct FROM fact_cube_monthly AS f LEFT JOIN dim_item AS i ON ((f.BARCODE = i.ICODE)) GROUP BY i.PARTYNAME;",
+    "v_vendor_scorecard": "CREATE VIEW v_vendor_scorecard AS WITH ranked_vendors AS (SELECT *, percent_rank() OVER (ORDER BY net_revenue ASC) AS rev_rank, percent_rank() OVER (ORDER BY sell_through_pct ASC) AS st_rank, percent_rank() OVER (ORDER BY margin_pct ASC) AS margin_rank, percent_rank() OVER (ORDER BY return_rate_pct DESC) AS return_rank FROM v_vendor_performance_summary)SELECT vendor_name, total_skus_supplied, receive_units, receive_value, return_units, return_value, sales_units, net_revenue, gross_profit, current_stock_units, current_stock_value, sell_through_pct, margin_pct, return_rate_pct, round((((((rev_rank * 0.35) + (st_rank * 0.35)) + (margin_rank * 0.20)) + (return_rank * 0.10)) * 100.0), 1) AS vendor_score FROM ranked_vendors;"
+  },
+  "inferred_relationships": [
+    {
+      "from_table": "dim_location",
+      "from_column": "ADMSITE_CODE",
+      "to_table": "fact_cube_monthly",
+      "to_column": "ADMSITE_CODE",
+      "inferred": true
+    },
+    {
+      "from_table": "fact_cube_monthly",
+      "from_column": "BARCODE",
+      "to_table": "dim_item",
+      "to_column": "ICODE",
+      "inferred": true
+    },
+    {
+      "from_table": "fact_cube_monthly",
+      "from_column": "ADMSITE_CODE",
+      "to_table": "dim_location",
+      "to_column": "ADMSITE_CODE",
+      "inferred": true
+    }
+  ],
+  "duplicate_column_names": {
+    "id": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "category": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "priority": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "confidence_score": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "barcode": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_dead_stock_candidates",
+      "v_gmroi_analysis",
+      "v_rebalance_recommendations",
+      "v_sku_velocity_summary"
+    ],
+    "title": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "department": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_buying_accuracy_summary",
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_dead_stock_candidates",
+      "v_gmroi_analysis",
+      "v_price_ladder_performance",
+      "v_rebalance_recommendations",
+      "v_size_curve_distribution",
+      "v_sku_velocity_summary",
+      "v_store_stock_cover"
+    ],
+    "division": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_dead_stock_candidates",
+      "v_gmroi_analysis",
+      "v_size_curve_distribution",
+      "v_sku_velocity_summary"
+    ],
+    "message": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "action_quantity": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "recommended_discount_pct": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "estimated_financial_impact": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "source_store_code": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_rebalance_recommendations"
+    ],
+    "source_store_name": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_rebalance_recommendations"
+    ],
+    "target_store_code": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_rebalance_recommendations"
+    ],
+    "target_store_name": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed",
+      "v_rebalance_recommendations"
+    ],
+    "created_at": [
+      "ai_recommendations_feed",
+      "v_ai_recommendations_feed"
+    ],
+    "Division": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "Section": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "Department": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "Department Allias": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "CNAME1": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "CNAME2": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "CNAME3": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "CNAME4": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "CNAME5": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "CNAME6": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "DESC1": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "DESC2": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "DESC3": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "PARTYNAME": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "ICODE": [
+      "dim_item",
+      "v_dim_item_colour"
+    ],
+    "RATE": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "MRP": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "STOCKINDATE": [
+      "dim_item",
+      "v_dim_item_colour",
+      "v_fact_item_location_monthly"
+    ],
+    "ADMSITE_CODE": [
+      "dim_location",
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SITE_TYPE": [
+      "dim_location",
+      "v_fact_item_location_monthly"
+    ],
+    "SEQ": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "CUBE_CODE": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "CUBENAME": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "CREATOR": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "REPORT_DATE": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "START_DATE": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "END_DATE": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "BARCODE": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "OPENING_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "OPENING_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "GOODS_RECEIVE_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "GOODS_RECEIVE_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "GOODS_RETURN_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "GOODS_RETURN_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SITE_TRANSFER_IN_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SITE_TRANSFER_IN_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SITE_TRANSFER_OUT_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SITE_TRANSFER_OUT_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "RETAIL_SALE_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "RETAIL_SALE_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "NET_SALE_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "NET_SALE_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "NET_SALE_COGS_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "CLOSING_STOCK_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "CLOSING_STOCK_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "GP_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "ADJUSTED_GP_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SALE_TAX_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SALE_PROMO_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "SALE_DISCOUNT_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "WAREHOUSE_TRANSFER_IN_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "WAREHOUSE_TRANSFER_IN_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "WH_TRANSFER_OUT_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "WH_TRANSFER_OUT_AMOUNT": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "PENDING_PO_QUANTITY": [
+      "fact_cube_monthly",
+      "v_fact_item_location_monthly"
+    ],
+    "total_bought_units": [
+      "v_buying_accuracy_summary",
+      "v_size_curve_distribution"
+    ],
+    "total_sold_units": [
+      "v_buying_accuracy_summary",
+      "v_size_curve_distribution"
+    ],
+    "section": [
+      "v_category_hierarchy_summary",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "net_revenue": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_dead_stock_candidates",
+      "v_size_curve_distribution",
+      "v_sku_velocity_summary",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "sales_units": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary",
+      "v_store_stock_cover",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "gross_profit": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "margin_pct": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_price_ladder_performance",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "closing_stock_value": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "closing_stock_units": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "sell_through_pct": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_colour_performance_summary",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "woc": [
+      "v_category_hierarchy_summary",
+      "v_category_matrix",
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "extracted_colour": [
+      "v_colour_performance_summary",
+      "v_dim_item_colour"
+    ],
+    "total_skus": [
+      "v_colour_performance_summary",
+      "v_price_ladder_performance"
+    ],
+    "current_stock_units": [
+      "v_colour_performance_summary",
+      "v_size_curve_distribution",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "current_stock_value": [
+      "v_colour_performance_summary",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "description": [
+      "v_dead_stock_candidates",
+      "v_rebalance_recommendations",
+      "v_sku_velocity_summary"
+    ],
+    "vendor": [
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "mrp": [
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "cost_rate": [
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "moi": [
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "velocity_status": [
+      "v_dead_stock_candidates",
+      "v_sku_velocity_summary"
+    ],
+    "admsite_code": [
+      "v_gmroi_analysis",
+      "v_store_stock_cover"
+    ],
+    "store_name": [
+      "v_gmroi_analysis",
+      "v_store_stock_cover"
+    ],
+    "vendor_name": [
+      "v_gmroi_analysis",
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "total_revenue": [
+      "v_gmroi_analysis",
+      "v_price_ladder_performance"
+    ],
+    "total_gross_profit": [
+      "v_gmroi_analysis",
+      "v_price_ladder_performance"
+    ],
+    "stock_units": [
+      "v_price_ladder_performance",
+      "v_store_stock_cover"
+    ],
+    "total_skus_supplied": [
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "receive_units": [
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "receive_value": [
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "return_units": [
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "return_value": [
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ],
+    "return_rate_pct": [
+      "v_vendor_performance_summary",
+      "v_vendor_scorecard"
+    ]
+  }
+}

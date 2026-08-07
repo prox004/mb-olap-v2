@@ -2,6 +2,7 @@
 
 import React from "react";
 import { VendorScorecardItem } from "@/hooks/useVendorData";
+import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 
 interface VendorScorecardTableProps {
   items: VendorScorecardItem[];
@@ -65,7 +66,21 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
         </div>
 
         {/* Search Bar */}
-        <div className="relative w-full sm:w-72">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <ExportCsvButton
+            columns={[
+              { key: "vendor_name", header: "Vendor" },
+              { key: "net_revenue", header: "Net Revenue" },
+              { key: "gross_profit", header: "Gross Profit" },
+              { key: "margin_pct", header: "Margin %" },
+              { key: "return_rate_pct", header: "Return Rate %" },
+              { key: "total_skus_supplied", header: "SKUs Supplied" },
+              { key: "vendor_score", header: "Score" },
+            ]}
+            rows={items as unknown as Record<string, unknown>[]}
+            filenameParts={["Vendor_Scorecard"]}
+          />
+          <div className="relative w-full sm:w-72">
           <input
             type="text"
             placeholder="Search vendor name..."
@@ -73,6 +88,7 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full px-4 py-2 text-xs rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
           />
+          </div>
         </div>
       </div>
 

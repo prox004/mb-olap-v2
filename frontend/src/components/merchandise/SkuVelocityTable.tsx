@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { SkuVelocityItem } from "@/hooks/useMerchandiseData";
+import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 
 interface SkuVelocityTableProps {
   items: SkuVelocityItem[];
@@ -69,6 +70,21 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
         </div>
 
         {/* Velocity Filter Switcher */}
+        <div className="flex items-center gap-2">
+          <ExportCsvButton
+            columns={[
+              { key: "barcode", header: "Barcode" },
+              { key: "item_description", header: "Description" },
+              { key: "department", header: "Department" },
+              { key: "vendor_name", header: "Vendor" },
+              { key: "net_revenue", header: "Revenue" },
+              { key: "net_units_sold", header: "Units Sold" },
+              { key: "closing_stock_units", header: "Stock Units" },
+              { key: "velocity_status", header: "Velocity" },
+            ]}
+            rows={items as unknown as Record<string, unknown>[]}
+            filenameParts={["SKU_Velocity", velocityFilter]}
+          />
         <div className="flex items-center gap-2 overflow-x-auto">
           {["ALL", "FAST_MOVER", "MEDIUM_MOVER", "SLOW_MOVER", "DEAD_STOCK"].map((st) => (
             <button
@@ -83,6 +99,7 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
               {st === "ALL" ? "All Velocity" : st.replace("_", " ")}
             </button>
           ))}
+        </div>
         </div>
       </div>
 

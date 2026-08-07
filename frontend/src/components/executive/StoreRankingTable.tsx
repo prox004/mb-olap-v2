@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { StoreRankingItem } from "@/hooks/useExecutiveData";
+import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 
 function formatCurrency(val: number): string {
   if (val >= 1e7) {
@@ -51,6 +52,17 @@ export function StoreRankingTable({ stores, loading }: { stores: StoreRankingIte
             Outlet level revenue, gross margin %, stock valuation, and Weeks of Cover (WOC)
           </p>
         </div>
+        <ExportCsvButton
+          columns={[
+            { key: "store_name", header: "Store" },
+            { key: "store_revenue", header: "Revenue" },
+            { key: "store_margin_pct", header: "Gross Margin %" },
+            { key: "store_stock_value", header: "Stock Value" },
+            { key: "store_woc", header: "WOC" },
+          ]}
+          rows={sortedStores as unknown as Record<string, unknown>[]}
+          filenameParts={["Store_Rankings"]}
+        />
       </div>
 
       <div className="overflow-x-auto">

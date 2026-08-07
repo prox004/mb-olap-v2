@@ -13,6 +13,7 @@ from backend.app.api.v1.endpoints.colour import router as colour_router
 from backend.app.api.v1.endpoints.allocation import router as allocation_router
 from backend.app.api.v1.endpoints.recommendations import router as recommendations_router
 from backend.app.api.v1.endpoints.chat import router as chat_router
+from backend.app.api.v1.endpoints.reporting import router as reporting_router
 
 api_router = APIRouter()
 
@@ -27,6 +28,7 @@ api_router.include_router(colour_router, prefix="/colour", tags=["Colour Analyti
 api_router.include_router(allocation_router, prefix="/allocation", tags=["Store Allocation"])
 api_router.include_router(recommendations_router, prefix="/recommendations", tags=["AI Recommendations"])
 api_router.include_router(chat_router, prefix="/chat", tags=["Wren AI Semantic Assistant"])
+api_router.include_router(reporting_router, prefix="/reporting", tags=["Self-Service Report Builder"])
 
 @api_router.get("/health", response_model=StandardResponse[dict], tags=["System Health"])
 def health_check(db: DuckDBPyConnection = Depends(get_db)):

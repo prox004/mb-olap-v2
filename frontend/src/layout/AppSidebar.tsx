@@ -30,6 +30,13 @@ type NavGroup = {
 // Organized Enterprise Navigation Groups
 const olapNavGroups: NavGroup[] = [
   {
+    groupName: "Self-Service Reports",
+    items: [
+      { name: "Report Builder", icon: <TableIcon />, path: "/report-builder", new: true },
+      { name: "Comparison", icon: <PieChartIcon />, path: "/comparison", new: true },
+    ],
+  },
+  {
     groupName: "Overview & Hierarchy",
     items: [
       { name: "CEO Executive View", icon: <GridIcon />, path: "/" },

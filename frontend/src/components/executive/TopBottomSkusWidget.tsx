@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { SKURankingItem } from "@/hooks/useExecutiveData";
+import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 
 function formatCurrency(val: number): string {
   if (val >= 1e7) {
@@ -44,6 +45,20 @@ export function TopBottomSkusWidget({
           </p>
         </div>
 
+        <div className="flex items-center gap-2">
+          <ExportCsvButton
+            columns={[
+              { key: "barcode", header: "Barcode" },
+              { key: "item_description", header: "Description" },
+              { key: "department", header: "Department" },
+              { key: "sku_revenue", header: "Revenue" },
+              { key: "sku_sales_units", header: "Units" },
+              { key: "sku_gross_profit", header: "Gross Profit" },
+              { key: "current_stock_units", header: "Stock Units" },
+            ]}
+            rows={listData as unknown as Record<string, unknown>[]}
+            filenameParts={["SKU_Performance", activeTab]}
+          />
         <div className="flex items-center p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
           <button
             onClick={() => setActiveTab("top")}
@@ -65,6 +80,7 @@ export function TopBottomSkusWidget({
           >
             Bottom 10 Slow Movers / Dead Stock
           </button>
+        </div>
         </div>
       </div>
 
