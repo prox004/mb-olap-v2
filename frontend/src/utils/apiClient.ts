@@ -58,6 +58,10 @@ export async function apiClient<T = unknown>(endpoint: string, options: FetchOpt
 
   let lastError: unknown;
 
+  if (!quiet) {
+    console.log(`[API Client Fetching] ${url}`);
+  }
+
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       const response = await fetch(url, config);
@@ -86,14 +90,14 @@ export async function apiClient<T = unknown>(endpoint: string, options: FetchOpt
         continue;
       }
       if (!quiet) {
-        console.error(`[API Client Error] ${endpoint}:`, error);
+        console.error(`[API Client Error] ${endpoint} (URL: ${url}):`, error);
       }
       throw error;
     }
   }
 
   if (!quiet) {
-    console.error(`[API Client Error] ${endpoint}:`, lastError);
+    console.error(`[API Client Error] ${endpoint} (URL: ${url}):`, lastError);
   }
   throw lastError;
 }
