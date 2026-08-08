@@ -1,13 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useOlapFilter } from "@/context/OlapFilterContext";
 import { useComparisonData } from "@/hooks/useComparisonData";
+import { useDimensionComparison } from "@/hooks/useDimensionComparison";
 import { ComparisonSelectors } from "@/components/comparison/ComparisonSelectors";
 import { ComparisonKpiGrid } from "@/components/comparison/ComparisonKpiGrid";
 import { ComparisonChartSection } from "@/components/comparison/ComparisonChartSection";
 import { ComparisonTable } from "@/components/comparison/ComparisonTable";
+import { ComparisonTableConfigPanel } from "@/components/comparison/ComparisonTableConfigPanel";
+import { ComparisonDatePanel } from "@/components/comparison/ComparisonDatePanel";
 import { ComparisonExportBar } from "@/components/comparison/ComparisonExportBar";
+import {
+  DEFAULT_COMPARISON_DATE_CONFIG,
+  DEFAULT_COMPARISON_TABLE_CONFIG,
+} from "@/types/comparison";
+import { formatSelectionLabel } from "@/utils/comparisonUtils";
 
 const DIVISIONS = ["All", "MENS", "LADIES", "KIDS", "NON-APPAREL"];
 const DEPARTMENTS = [
@@ -20,6 +28,8 @@ const DEPARTMENTS = [
 
 export default function ComparisonPage() {
   const { availableStores, availableMonths } = useOlapFilter();
+  const [tableConfig, setTableConfig] = useState(DEFAULT_COMPARISON_TABLE_CONFIG);
+  const [dateConfig, setDateConfig] = useState(DEFAULT_COMPARISON_DATE_CONFIG);
   const {
     left,
     right,
@@ -34,15 +44,38 @@ export default function ComparisonPage() {
     compare,
   } = useComparisonData(availableStores);
 
+  const mergedTableConfig = useMemo(
+    () => ({
+      ...tableConfig,
+      dateField: dateConfig.dateField,
+      compareBy: dateConfig.compareBy,
+      dateRange: dateConfig.dateRange,
+      customFrom: dateConfig.customFrom,
+      customTo: dateConfig.customTo,
+      comparePeriods: dateConfig.comparePeriods,
+    }),
+    [tableConfig, dateConfig]
+  );
+
+  const storeIds = useMemo(
+    () => (report ? [report.left.storeId, report.right.storeId] : undefined),
+    [report]
+  );
+  const {
+    dataset,
+    rows: dimensionRows,
+    loading: dimensionLoading,
+  } = useDimensionComparison(mergedTableConfig, storeIds);
+
   const leftLabel = report
-    ? `${report.left.storeName} · ${report.left.month}`
+    ? formatSelectionLabel(report.left.storeName, report.left.month, report.left.date)
     : "Left";
   const rightLabel = report
-    ? `${report.right.storeName} · ${report.right.month}`
+    ? formatSelectionLabel(report.right.storeName, report.right.month, report.right.date)
     : "Right";
 
   return (
-    <div className="space-y-6 print:space-y-4" id="comparison-report">
+    <div className="space-y-5 print:space-y-4" id="comparison-report">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -64,6 +97,11 @@ export default function ComparisonPage() {
         onRightChange={setRight}
         onCompare={compare}
         loading={loading}
+      />
+
+      <ComparisonDatePanel
+        config={dateConfig}
+        onChange={(patch) => setDateConfig((prev) => ({ ...prev, ...patch }))}
       />
 
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
@@ -155,12 +193,34 @@ export default function ComparisonPage() {
 
           <ComparisonChartSection left={report.left} right={report.right} />
 
-          <ComparisonTable
-            leftKpis={report.left.kpis}
-            rightKpis={report.right.kpis}
-            leftLabel={leftLabel}
-            rightLabel={rightLabel}
-          />
+          {dateConfig.dateField && (
+            <>
+              <ComparisonTableConfigPanel
+                config={tableConfig}
+                dataset={dataset}
+                onChange={(patch) => setTableConfig((prev) => ({ ...prev, ...patch }))}
+              />
+
+              <ComparisonTable
+                leftKpis={report.left.kpis}
+                rightKpis={report.right.kpis}
+                leftLabel={leftLabel}
+                rightLabel={rightLabel}
+                tableConfig={mergedTableConfig}
+                dimensionRows={dimensionRows}
+                dimensionLoading={dimensionLoading}
+              />
+            </>
+          )}
+
+          {!dateConfig.dateField && (
+            <ComparisonTable
+              leftKpis={report.left.kpis}
+              rightKpis={report.right.kpis}
+              leftLabel={leftLabel}
+              rightLabel={rightLabel}
+            />
+          )}
         </div>
       )}
     </div>

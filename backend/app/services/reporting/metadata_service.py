@@ -96,6 +96,56 @@ class MetadataService:
             raise ValueError(f"Unknown measure '{field_id}' in dataset '{dataset_id}'")
         return measure["expression"]
 
+    def resolve_value_sql(
+        self, dataset_id: str, field_id: str, aggregation: str
+    ) -> str:
+        measure = self.get_measure(dataset_id, field_id)
+        if not measure:
+            raise ValueError(f"Unknown measure '{field_id}' in dataset '{dataset_id}'")
+
+        source = measure.get("source_expression")
+        if not source:
+            if aggregation == "sum":
+                return measure["expression"]
+            raise ValueError(
+                f"Aggregation '{aggregation}' requires source_expression for measure '{field_id}'"
+            )
+
+        agg = aggregation.lower()
+        if agg == "count_distinct":
+            return f"COUNT(DISTINCT {source})"
+        if agg == "count":
+            return f"COUNT({source})"
+        if agg == "stddev":
+            return f"STDDEV_POP({source})"
+        if agg == "variance":
+            return f"VAR_POP({source})"
+        if agg == "median":
+            return f"MEDIAN({source})"
+        return f"{agg.upper()}({source})"
+
+    def value_field_alias(self, value_field_id: str, field_id: str, aggregation: str) -> str:
+        return f"val_{value_field_id.replace('-', '_')[:8]}_{field_id}_{aggregation}"
+
+    def resolve_dimension_with_grouping(
+        self, dataset_id: str, field_id: str, grouping: Optional[str] = None
+    ) -> str:
+        base = self.resolve_dimension_sql(dataset_id, field_id)
+        if not grouping:
+            return base
+        g = grouping.lower()
+        if g == "year":
+            return f"strftime(CAST({base} AS DATE), '%Y')"
+        if g == "quarter":
+            return f"strftime(CAST({base} AS DATE), '%Y-Q') || CAST(EXTRACT(QUARTER FROM CAST({base} AS DATE)) AS VARCHAR)"
+        if g == "month":
+            return f"strftime(CAST({base} AS DATE), '%Y-%m')"
+        if g == "week":
+            return f"strftime(CAST({base} AS DATE), '%Y-W%W')"
+        if g == "day":
+            return f"strftime(CAST({base} AS DATE), '%Y-%m-%d')"
+        return base
+
     def resolve_measure_label(self, dataset_id: str, field_id: str) -> str:
         measure = self.get_measure(dataset_id, field_id)
         return measure["label"] if measure else field_id

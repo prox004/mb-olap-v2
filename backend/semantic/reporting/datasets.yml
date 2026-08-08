@@ -88,16 +88,19 @@ datasets:
       - id: net_revenue
         label: Net Revenue
         expression: "SUM(ABS(v.NET_SALE_AMOUNT))"
+        source_expression: "ABS(v.NET_SALE_AMOUNT)"
         format: currency
         description: Total net sales revenue (ABS applied)
       - id: net_units_sold
         label: Net Units Sold
         expression: "SUM(ABS(v.NET_SALE_QUANTITY))"
+        source_expression: "ABS(v.NET_SALE_QUANTITY)"
         format: integer
         description: Total units sold (ABS applied)
       - id: gross_profit
         label: Gross Profit
         expression: "SUM(v.GP_AMOUNT)"
+        source_expression: "v.GP_AMOUNT"
         format: currency
       - id: gross_margin_pct
         label: Gross Margin %
@@ -106,27 +109,33 @@ datasets:
       - id: closing_stock_value
         label: Closing Stock Value
         expression: "SUM(v.CLOSING_STOCK_AMOUNT)"
+        source_expression: "v.CLOSING_STOCK_AMOUNT"
         format: currency
       - id: closing_stock_units
         label: Closing Stock Units
         expression: "SUM(v.CLOSING_STOCK_QUANTITY)"
+        source_expression: "v.CLOSING_STOCK_QUANTITY"
         format: integer
       - id: opening_stock_value
         label: Opening Stock Value
         expression: "SUM(v.OPENING_AMOUNT)"
+        source_expression: "v.OPENING_AMOUNT"
         format: currency
       - id: goods_received_value
         label: Goods Received Value
         expression: "SUM(v.GOODS_RECEIVE_AMOUNT)"
+        source_expression: "v.GOODS_RECEIVE_AMOUNT"
         format: currency
       - id: cogs
         label: Cost of Goods Sold
         expression: "SUM(v.NET_SALE_COGS_AMOUNT)"
+        source_expression: "v.NET_SALE_COGS_AMOUNT"
         format: currency
         roles: [finance]
       - id: record_count
         label: Record Count
         expression: "COUNT(*)"
+        source_expression: "1"
         format: integer
 
   - id: category_performance

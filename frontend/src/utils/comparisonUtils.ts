@@ -56,7 +56,9 @@ export function isSameSelection(
   leftStore: number | null,
   leftMonth: string | null,
   rightStore: number | null,
-  rightMonth: string | null
+  rightMonth: string | null,
+  leftDate?: string | null,
+  rightDate?: string | null
 ): boolean {
   return (
     leftStore !== null &&
@@ -64,6 +66,17 @@ export function isSameSelection(
     leftMonth !== null &&
     rightMonth !== null &&
     leftStore === rightStore &&
-    leftMonth === rightMonth
+    leftMonth === rightMonth &&
+    (leftDate ?? null) === (rightDate ?? null)
   );
+}
+
+export function formatSelectionLabel(
+  storeName: string,
+  month: string,
+  date?: string | null
+): string {
+  const parts = [storeName, month];
+  if (date) parts.push(date);
+  return parts.join(" · ");
 }

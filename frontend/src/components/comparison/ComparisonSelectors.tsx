@@ -82,6 +82,17 @@ function SelectionCard({
             ))}
           </select>
         </div>
+        <div>
+          <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1 block">
+            Date <span className="font-normal normal-case text-gray-400">(optional)</span>
+          </label>
+          <input
+            type="date"
+            value={selection.date ?? ""}
+            onChange={(e) => onChange({ ...selection, date: e.target.value || null })}
+            className="w-full px-3 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900"
+          />
+        </div>
       </div>
     </div>
   );

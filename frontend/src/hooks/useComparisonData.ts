@@ -23,7 +23,8 @@ async function fetchSideData(
   storeId: number,
   month: string,
   storeName: string,
-  filters: ComparisonFilters
+  filters: ComparisonFilters,
+  date?: string | null
 ): Promise<ComparisonSideData> {
   const params = {
     store_ids: [storeId],
@@ -51,6 +52,7 @@ async function fetchSideData(
     storeId,
     storeName,
     month,
+    date: date ?? null,
     kpis: kpiRes.data,
     departments: hierarchyRes.data || [],
     topSkus: skuRes.data?.top_skus || [],
@@ -59,8 +61,8 @@ async function fetchSideData(
 }
 
 export function useComparisonData(stores: LocationOption[]) {
-  const [left, setLeft] = useState<ComparisonSelection>({ storeId: null, month: null });
-  const [right, setRight] = useState<ComparisonSelection>({ storeId: null, month: null });
+  const [left, setLeft] = useState<ComparisonSelection>({ storeId: null, month: null, date: null });
+  const [right, setRight] = useState<ComparisonSelection>({ storeId: null, month: null, date: null });
   const [filters, setFilters] = useState<ComparisonFilters>({
     division: "All",
     department: "All",
@@ -84,16 +86,16 @@ export function useComparisonData(stores: LocationOption[]) {
       return;
     }
 
-    if (isSameSelection(left.storeId, left.month, right.storeId, right.month)) {
-      setValidationError("Both selections are identical. Choose a different store or month for comparison.");
+    if (isSameSelection(left.storeId, left.month, right.storeId, right.month, left.date, right.date)) {
+      setValidationError("Both selections are identical. Choose a different store, month, or date for comparison.");
       return;
     }
 
     setLoading(true);
     try {
       const [leftData, rightData] = await Promise.all([
-        fetchSideData(left.storeId, left.month, getStoreName(left.storeId), filters),
-        fetchSideData(right.storeId, right.month, getStoreName(right.storeId), filters),
+        fetchSideData(left.storeId, left.month, getStoreName(left.storeId), filters, left.date),
+        fetchSideData(right.storeId, right.month, getStoreName(right.storeId), filters, right.date),
       ]);
 
       setReport({
