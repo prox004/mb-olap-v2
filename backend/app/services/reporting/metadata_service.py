@@ -1,9 +1,45 @@
 import os
+import sys
 from typing import Any, Dict, List, Optional
 
 import yaml
 
 from backend.app.schemas.reporting import DatasetMeta, DimensionMeta, MeasureMeta
+
+
+def _find_datasets_yaml(specified_path: Optional[str] = None) -> Optional[str]:
+    candidates = []
+
+    # 1. Specified path if provided and not default
+    if specified_path:
+        candidates.append(specified_path if os.path.isabs(specified_path) else os.path.abspath(specified_path))
+
+    # 2. Environment variable
+    env_path = os.getenv("DATASETS_YAML_PATH")
+    if env_path:
+        candidates.append(env_path if os.path.isabs(env_path) else os.path.abspath(env_path))
+
+    # 3. PyInstaller bundle directory (_MEIPASS)
+    if getattr(sys, "frozen", False):
+        bundle_dir = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.append(os.path.join(bundle_dir, "backend", "semantic", "reporting", "datasets.yml"))
+        candidates.append(os.path.join(bundle_dir, "semantic", "reporting", "datasets.yml"))
+        candidates.append(os.path.join(exe_dir, "backend", "semantic", "reporting", "datasets.yml"))
+        candidates.append(os.path.join(exe_dir, "semantic", "reporting", "datasets.yml"))
+
+    # 4. Source tree relative to this file
+    current_file_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.abspath(os.path.join(current_file_dir, "..", "..", ".."))
+    candidates.append(os.path.join(repo_root, "backend", "semantic", "reporting", "datasets.yml"))
+
+    # 5. Fallback relative to CWD
+    candidates.append(os.path.abspath("backend/semantic/reporting/datasets.yml"))
+
+    for path in candidates:
+        if path and os.path.isfile(path):
+            return path
+    return None
 
 
 class MetadataService:
@@ -15,17 +51,18 @@ class MetadataService:
         self._reload()
 
     def _reload(self) -> None:
-        path = self.config_path
-        if not os.path.isabs(path):
-            path = os.path.abspath(path)
-        if not os.path.exists(path):
+        path = _find_datasets_yaml(self.config_path)
+        if not path or not os.path.exists(path):
             self._datasets = {}
             return
+        self.config_path = path
         with open(path, "r", encoding="utf-8") as f:
             raw = yaml.safe_load(f) or {}
         self._datasets = {d["id"]: d for d in raw.get("datasets", [])}
 
     def list_datasets(self) -> List[DatasetMeta]:
+        if not self._datasets:
+            self._reload()
         result = []
         for ds in self._datasets.values():
             result.append(
@@ -40,6 +77,8 @@ class MetadataService:
         return result
 
     def get_dataset(self, dataset_id: str) -> Optional[Dict[str, Any]]:
+        if not self._datasets:
+            self._reload()
         return self._datasets.get(dataset_id)
 
     def get_dataset_meta(self, dataset_id: str) -> Optional[DatasetMeta]:

@@ -44,15 +44,19 @@ def main():
 
     db_path = os.path.join(base_dir, "db", "olap_warehouse.duckdb")
     reports_db_path = os.path.join(base_dir, "db", "reports.db")
+    datasets_yaml_path = os.path.join(bundle_dir, "backend", "semantic", "reporting", "datasets.yml")
 
     # Fallback to bundle dir if db not in base_dir
     if not os.path.isfile(db_path):
         db_path = os.path.join(bundle_dir, "backend", "db", "olap_warehouse.duckdb")
     if not os.path.isfile(reports_db_path):
         reports_db_path = os.path.join(bundle_dir, "backend", "db", "reports.db")
+    if not os.path.isfile(datasets_yaml_path):
+        datasets_yaml_path = os.path.join(base_dir, "backend", "semantic", "reporting", "datasets.yml")
 
     os.environ["DUCKDB_PATH"] = db_path
     os.environ["REPORTS_DB_PATH"] = reports_db_path
+    os.environ["DATASETS_YAML_PATH"] = datasets_yaml_path
     os.environ["PYTHONPATH"] = bundle_dir
 
     # Add bundle directory to sys.path
@@ -65,6 +69,7 @@ def main():
     print(f" App Directory:  {base_dir}")
     print(f" DuckDB Path:    {db_path}")
     print(f" Reports DB:     {reports_db_path}")
+    print(f" Datasets YAML:  {datasets_yaml_path}")
     print("==================================================")
 
     if not os.path.isfile(db_path):

@@ -102,7 +102,7 @@ def main():
 
     log(f"Executable bundle generated at: {app_dist_dir}")
 
-    # 3. Copy Database Files to dist/MB-OLAP-v2/db/
+    # 3. Copy Database Files and Datasets YAML to dist/MB-OLAP-v2/
     dist_db_dir = os.path.join(app_dist_dir, "db")
     os.makedirs(dist_db_dir, exist_ok=True)
 
@@ -120,6 +120,13 @@ def main():
         shutil.copy2(src_reports_db, os.path.join(dist_db_dir, "reports.db"))
     else:
         log(f"WARNING: Reports DB file not found at {src_reports_db}")
+
+    # Copy semantic reporting datasets.yml as explicit fallback
+    dist_semantic_dir = os.path.join(app_dist_dir, "backend", "semantic", "reporting")
+    os.makedirs(dist_semantic_dir, exist_ok=True)
+    if os.path.isfile(datasets_file):
+        log("Copying semantic reporting datasets configuration...")
+        shutil.copy2(datasets_file, os.path.join(dist_semantic_dir, "datasets.yml"))
 
     # 4. Create README.txt for non-technical user
     readme_path = os.path.join(app_dist_dir, "HOW_TO_RUN.txt")
