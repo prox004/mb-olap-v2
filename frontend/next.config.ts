@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  images: {
+    unoptimized: true,
+  },
   // Turbopack config (default in Next.js 16, used by Vercel builds)
   turbopack: {
     rules: {
