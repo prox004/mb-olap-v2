@@ -70,8 +70,94 @@ export const ReportBuilder: React.FC = () => {
     report.filters.length;
 
   const emptyFilters = report.filters.filter((f) => !f.value && f.operator !== "is_empty" && f.operator !== "is_not_empty");
-  const csvRows = preview?.data ?? [];
-  const csvColumns = preview?.columns.map((col) => ({ key: col, header: col })) ?? [];
+  const isPivotWithCols = Boolean(
+    report.columns.length > 0 &&
+    report.visualization !== "table" &&
+    preview?.data?.length
+  );
+
+  const { csvColumns, csvRows } = React.useMemo(() => {
+    if (!preview?.data?.length || !preview?.columns?.length) {
+      return { csvColumns: [], csvRows: [] };
+    }
+
+    if (!isPivotWithCols) {
+      return {
+        csvColumns: preview.columns.map((col) => ({ key: col, header: col })),
+        csvRows: preview.data,
+      };
+    }
+
+    const rowDimLabels = report.rows.map((id) => activeDataset?.dimensions.find((d) => d.id === id)?.label || id);
+    const colDimLabels = report.columns.map((id) => activeDataset?.dimensions.find((d) => d.id === id)?.label || id);
+
+    const actualRowCols = rowDimLabels.map((lbl) => {
+      const exact = preview.columns.find((c) => c === lbl);
+      return exact || preview.columns.find((c) => c.toLowerCase() === lbl.toLowerCase()) || lbl;
+    });
+
+    const actualColCols = colDimLabels.map((lbl) => {
+      const exact = preview.columns.find((c) => c === lbl);
+      return exact || preview.columns.find((c) => c.toLowerCase() === lbl.toLowerCase()) || lbl;
+    });
+
+    const dimSet = new Set([...actualRowCols, ...actualColCols]);
+    const valueCols = preview.columns.filter((c) => !dimSet.has(c));
+
+    const colHeadersSet = new Set<string>();
+    const rowKeysSet = new Set<string>();
+    const rowValuesMap: Record<string, Record<string, unknown>> = {};
+    const matrix: Record<string, Record<string, Record<string, unknown>>> = {};
+
+    for (const record of preview.data) {
+      const colKey = actualColCols.map((c) => String(record[c] ?? "—")).join(" / ");
+      colHeadersSet.add(colKey);
+
+      const rKey = actualRowCols.length > 0
+        ? actualRowCols.map((c) => String(record[c] ?? "—")).join(" \u0000 ")
+        : "__total__";
+
+      if (!rowKeysSet.has(rKey)) {
+        rowKeysSet.add(rKey);
+        const rObj: Record<string, unknown> = {};
+        actualRowCols.forEach((c) => {
+          rObj[c] = record[c];
+        });
+        rowValuesMap[rKey] = rObj;
+      }
+
+      if (!matrix[rKey]) matrix[rKey] = {};
+      if (!matrix[rKey][colKey]) matrix[rKey][colKey] = {};
+
+      for (const vCol of valueCols) {
+        matrix[rKey][colKey][vCol] = record[vCol];
+      }
+    }
+
+    const uniqueColHeaders = Array.from(colHeadersSet);
+    const cols: { key: string; header: string }[] = actualRowCols.map((c) => ({ key: c, header: c }));
+
+    for (const cKey of uniqueColHeaders) {
+      for (const vCol of valueCols) {
+        const key = `${cKey} - ${vCol}`;
+        cols.push({ key, header: valueCols.length > 1 ? `${cKey} (${vCol})` : cKey });
+      }
+    }
+
+    const rows: Record<string, unknown>[] = [];
+    for (const rKey of Array.from(rowKeysSet)) {
+      const rowItem: Record<string, unknown> = { ...(rowValuesMap[rKey] || {}) };
+      for (const cKey of uniqueColHeaders) {
+        for (const vCol of valueCols) {
+          const key = `${cKey} - ${vCol}`;
+          rowItem[key] = matrix[rKey]?.[cKey]?.[vCol] ?? "";
+        }
+      }
+      rows.push(rowItem);
+    }
+
+    return { csvColumns: cols, csvRows: rows };
+  }, [preview, isPivotWithCols, report.rows, report.columns, activeDataset]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -185,7 +271,12 @@ export const ReportBuilder: React.FC = () => {
               </select>
             </div>
             <div className="flex-1 overflow-hidden bg-[#fafbfc] dark:bg-gray-950/30">
-              <PivotPreviewTable preview={preview} loading={loading} />
+              <PivotPreviewTable
+                preview={preview}
+                loading={loading}
+                report={report}
+                dataset={activeDataset}
+              />
             </div>
           </main>
 

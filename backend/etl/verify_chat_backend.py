@@ -1,5 +1,9 @@
 import os
+import sys
 import duckdb
+
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 from backend.app.services.wren_context_engine import wren_engine
 from backend.app.services.groq_llm_service import groq_service
 from backend.app.services.sql_validator import sql_validator

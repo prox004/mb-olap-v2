@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 from groq import Groq
 from backend.app.services.wren_context_engine import wren_engine
@@ -10,40 +10,110 @@ from backend.app.services.wren_context_engine import wren_engine
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".env"))
 
+PRIORITIZED_MODELS = [
+    os.getenv("GROQ_PRIMARY_MODEL", ""),
+    os.getenv("GROQ_MODEL", ""),
+    "qwen/qwen3.8-27b",
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.6-27b",
+    "openai/gpt-oss-20b",
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+]
+# Filter out empty strings
+CANDIDATE_MODELS = [m for m in PRIORITIZED_MODELS if m]
+
+
 class GroqLLMService:
     """
-    Groq API LLM Service supporting llama-3.3-70b-versatile and llama-3.1-8b-instant models.
-    Translates business questions into DuckDB SQL and synthesizes natural language executive summaries.
+    Groq API LLM Service supporting resilient multi-model failover and strict
+    grounded prompt engineering to prevent hallucinations and vague responses.
     """
 
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY", "")
         self.client = Groq(api_key=self.api_key) if self.api_key else None
-        self.primary_model = "llama-3.3-70b-versatile"
-        self.fallback_model = "llama-3.1-8b-instant"
+        self._active_model = CANDIDATE_MODELS[0] if CANDIDATE_MODELS else "qwen/qwen3.8-27b"
+
+    @property
+    def primary_model(self) -> str:
+        return self._active_model
+
+    @primary_model.setter
+    def primary_model(self, model: str) -> None:
+        self._active_model = model
+
+    @property
+    def fallback_model(self) -> str:
+        return self._active_model
+
+    @fallback_model.setter
+    def fallback_model(self, model: str) -> None:
+        self._active_model = model
+
+    def _create_completion(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.1,
+        max_tokens: int = 1024,
+    ) -> Optional[str]:
+        """
+        Executes a Groq chat completion with automatic model failover across candidate models.
+        """
+        if not self.client:
+            return None
+
+        # Build list of models starting with the current active model
+        models_to_try = [self._active_model] + [m for m in CANDIDATE_MODELS if m != self._active_model]
+
+        last_error = None
+        for model in models_to_try:
+            try:
+                response = self.client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+                self._active_model = model
+                content = response.choices[0].message.content
+                return content or ""
+            except Exception as e:
+                last_error = e
+                print(f"[GROQ_LLM] Model '{model}' failed: {e}. Trying fallback model...")
+                continue
+
+        print(f"[GROQ_LLM] All Groq candidate models failed. Last error: {last_error}")
+        return None
 
     def extract_sql_from_response(self, text: str) -> str:
         """
         Extracts SQL code block from LLM output markdown.
         """
+        if not text:
+            return ""
         match = re.search(r"```sql\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
         if match:
             return match.group(1).strip()
-        
+
         # Fallback if markdown tags omitted
         clean_text = text.strip()
         if clean_text.upper().startswith("SELECT"):
             return clean_text
-        
+
+        # Strip any leading generic markdown block
+        match_generic = re.search(r"```\s*(.*?)\s*```", text, re.DOTALL)
+        if match_generic:
+            return match_generic.group(1).strip()
+
         return clean_text
 
     def generate_sql(self, user_prompt: str) -> str:
         """
         Translates a natural language user prompt into governed DuckDB SQL.
-        If GROQ_API_KEY is absent, falls back to golden memory semantic matching.
+        If Groq API is unavailable, falls back to semantic golden SQL matching.
         """
         if not self.client:
-            # Fallback to golden memory pair matching if API key missing
             matches = wren_engine.find_matching_golden_sql(user_prompt, top_k=1)
             if matches:
                 return matches[0]["sql"]
@@ -58,26 +128,21 @@ class GroqLLMService:
                     "You are an expert Enterprise Retail OLAP Data Engineer powered by Wren AI. "
                     "Convert natural language business questions into syntactically valid DuckDB SQL based ONLY on the provided Wren AI MDL context.\n\n"
                     f"{system_context}"
-                )
+                ),
             },
             {
                 "role": "user",
-                "content": f"Generate DuckDB SQL for the question: \"{user_prompt}\""
-            }
+                "content": f"Generate DuckDB SQL for the question: \"{user_prompt}\"",
+            },
         ]
 
-        try:
-            response = self.client.chat.completions.create(
-                model=self.primary_model,
-                messages=messages,
-                temperature=0.1,
-                max_tokens=1024
-            )
-            raw_content = response.choices[0].message.content
+        raw_content = self._create_completion(messages, temperature=0.0, max_tokens=1024)
+        if raw_content:
             return self.extract_sql_from_response(raw_content)
-        except Exception:
-            matches = wren_engine.find_matching_golden_sql(user_prompt, top_k=1)
-            return matches[0]["sql"] if matches else "SELECT 1;"
+
+        # Fallback to golden memory pair matching if LLM call failed
+        matches = wren_engine.find_matching_golden_sql(user_prompt, top_k=1)
+        return matches[0]["sql"] if matches else "SELECT 1;"
 
     def fix_union_order_by(self, sql: str) -> str:
         """
@@ -102,7 +167,13 @@ class GroqLLMService:
             fixed_parts.append(branch)
         return '\n'.join(fixed_parts)
 
-    def generate_zero_result_repair_sql(self, raw_query: str, failed_sql: str, entity_phrases: List[str], candidates: List[Dict[str, Any]]) -> str:
+    def generate_zero_result_repair_sql(
+        self,
+        raw_query: str,
+        failed_sql: str,
+        entity_phrases: List[str],
+        candidates: List[Dict[str, Any]],
+    ) -> str:
         """
         Uses entity extraction and fuzzy DB candidates to repair zero-result queries.
         """
@@ -129,21 +200,14 @@ Repair Rules:
 
         messages = [
             {"role": "system", "content": system_context},
-            {"role": "user", "content": repair_prompt}
+            {"role": "user", "content": repair_prompt},
         ]
 
-        try:
-            response = self.client.chat.completions.create(
-                model=self.primary_model,
-                messages=messages,
-                temperature=0.0,
-                max_tokens=1024
-            )
-            raw = response.choices[0].message.content
+        raw = self._create_completion(messages, temperature=0.0, max_tokens=1024)
+        if raw:
             repaired = self.extract_sql_from_response(raw)
             return self.fix_union_order_by(repaired)
-        except Exception:
-            return failed_sql
+        return failed_sql
 
     def refine_sql_error(self, broken_sql: str, error_trace: str, user_prompt: str) -> str:
         """
@@ -161,7 +225,7 @@ Repair Rules:
                     "You are a DuckDB SQL auto-correction assistant. Fix the provided broken SQL query based on the DuckDB error traceback.\n"
                     "Return ONLY the corrected SQL query inside a ```sql ... ``` code block.\n\n"
                     f"{system_context}"
-                )
+                ),
             },
             {
                 "role": "user",
@@ -170,24 +234,19 @@ Repair Rules:
                     f"Broken SQL: `{broken_sql}`\n"
                     f"DuckDB Error Traceback: {error_trace}\n\n"
                     "Provide the corrected SQL query:"
-                )
-            }
+                ),
+            },
         ]
 
-        try:
-            response = self.client.chat.completions.create(
-                model=self.primary_model,
-                messages=messages,
-                temperature=0.0,
-                max_tokens=1024
-            )
-            return self.extract_sql_from_response(response.choices[0].message.content)
-        except Exception:
-            return broken_sql
+        raw = self._create_completion(messages, temperature=0.0, max_tokens=1024)
+        if raw:
+            return self.extract_sql_from_response(raw)
+        return broken_sql
 
     def generate_summary(self, user_prompt: str, sql: str, data: List[Dict[str, Any]]) -> str:
         """
-        Synthesizes a natural language executive summary of query results.
+        Synthesizes a precise, grounded executive summary of query results.
+        Enforces strict anti-hallucination rules and Indian numbering/currency format.
         """
         if not data:
             return f"Query executed successfully, but returned 0 results for: '{user_prompt}'."
@@ -195,46 +254,61 @@ Repair Rules:
         if not self.client:
             row_count = len(data)
             first_row = data[0]
-            metric_keys = [k for k in first_row.keys() if k.lower() not in ['department', 'store_name', 'barcode', 'division', 'partyname', 'section']]
+            metric_keys = [
+                k
+                for k in first_row.keys()
+                if k.lower()
+                not in [
+                    "department",
+                    "store_name",
+                    "barcode",
+                    "division",
+                    "partyname",
+                    "section",
+                    "admsite_code",
+                    "icode",
+                ]
+            ]
             top_metric = f" ({metric_keys[0]}: {first_row[metric_keys[0]]})" if metric_keys else ""
-            return f"Found {row_count} records for '{user_prompt}'. Top result: {list(first_row.values())[0]}{top_metric}."
+            first_val = list(first_row.values())[0] if first_row else ""
+            return f"Found {row_count} records for '{user_prompt}'. Top result: {first_val}{top_metric}."
 
-        sample_data = data[:5]
+        sample_data = data[:10]
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "You are an Executive Retail Intelligence AI. Provide a concise 2-sentence executive insight summarizing the query results for a retail executive.\n\n"
-                    "CURRENCY & FORMATTING RULES (MANDATORY):\n"
-                    "- All monetary values are Indian Rupees.\n"
-                    "- ALWAYS use the ₹ symbol. NEVER output $, USD, Dollar, EUR, or Euros.\n"
-                    "- Format numbers using Indian numbering system (e.g. ₹2.29 Cr or ₹2,29,09,200)."
-                )
+                    "You are an Executive Retail Intelligence AI for M Baazar retail analytics.\n\n"
+                    "STRICT ANTI-HALLUCINATION & FACTUAL ACCURACY RULES:\n"
+                    "1. Base your summary EXCLUSIVELY on the provided Query Results JSON data. Never invent entities, store names, categories, or figures not present in the data.\n"
+                    "2. State specific top entities and key values directly from the results.\n"
+                    "3. CURRENCY & NUMBER FORMATTING (MANDATORY):\n"
+                    "   - All monetary amounts are in Indian Rupees (₹). ALWAYS use the ₹ symbol. NEVER use $, USD, Dollar, EUR, or Euros.\n"
+                    "   - Format large rupee amounts clearly using Indian numbering conventions: e.g. ₹3.93 Cr for Crores (10,000,000+), ₹22.50 L for Lakhs (100,000+).\n"
+                    "   - Format percentages with '%' (e.g. 32.5%).\n"
+                    "4. Provide a direct, professional 2-sentence executive summary highlighting the primary finding and top contributors."
+                ),
             },
             {
                 "role": "user",
                 "content": (
                     f"User Question: \"{user_prompt}\"\n"
                     f"SQL Executed: `{sql}`\n"
-                    f"Top Results: {json.dumps(sample_data, default=str)}\n\n"
-                    "Synthesize executive summary:"
-                )
-            }
+                    f"Query Results ({len(data)} total rows, top rows shown): {json.dumps(sample_data, default=str)}\n\n"
+                    "Synthesize a factual, grounded executive summary:"
+                ),
+            },
         ]
 
-        try:
-            response = self.client.chat.completions.create(
-                model=self.fallback_model,
-                messages=messages,
-                temperature=0.3,
-                max_tokens=150
-            )
-            raw_summary = response.choices[0].message.content.strip()
+        raw_summary = self._create_completion(messages, temperature=0.1, max_tokens=250)
+        if raw_summary:
+            clean_summary = raw_summary.strip()
             # Sanitize currency symbols to ensure Indian Rupees (₹)
-            clean_summary = re.sub(r"[$€£¥]", "₹", raw_summary)
+            clean_summary = re.sub(r"[$€£¥]", "₹", clean_summary)
             clean_summary = re.sub(r"\bUSD\b", "INR", clean_summary, flags=re.IGNORECASE)
             return clean_summary
-        except Exception:
-            return f"Retrieved {len(data)} records for '{user_prompt}'."
+
+        return f"Retrieved {len(data)} records for '{user_prompt}'."
+
 
 groq_service = GroqLLMService()

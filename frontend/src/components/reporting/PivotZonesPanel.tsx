@@ -55,13 +55,13 @@ function ZoneDropArea({
 }: {
   zone: PivotZone;
   children: React.ReactNode;
-  onDropItem: (item: DragItem) => void;
+  onDropItem: (item: DragItem, targetZone: PivotZone) => void;
   count: number;
 }) {
   const meta = ZONE_META[zone];
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: ITEM_TYPE,
-    drop: (item: DragItem) => onDropItem({ ...item, zone }),
+    drop: (item: DragItem) => onDropItem(item, zone),
     canDrop: (item) => {
       if (zone === "values") return item.kind === "measure";
       return item.kind === "dimension";
@@ -199,7 +199,7 @@ function FilterRow({
 interface PivotZonesPanelProps {
   dataset: DatasetMeta | undefined;
   report: ReportDefinition;
-  onAddToZone: (zone: PivotZone, fieldId: string, kind: "dimension" | "measure") => void;
+  onAddToZone: (zone: PivotZone, fieldId: string, kind: "dimension" | "measure", fromZone?: PivotZone) => void;
   onRemoveFromZone: (zone: PivotZone, id: string, index?: number) => void;
   onReorderZone: (zone: "rows" | "columns", from: number, to: number) => void;
   onUpdateValueField: (id: string, patch: Partial<ValueFieldConfig>) => void;
@@ -218,9 +218,8 @@ export function PivotZonesPanel({
   const getDimLabel = (id: string) => dataset?.dimensions.find((d) => d.id === id)?.label ?? id;
   const getMsrLabel = (id: string) => dataset?.measures.find((m) => m.id === id)?.label ?? id;
 
-  const handleDrop = (item: DragItem) => {
-    if (!item.zone) return;
-    onAddToZone(item.zone, item.fieldId, item.kind);
+  const handleDrop = (item: DragItem, targetZone: PivotZone) => {
+    onAddToZone(targetZone, item.fieldId, item.kind, item.zone);
   };
 
   if (!dataset) return null;

@@ -31,19 +31,15 @@ def extract_entities_with_llm(groq_service, raw_query: str) -> List[str]:
             {"role": "system", "content": ENTITY_EXTRACTION_SYSTEM_PROMPT},
             {"role": "user", "content": raw_query}
         ]
-        response = groq_service.client.chat.completions.create(
-            model=groq_service.fallback_model,
-            messages=messages,
-            temperature=0.0,
-            max_tokens=256
-        )
-        content = response.choices[0].message.content or ""
+        content = groq_service._create_completion(messages, temperature=0.0, max_tokens=256)
+        if not content:
+            return []
         content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
-        
+
         # Clean markdown wrappers if any
         if content.startswith("```"):
             content = re.sub(r"^```json\s*|^```\s*|```$", "", content, flags=re.MULTILINE).strip()
-            
+
         payload = json.loads(content)
         entities = payload.get("entities", [])
         if not isinstance(entities, list):

@@ -9,6 +9,7 @@ import {
   DEFAULT_REPORT,
   FieldValueOption,
   normalizeReport,
+  PivotZone,
   PreviewResponse,
   ReportDefinition,
   SavedReport,
@@ -298,14 +299,31 @@ export function useReportBuilder(initialReportId?: string | null) {
   );
 
   const addToZone = useCallback(
-    (zone: "rows" | "columns" | "filters" | "values", fieldId: string, kind: "dimension" | "measure") => {
+    (
+      zone: "rows" | "columns" | "filters" | "values",
+      fieldId: string,
+      kind: "dimension" | "measure",
+      fromZone?: PivotZone
+    ) => {
       setReportWithHistory((prev) => {
         const next = { ...prev };
-        if (zone === "rows" && kind === "dimension" && !next.rows.includes(fieldId)) {
-          next.rows = [...next.rows, fieldId];
+        if (fromZone && fromZone !== zone) {
+          if (fromZone === "rows") next.rows = next.rows.filter((r) => r !== fieldId);
+          if (fromZone === "columns") next.columns = next.columns.filter((c) => c !== fieldId);
+          if (fromZone === "values") next.value_fields = next.value_fields.filter((v) => v.field_id !== fieldId);
+          if (fromZone === "filters") next.filters = next.filters.filter((f) => f.field_id !== fieldId);
         }
-        if (zone === "columns" && kind === "dimension" && !next.columns.includes(fieldId)) {
-          next.columns = [...next.columns, fieldId];
+        if (zone === "rows" && kind === "dimension") {
+          next.columns = next.columns.filter((c) => c !== fieldId);
+          if (!next.rows.includes(fieldId)) {
+            next.rows = [...next.rows, fieldId];
+          }
+        }
+        if (zone === "columns" && kind === "dimension") {
+          next.rows = next.rows.filter((r) => r !== fieldId);
+          if (!next.columns.includes(fieldId)) {
+            next.columns = [...next.columns, fieldId];
+          }
         }
         if (zone === "values" && kind === "measure") {
           if (!next.value_fields.some((v) => v.field_id === fieldId && v.aggregation === "sum")) {
