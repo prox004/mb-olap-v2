@@ -3,18 +3,23 @@
 import React, { useState } from "react";
 import { StoreRankingItem } from "@/hooks/useExecutiveData";
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
+import { formatDisplayValue } from "@/utils";
 
-function formatCurrency(val: number): string {
-  if (val >= 1e7) {
-    return `₹${(val / 1e7).toFixed(2)} Cr`;
-  } else if (val >= 1e5) {
-    return `₹${(val / 1e5).toFixed(2)} L`;
+function formatCurrency(val: number | null | undefined): string {
+  if (val == null || isNaN(Number(val))) return "N/A";
+  const num = Number(val);
+  const abs = Math.abs(num);
+  const sign = num < 0 ? "-" : "";
+  if (abs >= 1e7) {
+    return `${sign}₹${(abs / 1e7).toFixed(2)} Cr`;
+  } else if (abs >= 1e5) {
+    return `${sign}₹${(abs / 1e5).toFixed(2)} L`;
   } else {
-    return `₹${val.toLocaleString("en-IN")}`;
+    return `${sign}₹${abs.toLocaleString("en-IN")}`;
   }
 }
 
-export function StoreRankingTable({ stores, loading }: { stores: StoreRankingItem[]; loading: boolean }) {
+export function StoreRankingTable({ stores = [], loading }: { stores?: StoreRankingItem[]; loading: boolean }) {
   const [sortCol, setSortCol] = useState<keyof StoreRankingItem>("store_revenue");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
@@ -33,7 +38,9 @@ export function StoreRankingTable({ stores, loading }: { stores: StoreRankingIte
     }
   };
 
-  const sortedStores = [...stores].sort((a, b) => {
+  const safeStores = Array.isArray(stores) ? stores : [];
+
+  const sortedStores = [...safeStores].sort((a, b) => {
     const valA = a[sortCol] ?? 0;
     const valB = b[sortCol] ?? 0;
     if (valA < valB) return sortDir === "asc" ? -1 : 1;
@@ -49,7 +56,7 @@ export function StoreRankingTable({ stores, loading }: { stores: StoreRankingIte
             Store Performance Rankings
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Outlet level revenue, gross margin %, stock valuation, and Weeks of Cover (WOC)
+            Outlet level revenue, gross margin %, closing stock (Apr 2025 – Sep 2026), and 24-week Weeks of Cover (WOC)
           </p>
         </div>
         <ExportCsvButton
@@ -97,59 +104,70 @@ export function StoreRankingTable({ stores, loading }: { stores: StoreRankingIte
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {sortedStores.map((item, index) => {
-              const isTopStore = index === 0;
-              return (
-                <tr
-                  key={item.admsite_code}
-                  className={`hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
-                    isTopStore ? "bg-emerald-50/40 dark:bg-emerald-950/20 font-medium" : ""
-                  }`}
-                >
-                  <td className="py-3.5 px-4 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] flex items-center justify-center font-bold">
-                      {index + 1}
-                    </span>
-                    {item.store_name}
-                    {isTopStore && (
-                      <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
-                        Top Store
+            {sortedStores.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-12 text-center text-gray-400">
+                  No store records found matching current filters.
+                </td>
+              </tr>
+            ) : (
+              sortedStores.map((item, index) => {
+                const isTopStore = index === 0;
+                return (
+                  <tr
+                    key={item.admsite_code}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
+                      isTopStore ? "bg-emerald-50/40 dark:bg-emerald-950/20 font-medium" : ""
+                    }`}
+                  >
+                    <td className="py-3.5 px-4 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] flex items-center justify-center font-bold">
+                        {index + 1}
                       </span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 font-medium text-gray-900 dark:text-white">
-                    {formatCurrency(item.store_revenue)}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        item.store_margin_pct >= 40
-                          ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400"
-                          : item.store_margin_pct >= 20
-                          ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                          : "bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400"
-                      }`}
-                    >
-                      {item.store_margin_pct}%
-                    </span>
-                  </td>
+                      {formatDisplayValue(item.store_name)}
+                      {isTopStore && (
+                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
+                          Top Store
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 font-medium text-gray-900 dark:text-white">
+                      {formatCurrency(item.store_revenue)}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                          item.store_margin_pct != null && item.store_margin_pct >= 40
+                            ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400"
+                            : item.store_margin_pct != null && item.store_margin_pct >= 20
+                            ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+                            : "bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400"
+                        }`}
+                      >
+                        {item.store_margin_pct != null ? `${item.store_margin_pct}%` : "0%"}
+                      </span>
+                    </td>
                   <td className="py-3.5 px-4">{formatCurrency(item.store_stock_value)}</td>
                   <td className="py-3.5 px-4 font-medium">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                        item.store_woc <= 25
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : item.store_woc <= 50
-                          ? "text-amber-600 dark:text-amber-400"
-                          : "text-purple-600 dark:text-purple-400"
-                      }`}
-                    >
-                      {item.store_woc} Wks
-                    </span>
+                    {item.store_woc != null ? (
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                          item.store_woc <= 25
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : item.store_woc <= 50
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-purple-600 dark:text-purple-400"
+                        }`}
+                      >
+                        {item.store_woc} Wks
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
                   </td>
                 </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </div>

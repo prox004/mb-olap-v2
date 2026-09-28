@@ -3,6 +3,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
+import { formatDisplayValue } from "@/utils";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -67,7 +68,7 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
   if (visualizationType === "PIE_CHART" && columns.length >= 2) {
     const catCol = columns[0];
     const valCol = columns[1];
-    const labels = data.map((d) => String(d[catCol] ?? "N/A"));
+    const labels = data.map((d) => formatDisplayValue(d[catCol] as string));
     const series = data.map((d) => Number(d[valCol]) || 0);
 
     const options: ApexOptions = {
@@ -94,7 +95,7 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
   if (visualizationType === "BAR_CHART" && columns.length >= 2) {
     const catCol = columns[0];
     const valCol = columns[1];
-    const categories = data.slice(0, 15).map((d) => String(d[catCol] ?? "N/A"));
+    const categories = data.slice(0, 15).map((d) => formatDisplayValue(d[catCol] as string));
     const values = data.slice(0, 15).map((d) => Number(d[valCol]) || 0);
 
     const options: ApexOptions = {
@@ -150,7 +151,7 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
               <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 {columns.map((col) => (
                   <td key={col} className="px-3 py-2 whitespace-nowrap">
-                    {typeof row[col] === "number" ? row[col].toLocaleString() : String(row[col] ?? "")}
+                    {typeof row[col] === "number" ? row[col].toLocaleString() : formatDisplayValue(row[col] as string)}
                   </td>
                 ))}
               </tr>

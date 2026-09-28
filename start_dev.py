@@ -36,30 +36,55 @@ def main():
     reports_db_path = os.path.join(root_dir, "backend", "db", "reports.db")
     health_url = "http://127.0.0.1:8000/api/v1/health"
 
+    # Load .env file if present
+    env_file = os.path.join(root_dir, ".env")
+    if os.path.isfile(env_file):
+        with open(env_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    os.environ.setdefault(k.strip(), v.strip())
+
+    warehouse_backend = os.getenv("WAREHOUSE_BACKEND", "clickhouse").lower()
     os.environ["PYTHONPATH"] = root_dir
+    os.environ["WAREHOUSE_BACKEND"] = warehouse_backend
     os.environ["DUCKDB_PATH"] = db_path
     os.environ["REPORTS_DB_PATH"] = reports_db_path
 
-    if not os.path.isfile(db_path):
+    if warehouse_backend == "duckdb" and not os.path.isfile(db_path):
         print(f"ERROR: DuckDB warehouse not found at {db_path}")
         print("Run: python backend/etl/run_pipeline.py")
         sys.exit(1)
 
+    print(f"   Configured Warehouse Backend: {warehouse_backend.upper()}")
+
     processes = []
 
     try:
-        print("1. Launching Backend FastAPI Server (http://localhost:8000)...")
-        backend_proc = subprocess.Popen(
-            [sys.executable, "backend/run.py"],
-            cwd=root_dir,
-            env=os.environ.copy(),
-        )
-        processes.append(backend_proc)
+        # Check if backend is already running (e.g. via Docker Compose)
+        backend_already_running = False
+        try:
+            with urllib.request.urlopen(health_url, timeout=2) as resp:
+                if resp.status == 200:
+                    backend_already_running = True
+                    print("1. Backend FastAPI Server is ALREADY running and healthy (http://localhost:8000).")
+        except Exception:
+            backend_already_running = False
 
-        if not wait_for_backend(health_url):
-            print("ERROR: Backend did not become ready in time.")
-            backend_proc.terminate()
-            sys.exit(1)
+        if not backend_already_running:
+            print("1. Launching Backend FastAPI Server (http://localhost:8000)...")
+            backend_proc = subprocess.Popen(
+                [sys.executable, "backend/run.py"],
+                cwd=root_dir,
+                env=os.environ.copy(),
+            )
+            processes.append(backend_proc)
+
+            if not wait_for_backend(health_url):
+                print("ERROR: Backend did not become ready in time.")
+                backend_proc.terminate()
+                sys.exit(1)
 
         print("2. Launching Frontend Next.js Application (http://localhost:3000)...")
         frontend_proc = subprocess.Popen(

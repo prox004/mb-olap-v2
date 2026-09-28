@@ -3,6 +3,7 @@
 import React from "react";
 import { VendorListResponse, VendorScorecardItem } from "@/hooks/useVendorData";
 import { AlertIcon, GroupIcon, ShootingStarIcon } from "@/icons";
+import { formatDisplayValue } from "@/utils";
 
 interface VendorSummaryCardsProps {
   scorecard: VendorListResponse;
@@ -15,8 +16,11 @@ export const VendorSummaryCards: React.FC<VendorSummaryCardsProps> = ({
   returnVendors,
   loading = false,
 }) => {
-  const topVendor = scorecard.items.length > 0
-    ? [...scorecard.items].sort((a, b) => b.vendor_score - a.vendor_score)[0]
+  const safeItems = Array.isArray(scorecard?.items) ? scorecard.items : [];
+  const safeReturnVendors = Array.isArray(returnVendors) ? returnVendors : [];
+
+  const topVendor = safeItems.length > 0
+    ? [...safeItems].sort((a, b) => (b.vendor_score ?? 0) - (a.vendor_score ?? 0))[0]
     : null;
 
   return (
@@ -45,8 +49,8 @@ export const VendorSummaryCards: React.FC<VendorSummaryCardsProps> = ({
           <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
             Top Rated Supplier
           </span>
-          <div className="text-sm font-bold text-gray-900 dark:text-white mt-1 truncate" title={topVendor?.vendor_name || "N/A"}>
-            {loading ? "..." : (topVendor?.vendor_name || "N/A")}
+          <div className="text-sm font-bold text-gray-900 dark:text-white mt-1 truncate" title={formatDisplayValue(topVendor?.vendor_name)}>
+            {loading ? "..." : formatDisplayValue(topVendor?.vendor_name)}
           </div>
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
@@ -66,7 +70,7 @@ export const VendorSummaryCards: React.FC<VendorSummaryCardsProps> = ({
             High Return Alert Suppliers
           </span>
           <div className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">
-            {loading ? "..." : returnVendors.length}
+            {loading ? "..." : safeReturnVendors.length}
           </div>
           <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
             Suppliers with Goods Return Rate &gt; 5%

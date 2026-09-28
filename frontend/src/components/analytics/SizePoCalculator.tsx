@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { apiClient } from "@/utils/apiClient";
+import { formatDisplayValue } from "@/utils";
 
 type RecommendationItem = {
   size_code: string;
@@ -126,7 +127,7 @@ export default function SizePoCalculator() {
             <option value="">Select Department...</option>
             {departments.map((dept) => (
               <option key={dept} value={dept}>
-                {dept}
+                {formatDisplayValue(dept)}
               </option>
             ))}
           </select>
@@ -184,7 +185,7 @@ export default function SizePoCalculator() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {recommendations.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02]">
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{item.size_code}</td>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{formatDisplayValue(item.size_code)}</td>
                   <td className="px-4 py-3 text-right">{item.historical_contribution_pct.toFixed(2)}%</td>
                   <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
                     {item.recommended_units.toLocaleString()}

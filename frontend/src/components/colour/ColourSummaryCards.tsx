@@ -3,6 +3,7 @@
 import React from "react";
 import { ColourSummaryResponse } from "@/hooks/useColourData";
 import { BoltIcon, BoxCubeIcon, ListIcon, PieChartIcon } from "@/icons";
+import { formatDisplayValue } from "@/utils";
 
 interface ColourSummaryCardsProps {
   summary: ColourSummaryResponse;
@@ -13,16 +14,16 @@ export const ColourSummaryCards: React.FC<ColourSummaryCardsProps> = ({
   summary,
   loading = false,
 }) => {
-  const topRevenueItem = summary.items.length > 0
-    ? [...summary.items].sort((a, b) => b.net_revenue - a.net_revenue)[0]
+  const topRevenueItem = summary?.items && summary.items.length > 0
+    ? [...summary.items].sort((a, b) => (b.net_revenue || 0) - (a.net_revenue || 0))[0]
     : null;
 
-  const topSellThroughItem = summary.items.length > 0
-    ? [...summary.items].sort((a, b) => b.sell_through_pct - a.sell_through_pct)[0]
+  const topSellThroughItem = summary?.items && summary.items.length > 0
+    ? [...summary.items].filter(i => i.sell_through_pct != null).sort((a, b) => (b.sell_through_pct ?? 0) - (a.sell_through_pct ?? 0))[0]
     : null;
 
-  const mostStockedItem = summary.items.length > 0
-    ? [...summary.items].sort((a, b) => b.current_stock_units - a.current_stock_units)[0]
+  const mostStockedItem = summary?.items && summary.items.length > 0
+    ? [...summary.items].filter(i => i.current_stock_units != null).sort((a, b) => (b.current_stock_units ?? 0) - (a.current_stock_units ?? 0))[0]
     : null;
 
   return (
@@ -34,7 +35,7 @@ export const ColourSummaryCards: React.FC<ColourSummaryCardsProps> = ({
             Top Revenue Colour
           </span>
           <div className="text-lg font-bold text-gray-900 dark:text-white mt-1">
-            {loading ? "..." : (topRevenueItem?.extracted_colour || "N/A")}
+            {loading ? "..." : formatDisplayValue(topRevenueItem?.extracted_colour)}
           </div>
           <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
             ₹{loading ? "..." : Math.round(topRevenueItem?.net_revenue || 0).toLocaleString()}
@@ -52,10 +53,10 @@ export const ColourSummaryCards: React.FC<ColourSummaryCardsProps> = ({
             Top Sell-Through Colour
           </span>
           <div className="text-lg font-bold text-gray-900 dark:text-white mt-1">
-            {loading ? "..." : (topSellThroughItem?.extracted_colour || "N/A")}
+            {loading ? "..." : formatDisplayValue(topSellThroughItem?.extracted_colour)}
           </div>
           <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-0.5">
-            {loading ? "..." : (topSellThroughItem?.sell_through_pct.toFixed(1) || "0.0")}% Realized
+            {loading ? "..." : (topSellThroughItem?.sell_through_pct != null ? `${topSellThroughItem.sell_through_pct.toFixed(1)}% Realized` : "N/A")}
           </p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-500 text-xl font-bold">
@@ -70,10 +71,10 @@ export const ColourSummaryCards: React.FC<ColourSummaryCardsProps> = ({
             Most Stocked Colour
           </span>
           <div className="text-lg font-bold text-gray-900 dark:text-white mt-1">
-            {loading ? "..." : (mostStockedItem?.extracted_colour || "N/A")}
+            {loading ? "..." : formatDisplayValue(mostStockedItem?.extracted_colour)}
           </div>
           <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">
-            {loading ? "..." : Math.round(mostStockedItem?.current_stock_units || 0).toLocaleString()} units
+            {loading ? "..." : (mostStockedItem?.current_stock_units != null ? `${Math.round(mostStockedItem.current_stock_units).toLocaleString()} units` : "N/A")}
           </p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/50 flex items-center justify-center text-amber-500 text-xl font-bold">

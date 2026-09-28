@@ -13,3 +13,5 @@ class StandardResponse(BaseModel, Generic[T]):
     message: str = "Success"
     data: Optional[T] = None
     meta: Optional[FilterMeta] = None
+    supported: Optional[bool] = None
+

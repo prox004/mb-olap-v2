@@ -7,25 +7,53 @@ import { ApexOptions } from "apexcharts";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-export function MonthlyTrendChart({ trends, loading }: { trends: MonthlyTrendItem[]; loading: boolean }) {
+export function MonthlyTrendChart({ trends = [], loading }: { trends?: MonthlyTrendItem[]; loading: boolean }) {
   if (loading) {
     return (
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-6 h-80 animate-pulse"></div>
     );
   }
 
-  const categories = trends.map((t) => {
-    if (!t.month_name) return "";
-    const [year, month] = t.month_name.split("-");
-    if (!year || !month) return t.month_name;
-    const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+  const safeTrends = Array.isArray(trends) ? trends : [];
+
+  if (safeTrends.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-6 shadow-xs">
+        <div className="mb-4">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">
+            Monthly Performance Trends
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Net Revenue (₹ Crores) vs Gross Profit Margin % trajectory
+          </p>
+        </div>
+        <div className="w-full h-64 flex items-center justify-center text-xs text-gray-400">
+          No monthly trend data available for selected filters.
+        </div>
+      </div>
+    );
+  }
+
+  const categories = safeTrends.map((t) => {
+    if (!t?.month_name) return "";
+    const parts = String(t.month_name).split("-");
+    if (parts.length < 2) return String(t.month_name);
+    const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
     return isNaN(dateObj.getTime())
-      ? t.month_name
-      : dateObj.toLocaleString("en-US", { month: "long", year: "numeric" });
+      ? String(t.month_name)
+      : dateObj.toLocaleString("en-US", { month: "short", year: "numeric" });
   });
 
-  const revenueSeries = trends.map((t) => Number((t.revenue / 1e7).toFixed(2))); // In Crores
-  const marginSeries = trends.map((t) => t.gross_margin_pct);
+  const revenueSeries = safeTrends.map((t) =>
+    t?.revenue != null && !isNaN(Number(t.revenue))
+      ? Number((t.revenue / 1e7).toFixed(2))
+      : 0
+  );
+  const marginSeries = safeTrends.map((t) =>
+    t?.gross_margin_pct != null && !isNaN(Number(t.gross_margin_pct))
+      ? Number(t.gross_margin_pct)
+      : 0
+  );
 
   const series = [
     {
@@ -60,9 +88,8 @@ export function MonthlyTrendChart({ trends, loading }: { trends: MonthlyTrendIte
     dataLabels: {
       enabled: true,
       enabledOnSeries: [1],
-      formatter: (val) => `${val}%`,
+      formatter: (val) => (val != null ? `${val}%` : ""),
     },
-    labels: categories,
     xaxis: {
       categories: categories,
     },
@@ -70,14 +97,14 @@ export function MonthlyTrendChart({ trends, loading }: { trends: MonthlyTrendIte
       {
         title: { text: "Revenue (₹ Crores)" },
         labels: {
-          formatter: (val) => `₹${val} Cr`,
+          formatter: (val) => (val != null ? `₹${val} Cr` : ""),
         },
       },
       {
         opposite: true,
         title: { text: "Gross Margin %" },
         labels: {
-          formatter: (val) => `${val}%`,
+          formatter: (val) => (val != null ? `${val}%` : ""),
         },
       },
     ],

@@ -153,36 +153,33 @@ def get_price_ladder(
     # If store_ids filter is provided, we must aggregate directly from raw tables 
     # as the v_price_ladder_performance view is pre-grouped at the department level.
     if store_ids:
+        query_params = list(store_ids)
         store_placeholders = ", ".join(["?"] * len(store_ids))
-        for sid in store_ids:
-            params.append(sid)
 
         where_dept = ""
-        if conditions:
-            # We already appended department to conditions, but we need it for the subquery
-            where_dept = f"WHERE UPPER(i.Department) = ?"
-            # We'll append department param after the store ids in the execute block
+        if department and department.upper() != "ALL":
+            where_dept = "WHERE UPPER(department) = ?"
+            query_params.append(department.strip().upper())
         
         # Build query
         query = f"""
         WITH price_bucketed AS (
             SELECT
-                f.BARCODE,
-                i.Department AS department,
-                COALESCE(i.MRP, i.RATE, 0.0) AS price_point,
+                v.BARCODE,
+                v.Department AS department,
+                COALESCE(v.MRP, v.RATE, 0.0) AS price_point,
                 CASE
-                    WHEN COALESCE(i.MRP, i.RATE, 0.0) < 300 THEN '< 300'
-                    WHEN COALESCE(i.MRP, i.RATE, 0.0) BETWEEN 300 AND 500 THEN '300 - 500'
-                    WHEN COALESCE(i.MRP, i.RATE, 0.0) BETWEEN 500 AND 1000 THEN '500 - 1000'
+                    WHEN COALESCE(v.MRP, v.RATE, 0.0) < 300 THEN '< 300'
+                    WHEN COALESCE(v.MRP, v.RATE, 0.0) BETWEEN 300 AND 500 THEN '300 - 500'
+                    WHEN COALESCE(v.MRP, v.RATE, 0.0) BETWEEN 500 AND 1000 THEN '500 - 1000'
                     ELSE '> 1000'
                 END AS price_band,
-                ABS(f.NET_SALE_QUANTITY) AS NET_SALE_QUANTITY,
-                ABS(f.NET_SALE_AMOUNT) AS NET_SALE_AMOUNT,
-                f.GP_AMOUNT,
-                f.CLOSING_STOCK_QUANTITY
-            FROM fact_cube_monthly f
-            LEFT JOIN dim_item i ON f.BARCODE = i.ICODE
-            WHERE f.ADMSITE_CODE IN ({store_placeholders})
+                v.NET_SALE_QUANTITY,
+                v.NET_SALE_AMOUNT,
+                v.GP_AMOUNT,
+                v.CLOSING_STOCK_QUANTITY
+            FROM v_fact_item_location_monthly v
+            WHERE v.ADMSITE_CODE IN ({store_placeholders})
         )
         SELECT
             price_band,
@@ -198,11 +195,7 @@ def get_price_ladder(
         GROUP BY price_band, department
         ORDER BY price_band
         """
-        # Execute query
-        if where_dept:
-            rows = db.execute(query, params + [department.strip().upper()]).fetchall()
-        else:
-            rows = db.execute(query, params).fetchall()
+        rows = db.execute(query, query_params).fetchall()
 
     else:
         # Standard query from v_price_ladder_performance

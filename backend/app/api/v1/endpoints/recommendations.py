@@ -14,7 +14,7 @@ from backend.app.schemas.recommendations import (
 
 router = APIRouter()
 
-@router.get("/feed", response_model=StandardResponse[List[RecommendationItem]])
+@router.get("/feed", response_model=StandardResponse[Optional[List[RecommendationItem]]])
 def get_recommendation_feed(
     category: Optional[str] = Query(None, enum=["REORDER", "TRANSFER", "MARKDOWN"]),
     priority: Optional[str] = Query(None, enum=["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
@@ -27,6 +27,16 @@ def get_recommendation_feed(
     """
     Returns Machine Learning generated actionable recommendation feed with confidence scores and predicted financial impact.
     """
+    from backend.app.config import settings
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        return StandardResponse(
+            success=False,
+            supported=False,
+            message="AI inventory recommendations require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset.",
+            data=None,
+            meta=None,
+        )
+
     conditions = []
     params = []
 
@@ -99,11 +109,21 @@ def get_recommendation_feed(
     return StandardResponse(success=True, data=items, meta=meta)
 
 
-@router.get("/summary", response_model=StandardResponse[RecommendationSummaryResponse])
+@router.get("/summary", response_model=StandardResponse[Optional[RecommendationSummaryResponse]])
 def get_recommendation_summary(db: DuckDBPyConnection = Depends(get_db)):
     """
     Returns overall Machine Learning model performance metrics, recommendation category breakdown, and financial impact.
     """
+    from backend.app.config import settings
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        return StandardResponse(
+            success=False,
+            supported=False,
+            message="AI inventory recommendations require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset.",
+            data=None,
+            meta=None,
+        )
+
     query = """
     SELECT
         COUNT(*) AS total_count,

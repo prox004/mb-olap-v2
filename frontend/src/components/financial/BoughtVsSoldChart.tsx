@@ -63,6 +63,19 @@ export default function BoughtVsSoldChart() {
     );
   }
 
+  if (data.length === 0) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-6 dark:border-amber-900/50 dark:bg-amber-950/20 text-center flex flex-col justify-center items-center h-80">
+        <h4 className="text-sm font-bold text-amber-800 dark:text-amber-300">
+          Procurement Realization Unavailable
+        </h4>
+        <p className="mt-2 text-xs text-amber-700 dark:text-amber-400 max-w-sm">
+          Not available — requires inventory/SOH data (procurement PO goods received and unsold inventory balances are absent in the 2025 sales ledger).
+        </p>
+      </div>
+    );
+  }
+
   // Calculate totals
   const totalBought = data.reduce((acc, curr) => acc + curr.total_bought_units, 0);
   const totalSold = data.reduce((acc, curr) => acc + curr.total_sold_units, 0);

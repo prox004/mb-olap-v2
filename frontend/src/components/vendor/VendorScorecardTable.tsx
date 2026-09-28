@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { VendorScorecardItem } from "@/hooks/useVendorData";
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
+import { formatDisplayValue } from "@/utils";
 
 interface VendorScorecardTableProps {
   items: VendorScorecardItem[];
@@ -61,7 +62,7 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
             Vendor Commercial Scorecard
           </h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Showing {items.length} of {totalVendors.toLocaleString()} suppliers sorted by {sortBy.replace("_", " ")} ({order.toUpperCase()})
+            Showing {(items || []).length} of {(totalVendors ?? 0).toLocaleString()} suppliers sorted by {sortBy.replace("_", " ")} ({order.toUpperCase()})
           </p>
         </div>
 
@@ -112,6 +113,7 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
               <th
                 onClick={() => onSort("receive_units")}
                 className="py-3.5 px-4 text-right cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
+                title="Net purchase units received (Apr 2025 – Sep 2026)"
               >
                 Received Units {renderSortIndicator("receive_units")}
               </th>
@@ -130,6 +132,7 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
               <th
                 onClick={() => onSort("sell_through_pct")}
                 className="py-3.5 px-4 text-right cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
+                title="Sell-Through % = Final Sale Qty / Available Units * 100 (Apr 2025 – Sep 2026)"
               >
                 Sell-Through % {renderSortIndicator("sell_through_pct")}
               </th>
@@ -160,7 +163,7 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
                   Loading vendor commercial performance...
                 </td>
               </tr>
-            ) : items.length === 0 ? (
+            ) : (!items || items.length === 0) ? (
               <tr>
                 <td colSpan={9} className="py-12 text-center text-gray-400">
                   No vendors found matching search filters.
@@ -172,32 +175,32 @@ export const VendorScorecardTable: React.FC<VendorScorecardTableProps> = ({
                   key={idx}
                   className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
                 >
-                  <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white max-w-xs truncate" title={item.vendor_name}>
-                    {item.vendor_name}
+                  <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white max-w-xs truncate" title={formatDisplayValue(item.vendor_name)}>
+                    {formatDisplayValue(item.vendor_name)}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-300 font-medium">
-                    {item.total_skus_supplied.toLocaleString()}
+                    {item.total_skus_supplied != null ? item.total_skus_supplied.toLocaleString() : "0"}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-300 font-medium">
-                    {Math.round(item.receive_units).toLocaleString()}
+                    {item.receive_units != null ? Math.round(item.receive_units).toLocaleString() : "0"}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-900 dark:text-white font-bold">
-                    ₹{Math.round(item.net_revenue).toLocaleString()}
+                    ₹{item.net_revenue != null ? Math.round(item.net_revenue).toLocaleString() : "0"}
                   </td>
                   <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400 font-semibold">
-                    ₹{Math.round(item.gross_profit).toLocaleString()}
+                    ₹{item.gross_profit != null ? Math.round(item.gross_profit).toLocaleString() : "0"}
                   </td>
                   <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
-                    {item.sell_through_pct.toFixed(1)}%
+                    {item.sell_through_pct != null ? `${item.sell_through_pct.toFixed(1)}%` : "0.0%"}
                   </td>
                   <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300">
-                    {item.margin_pct.toFixed(1)}%
+                    {item.margin_pct != null ? `${item.margin_pct.toFixed(1)}%` : "0.0%"}
                   </td>
-                  <td className={`py-3 px-4 text-right font-semibold ${item.return_rate_pct > 5 ? "text-rose-600 dark:text-rose-400" : "text-gray-600 dark:text-gray-300"}`}>
-                    {item.return_rate_pct.toFixed(1)}%
+                  <td className={`py-3 px-4 text-right font-semibold ${(item.return_rate_pct ?? 0) > 5 ? "text-rose-600 dark:text-rose-400" : "text-gray-600 dark:text-gray-300"}`}>
+                    {item.return_rate_pct != null ? `${item.return_rate_pct.toFixed(1)}%` : "0.0%"}
                   </td>
                   <td className="py-3 px-4 text-center">
-                    {getScoreBadge(item.vendor_score)}
+                    {item.vendor_score != null ? getScoreBadge(item.vendor_score) : "N/A"}
                   </td>
                 </tr>
               ))

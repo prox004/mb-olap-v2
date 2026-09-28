@@ -5,6 +5,7 @@ import { apiClient } from "@/utils/apiClient";
 import { useOlapFilter } from "@/context/OlapFilterContext";
 import { GmroiItem } from "./GmroiCards";
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
+import { formatDisplayValue } from "@/utils";
 
 export default function GmroiTable() {
   const { selectedStores, selectedDepartment } = useOlapFilter();
@@ -41,9 +42,9 @@ export default function GmroiTable() {
 
   const getDimensionName = (item: GmroiItem) => {
     if (groupBy === "store") return item.store_name || `Store #${item.admsite_code}`;
-    if (groupBy === "department") return item.department || "UNKNOWN";
-    if (groupBy === "vendor") return item.vendor_name || "UNKNOWN";
-    return `${item.item_name || "UNKNOWN"} (${item.barcode || "N/A"})`;
+    if (groupBy === "department") return formatDisplayValue(item.department);
+    if (groupBy === "vendor") return formatDisplayValue(item.vendor_name);
+    return `${formatDisplayValue(item.item_name)} (${item.barcode || "N/A"})`;
   };
 
   const getGmroiBadgeClass = (ratio: number) => {
@@ -63,10 +64,10 @@ export default function GmroiTable() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            GMROI Comparison & Rank Table
+            Period GMROI Comparison & Rank Table
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Gross Margin Return on Investment ratio across dimensions
+            Period Gross Margin Return on Investment ratio using two-point average inventory [(Opening + Closing) / 2]
           </p>
         </div>
 
@@ -110,6 +111,15 @@ export default function GmroiTable() {
       {loading ? (
         <div className="flex h-64 items-center justify-center">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+        </div>
+      ) : data.length === 0 ? (
+        <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-8 dark:border-gray-800 dark:bg-gray-900/20 text-center">
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-300">
+            No GMROI records found
+          </p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            No inventory or sales data found matching the selected filters.
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">

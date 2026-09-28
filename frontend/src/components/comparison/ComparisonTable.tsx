@@ -12,6 +12,7 @@ import {
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
 import { ComparisonTableConfig } from "@/types/comparison";
 import { DimensionComparisonRow } from "@/hooks/useDimensionComparison";
+import { formatDisplayValue } from "@/utils";
 
 interface ComparisonTableProps {
   leftKpis: ExecutiveKPIs;
@@ -146,7 +147,13 @@ function KpiComparisonTable({
                 <td className="px-4 py-3">{formatComparisonValue(row.left, row.format)}</td>
                 <td className="px-4 py-3">{formatComparisonValue(row.right, row.format)}</td>
                 <td className={`px-4 py-3 font-semibold ${directionColorClass(row.direction)}`}>
-                  {directionIcon(row.direction)} {formatComparisonValue(row.difference, row.format)}
+                  {row.difference !== null ? (
+                    <>
+                      {directionIcon(row.direction)} {formatComparisonValue(row.difference, row.format)}
+                    </>
+                  ) : (
+                    "N/A"
+                  )}
                 </td>
                 <td className={`px-4 py-3 font-semibold ${directionColorClass(row.direction)}`}>
                   {row.percentChange === null
@@ -212,7 +219,7 @@ function DateComparisonTable({
             {rows.map((row, idx) => (
               <tr key={`${row.period}-${row.dimensionValue}-${idx}`}>
                 <td className="px-4 py-3">{row.period}</td>
-                <td className="px-4 py-3 font-medium">{row.dimensionValue}</td>
+                <td className="px-4 py-3 font-medium">{formatDisplayValue(row.dimensionValue)}</td>
                 <td className="px-4 py-3 tabular-nums">{row.current.toLocaleString("en-IN")}</td>
                 {comparePeriods && (
                   <>

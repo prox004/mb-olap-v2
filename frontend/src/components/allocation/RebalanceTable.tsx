@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { RebalanceRecommendationItem } from "@/hooks/useAllocationData";
+import { formatDisplayValue } from "@/utils";
 
 export function RebalanceTable({
   recommendations,
@@ -96,18 +97,32 @@ export function RebalanceTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {visibleRecommendations.slice(0, 50).map((item, idx) => {
-              const key = `${item.barcode}-${item.source_store_code}-${item.target_store_code}-${idx}`;
-              const isApproved = !!approvedItems[key];
+            {visibleRecommendations.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Allocation recommendations unavailable
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      Requires inventory/SOH data, which is unavailable in the current POS sales ledger dataset.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              visibleRecommendations.slice(0, 50).map((item, idx) => {
+                const key = `${item.barcode}-${item.source_store_code}-${item.target_store_code}-${idx}`;
+                const isApproved = !!approvedItems[key];
 
               return (
                 <tr key={key} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
                   <td className="py-3.5 px-4 font-mono text-xs text-gray-900 dark:text-white">
                     <div className="font-bold">{item.barcode}</div>
-                    <div className="text-[11px] text-gray-400 font-sans">{item.description}</div>
+                    <div className="text-[11px] text-gray-400 font-sans">{formatDisplayValue(item.description)}</div>
                   </td>
                   <td className="py-3.5 px-4 font-medium text-gray-800 dark:text-gray-200">
-                    {item.department}
+                    {formatDisplayValue(item.department)}
                   </td>
                   <td className="py-3.5 px-4">
                     <span
@@ -121,13 +136,13 @@ export function RebalanceTable({
                     </span>
                   </td>
                   <td className="py-3.5 px-4">
-                    <div className="font-semibold text-gray-900 dark:text-white">{item.source_store_name}</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{formatDisplayValue(item.source_store_name)}</div>
                     <div className="text-[11px] text-amber-600 dark:text-amber-400">
                       Stock: {item.source_stock} ({item.source_woc} Wks)
                     </div>
                   </td>
                   <td className="py-3.5 px-4">
-                    <div className="font-semibold text-gray-900 dark:text-white">{item.target_store_name}</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{formatDisplayValue(item.target_store_name)}</div>
                     <div className={`text-[11px] ${item.target_stock < 0 ? "text-purple-600 dark:text-purple-400 font-bold" : "text-rose-600 dark:text-rose-400"}`}>
                       Stock: {item.target_stock} {item.target_stock < 0 ? "(Negative Lag)" : `(${item.target_woc} Wks)`}
                     </div>
@@ -174,7 +189,7 @@ export function RebalanceTable({
                   </td>
                 </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </div>

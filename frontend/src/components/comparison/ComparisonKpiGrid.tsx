@@ -73,8 +73,14 @@ export function ComparisonKpiGrid({
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-500">Difference</span>
                 <span className={`font-semibold ${directionColorClass(result.direction)}`}>
-                  {directionIcon(result.direction)}{" "}
-                  {formatComparisonValue(Math.abs(result.difference), meta.format)}
+                  {result.difference !== null ? (
+                    <>
+                      {directionIcon(result.direction)}{" "}
+                      {formatComparisonValue(Math.abs(result.difference), meta.format)}
+                    </>
+                  ) : (
+                    "N/A"
+                  )}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">

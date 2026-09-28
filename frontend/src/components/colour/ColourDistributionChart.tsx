@@ -4,6 +4,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import { ColourPerformanceItem } from "@/hooks/useColourData";
+import { formatDisplayValue } from "@/utils";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -18,16 +19,27 @@ const COLOUR_HEX_MAP: Record<string, string> = {
   BLACK: "#1E293B",
   WHITE: "#F8FAFC",
   NAVY: "#1E3A8A",
+  "NAVY BLUE": "#1E3A8A",
   BLUE: "#3B82F6",
+  "SKY BLUE": "#0284C7",
   RED: "#EF4444",
   GREEN: "#10B981",
+  "LIGHT GREEN": "#4ADE80",
   YELLOW: "#F59E0B",
   PINK: "#EC4899",
   BEIGE: "#D97706",
+  PEACH: "#FB923C",
   GREY: "#64748B",
+  "DARK GREY": "#334155",
+  CREAM: "#FEF08A",
+  "OFF WHITE": "#E2E8F0",
   MAROON: "#881337",
   OLIVE: "#65A30D",
+  ONION: "#A855F7",
+  PURPLE: "#9333EA",
+  MULTI: "#8B5CF6",
   MULTICOLOR: "#8B5CF6",
+  OTHERS: "#94A3B8",
   OTHER: "#94A3B8",
 };
 
@@ -44,9 +56,14 @@ export const ColourDistributionChart: React.FC<ColourDistributionChartProps> = (
   }
 
   const validItems = items.filter((item) => item.net_revenue > 0 || item.sales_units > 0);
-  const labels = validItems.map((item) => item.extracted_colour);
+  const labels = validItems.map((item) => formatDisplayValue(item.extracted_colour));
   const series = validItems.map((item) => Math.round(item.net_revenue));
-  const colors = validItems.map((item) => COLOUR_HEX_MAP[item.extracted_colour] || "#94A3B8");
+  const colors = validItems.map(
+    (item) =>
+      COLOUR_HEX_MAP[item.extracted_colour?.toUpperCase()] ||
+      COLOUR_HEX_MAP[formatDisplayValue(item.extracted_colour)?.toUpperCase()] ||
+      "#94A3B8"
+  );
 
   const options: ApexOptions = {
     colors: colors.length > 0 ? colors : ["#3B82F6"],

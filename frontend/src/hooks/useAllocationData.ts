@@ -49,8 +49,9 @@ export type TransferHistoryItem = {
 
 interface ApiResponse<T> {
   success: boolean;
-  data?: T;
+  data?: T | null;
   message?: string;
+  supported?: boolean;
 }
 
 export function useAllocationData() {
@@ -59,7 +60,9 @@ export function useAllocationData() {
   const [coverItems, setCoverItems] = useState<StoreStockCoverItem[]>([]);
   const [recommendations, setRecommendations] = useState<RebalanceRecommendationItem[]>([]);
   const [historyItems, setHistoryItems] = useState<TransferHistoryItem[]>([]);
-  
+  const [supported, setSupported] = useState<boolean>(true);
+  const [unsupportedMessage, setUnsupportedMessage] = useState<string | null>(null);
+
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,9 +82,35 @@ export function useAllocationData() {
         apiClient<ApiResponse<TransferHistoryItem[]>>("/allocation/transfer-history", { params: { store_ids: selectedStores } }),
       ]);
 
-      if (coverRes.success) setCoverItems(coverRes.data || []);
-      if (recRes.success) setRecommendations(recRes.data || []);
-      if (historyRes.success) setHistoryItems(historyRes.data || []);
+      if (recRes?.supported === false || coverRes?.supported === false) {
+        setSupported(false);
+        setUnsupportedMessage(
+          recRes?.message ||
+          coverRes?.message ||
+          "Allocation and rebalancing require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset."
+        );
+      } else {
+        setSupported(true);
+        setUnsupportedMessage(null);
+      }
+
+      if (coverRes?.success && Array.isArray(coverRes.data)) {
+        setCoverItems(coverRes.data);
+      } else {
+        setCoverItems([]);
+      }
+
+      if (recRes?.success && Array.isArray(recRes.data)) {
+        setRecommendations(recRes.data);
+      } else {
+        setRecommendations([]);
+      }
+
+      if (historyRes?.success && Array.isArray(historyRes.data)) {
+        setHistoryItems(historyRes.data);
+      } else {
+        setHistoryItems([]);
+      }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Failed to load store allocation metrics";
       console.error("Failed to fetch Store Allocation data:", err);
@@ -101,6 +130,8 @@ export function useAllocationData() {
     historyItems,
     loading,
     error,
+    supported,
+    unsupportedMessage,
     refresh: fetchData,
   };
 }

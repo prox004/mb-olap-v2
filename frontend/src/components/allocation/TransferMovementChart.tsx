@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import { TransferHistoryItem } from "@/hooks/useAllocationData";
 import { ApexOptions } from "apexcharts";
 
+import { formatDisplayValue } from "@/utils";
+
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export function TransferMovementChart({
@@ -20,7 +22,7 @@ export function TransferMovementChart({
     );
   }
 
-  const categories = historyItems.map((h) => h.store_name);
+  const categories = historyItems.map((h) => formatDisplayValue(h.store_name));
   const transferInSeries = historyItems.map((h) => Math.abs(h.transfer_in_units));
   const transferOutSeries = historyItems.map((h) => Math.abs(h.transfer_out_units));
 
@@ -67,9 +69,20 @@ export function TransferMovementChart({
         </div>
       </div>
 
-      <div className="w-full h-80">
-        <ReactApexChart options={options} series={series} type="bar" height={310} />
-      </div>
+      {historyItems.length === 0 ? (
+        <div className="w-full h-80 flex flex-col items-center justify-center text-xs text-gray-500 dark:text-gray-400 gap-1.5">
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Transfer movement history unavailable
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Requires store transfer order (STO) tracking data, which is unavailable in the current POS sales ledger dataset.
+          </p>
+        </div>
+      ) : (
+        <div className="w-full h-80">
+          <ReactApexChart options={options} series={series} type="bar" height={310} />
+        </div>
+      )}
     </div>
   );
 }

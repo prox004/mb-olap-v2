@@ -16,10 +16,14 @@ function formatCurrency(val: number): string {
 export function RecommendationFeed({
   items,
   loading,
+  isSupported = true,
+  unsupportedMessage,
   onExecute,
 }: {
   items: RecommendationItem[];
   loading: boolean;
+  isSupported?: boolean;
+  unsupportedMessage?: string | null;
   onExecute: (item: RecommendationItem) => void;
 }) {
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
@@ -28,6 +32,32 @@ export function RecommendationFeed({
   if (loading) {
     return (
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-6 h-80 animate-pulse"></div>
+    );
+  }
+
+  if (!isSupported) {
+    return (
+      <div className="bg-white dark:bg-gray-900 border border-amber-200 dark:border-amber-900/60 rounded-2xl p-8 mb-6 shadow-xs text-center space-y-4">
+        <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 flex items-center justify-center text-2xl mx-auto shadow-xs">
+          📦
+        </div>
+        <div className="max-w-xl mx-auto space-y-2">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            Recommendations Unavailable
+          </h3>
+          <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+            Requires inventory / SOH data
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            {unsupportedMessage ||
+              "AI inventory recommendations (Purchase Reorders, Store Transfers, and Dynamic Markdowns) require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset."}
+          </p>
+        </div>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <span>Active Warehouse: ClickHouse (mb_olap_v2 POS sales transactions)</span>
+        </div>
+      </div>
     );
   }
 
@@ -43,6 +73,7 @@ export function RecommendationFeed({
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-6 shadow-xs">
+
       <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
         <div>
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
@@ -97,91 +128,103 @@ export function RecommendationFeed({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredItems.map((item) => (
-          <div
-            key={item.id}
-            className="p-4 rounded-xl bg-gray-50/70 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 flex flex-col justify-between transition-all hover:border-gray-300 dark:hover:border-gray-600"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                      item.category === "REORDER"
-                        ? "bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300"
-                        : item.category === "TRANSFER"
-                        ? "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
-                        : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-                    }`}
-                  >
-                    {item.category}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                      item.priority === "CRITICAL"
-                        ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
-                        : item.priority === "HIGH"
-                        ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-                        : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                    }`}
-                  >
-                    {item.priority}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-semibold text-gray-500">ML Confidence:</span>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    {item.confidence_score}%
-                  </span>
-                </div>
-              </div>
-
-              <div className="mb-2">
-                <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                  {item.title} ({item.barcode})
-                </h4>
-                <div className="text-xs text-gray-500">
-                  {item.division} • {item.department}
-                </div>
-              </div>
-
-              <p className="text-xs text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
-                {item.message}
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
+      {filteredItems.length === 0 ? (
+        <div className="p-8 text-center bg-gray-50/50 dark:bg-gray-800/20 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            No recommendations
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            No active recommendation alerts found matching the selected filter.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className="p-4 rounded-xl bg-gray-50/70 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 flex flex-col justify-between transition-all hover:border-gray-300 dark:hover:border-gray-600"
+            >
               <div>
-                {item.estimated_financial_impact > 0 && (
-                  <div className="text-[11px] text-gray-500">
-                    Financial Value:{" "}
-                    <strong className="text-gray-900 dark:text-white font-bold">
-                      {formatCurrency(item.estimated_financial_impact)}
-                    </strong>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        item.category === "REORDER"
+                          ? "bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300"
+                          : item.category === "TRANSFER"
+                          ? "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                      }`}
+                    >
+                      {item.category}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        item.priority === "CRITICAL"
+                          ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"
+                          : item.priority === "HIGH"
+                          ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                          : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      {item.priority}
+                    </span>
                   </div>
-                )}
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-semibold text-gray-500">ML Confidence:</span>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      {item.confidence_score}%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mb-2">
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                    {item.title} ({item.barcode})
+                  </h4>
+                  <div className="text-xs text-gray-500">
+                    {item.division} • {item.department}
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
+                  {item.message}
+                </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleDismiss(item.id)}
-                  className="px-2.5 py-1 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
-                >
-                  Dismiss
-                </button>
-                <button
-                  onClick={() => onExecute(item)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand-500 text-white hover:bg-brand-600 shadow-xs transition-all cursor-pointer"
-                >
-                  Execute Action
-                </button>
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
+                <div>
+                  {item.estimated_financial_impact > 0 && (
+                    <div className="text-[11px] text-gray-500">
+                      Financial Value:{" "}
+                      <strong className="text-gray-900 dark:text-white font-bold">
+                        {formatCurrency(item.estimated_financial_impact)}
+                      </strong>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDismiss(item.id)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
+                  <button
+                    onClick={() => onExecute(item)}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand-500 text-white hover:bg-brand-600 shadow-xs transition-all cursor-pointer"
+                  >
+                    Execute Action
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
+
   );
 }

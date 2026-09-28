@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ColourPerformanceItem } from "@/hooks/useColourData";
+import { formatDisplayValue } from "@/utils";
 
 interface ColourMatrixTableProps {
   items: ColourPerformanceItem[];
@@ -50,7 +51,7 @@ export const ColourMatrixTable: React.FC<ColourMatrixTableProps> = ({
             <option value="ALL">All Colours ({distinctColours.length})</option>
             {distinctColours.map((col) => (
               <option key={col} value={col}>
-                {col}
+                {formatDisplayValue(col)}
               </option>
             ))}
           </select>
@@ -121,11 +122,11 @@ export const ColourMatrixTable: React.FC<ColourMatrixTableProps> = ({
                               : "#94A3B8",
                         }}
                       />
-                      {item.extracted_colour}
+                      {formatDisplayValue(item.extracted_colour)}
                     </span>
                   </td>
                   <td className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                    {item.department}
+                    {formatDisplayValue(item.department)}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400 font-medium">
                     {item.total_skus.toLocaleString()}
@@ -134,16 +135,16 @@ export const ColourMatrixTable: React.FC<ColourMatrixTableProps> = ({
                     {Math.round(item.sales_units).toLocaleString()}
                   </td>
                   <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white">
-                    ₹{Math.round(item.net_revenue).toLocaleString()}
+                    ₹{Math.round(item.net_revenue || 0).toLocaleString()}
                   </td>
                   <td className="py-3 px-4 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                    {item.margin_pct.toFixed(1)}%
+                    {item.margin_pct != null ? `${item.margin_pct.toFixed(1)}%` : "N/A"}
                   </td>
                   <td className="py-3 px-4 text-right font-semibold text-blue-600 dark:text-blue-400">
-                    {item.sell_through_pct.toFixed(1)}%
+                    {item.sell_through_pct != null ? `${item.sell_through_pct.toFixed(1)}%` : "N/A"}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-700 dark:text-gray-300 font-medium">
-                    {Math.round(item.current_stock_units).toLocaleString()}
+                    {item.current_stock_units != null ? Math.round(item.current_stock_units).toLocaleString() : "N/A"}
                   </td>
                 </tr>
               ))

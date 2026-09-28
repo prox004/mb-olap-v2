@@ -34,7 +34,8 @@ export type RecommendationSummaryData = {
 
 interface ApiResponse<T> {
   success: boolean;
-  data?: T;
+  supported?: boolean;
+  data?: T | null;
   message?: string;
 }
 
@@ -45,6 +46,8 @@ export function useRecommendationsData() {
   const [feedItems, setFeedItems] = useState<RecommendationItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSupported, setIsSupported] = useState<boolean>(true);
+  const [unsupportedMessage, setUnsupportedMessage] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -60,8 +63,21 @@ export function useRecommendationsData() {
         apiClient<ApiResponse<RecommendationItem[]>>("/recommendations/feed", { params: { ...params, limit: 100 } }),
       ]);
 
-      if (summaryRes.success && summaryRes.data) setSummary(summaryRes.data);
-      if (feedRes.success && feedRes.data) setFeedItems(feedRes.data);
+      if (summaryRes.supported === false || feedRes.supported === false) {
+        setIsSupported(false);
+        setUnsupportedMessage(
+          summaryRes.message ||
+            feedRes.message ||
+            "AI inventory recommendations require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset."
+        );
+        setSummary(null);
+        setFeedItems([]);
+      } else {
+        setIsSupported(true);
+        setUnsupportedMessage(null);
+        if (summaryRes.success && summaryRes.data) setSummary(summaryRes.data);
+        if (feedRes.success && feedRes.data) setFeedItems(feedRes.data);
+      }
     } catch (err: unknown) {
       console.error("Failed to fetch AI Recommendations data:", err);
       const msg = err instanceof Error ? err.message : "Failed to load AI recommendations";
@@ -80,6 +96,9 @@ export function useRecommendationsData() {
     feedItems,
     loading,
     error,
+    isSupported,
+    unsupportedMessage,
     refresh: fetchData,
   };
 }
+

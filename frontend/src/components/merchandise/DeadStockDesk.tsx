@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { DeadStockSummary } from "@/hooks/useMerchandiseData";
+import { formatDisplayValue } from "@/utils";
 
 interface DeadStockDeskProps {
   summary: DeadStockSummary;
@@ -92,12 +93,12 @@ export const DeadStockDesk: React.FC<DeadStockDeskProps> = ({
                 summary.items.map((item) => (
                   <tr key={item.barcode} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="p-3 font-mono font-bold text-gray-900 dark:text-white">{item.barcode}</td>
-                    <td className="p-3 max-w-xs truncate font-medium text-gray-900 dark:text-white" title={item.description}>
-                      {item.description || "N/A"}
+                    <td className="p-3 max-w-xs truncate font-medium text-gray-900 dark:text-white" title={formatDisplayValue(item.description)}>
+                      {formatDisplayValue(item.description)}
                     </td>
-                    <td className="p-3 text-gray-500">{item.department || "N/A"}</td>
-                    <td className="p-3 max-w-[120px] truncate text-gray-500" title={item.vendor}>
-                      {item.vendor || "N/A"}
+                    <td className="p-3 text-gray-500">{formatDisplayValue(item.department)}</td>
+                    <td className="p-3 max-w-[120px] truncate text-gray-500" title={formatDisplayValue(item.vendor)}>
+                      {formatDisplayValue(item.vendor)}
                     </td>
                     <td className="p-3 text-right font-medium">₹{item.mrp}</td>
                     <td className="p-3 text-right font-bold text-rose-600 dark:text-rose-400">

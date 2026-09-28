@@ -3,14 +3,17 @@
 import React, { useState, useMemo } from "react";
 import { CategoryHierarchyItem } from "@/hooks/useCategoryData";
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
+import { formatDisplayValue } from "@/utils";
 
-function formatCurrency(val: number): string {
-  if (val >= 1e7) {
-    return `₹${(val / 1e7).toFixed(2)} Cr`;
-  } else if (val >= 1e5) {
-    return `₹${(val / 1e5).toFixed(2)} L`;
+function formatCurrency(val: number | null | undefined): string {
+  if (val == null || isNaN(Number(val))) return "N/A";
+  const num = Number(val);
+  if (num >= 1e7) {
+    return `₹${(num / 1e7).toFixed(2)} Cr`;
+  } else if (num >= 1e5) {
+    return `₹${(num / 1e5).toFixed(2)} L`;
   } else {
-    return `₹${val.toLocaleString("en-IN")}`;
+    return `₹${num.toLocaleString("en-IN")}`;
   }
 }
 
@@ -54,8 +57,9 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
 
   const groupedData = useMemo(() => {
     const divs: Record<string, GroupedDivision> = {};
+    const safeItems = Array.isArray(items) ? items : [];
 
-    items.forEach((item) => {
+    safeItems.forEach((item) => {
       const divName = item.division || "UNKNOWN";
       const secName = item.section || "DEFAULT SECTION";
 
@@ -75,11 +79,11 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
       }
 
       const div = divs[divName];
-      div.net_revenue += item.net_revenue;
-      div.sales_units += item.sales_units;
-      div.gross_profit += item.gross_profit;
-      div.closing_stock_value += item.closing_stock_value;
-      div.closing_stock_units += item.closing_stock_units;
+      div.net_revenue += Number(item.net_revenue) || 0;
+      div.sales_units += Number(item.sales_units) || 0;
+      div.gross_profit += Number(item.gross_profit) || 0;
+      div.closing_stock_value += Number(item.closing_stock_value) || 0;
+      div.closing_stock_units += Number(item.closing_stock_units) || 0;
 
       if (!div.sections[secName]) {
         div.sections[secName] = {
@@ -97,21 +101,25 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
       }
 
       const sec = div.sections[secName];
-      sec.net_revenue += item.net_revenue;
-      sec.sales_units += item.sales_units;
-      sec.gross_profit += item.gross_profit;
-      sec.closing_stock_value += item.closing_stock_value;
-      sec.closing_stock_units += item.closing_stock_units;
+      sec.net_revenue += Number(item.net_revenue) || 0;
+      sec.sales_units += Number(item.sales_units) || 0;
+      sec.gross_profit += Number(item.gross_profit) || 0;
+      sec.closing_stock_value += Number(item.closing_stock_value) || 0;
+      sec.closing_stock_units += Number(item.closing_stock_units) || 0;
       sec.departments.push(item);
     });
 
     Object.values(divs).forEach((div) => {
       div.margin_pct = div.net_revenue > 0 ? Number(((div.gross_profit / div.net_revenue) * 100).toFixed(2)) : 0;
       div.woc = (div.sales_units / 12.0) > 0 ? Number((div.closing_stock_units / (div.sales_units / 12.0)).toFixed(1)) : 999;
+      const divTotalUnits = div.sales_units + div.closing_stock_units;
+      div.sell_through_pct = divTotalUnits > 0 ? Number(((div.sales_units / divTotalUnits) * 100).toFixed(1)) : 0;
 
       Object.values(div.sections).forEach((sec) => {
         sec.margin_pct = sec.net_revenue > 0 ? Number(((sec.gross_profit / sec.net_revenue) * 100).toFixed(2)) : 0;
         sec.woc = (sec.sales_units / 12.0) > 0 ? Number((sec.closing_stock_units / (sec.sales_units / 12.0)).toFixed(1)) : 999;
+        const secTotalUnits = sec.sales_units + sec.closing_stock_units;
+        sec.sell_through_pct = secTotalUnits > 0 ? Number(((sec.sales_units / secTotalUnits) * 100).toFixed(1)) : 0;
       });
     });
 
@@ -166,101 +174,109 @@ export function CategoryTreeTable({ items, loading }: { items: CategoryHierarchy
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {groupedData.map((div) => {
-              const isDivExpanded = !!expandedDivisions[div.divisionName];
+            {groupedData.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-8 text-center text-gray-400">
+                  No category records found.
+                </td>
+              </tr>
+            ) : (
+              groupedData.map((div) => {
+                const isDivExpanded = !!expandedDivisions[div.divisionName];
 
-              return (
-                <React.Fragment key={div.divisionName}>
-                  {/* Division Row */}
-                  <tr
-                    onClick={() => toggleDivision(div.divisionName)}
-                    className="bg-gray-100/70 dark:bg-gray-800/80 font-bold hover:bg-gray-200/60 dark:hover:bg-gray-700/60 cursor-pointer transition-colors"
-                  >
-                    <td className="py-3 px-4 text-gray-900 dark:text-white flex items-center gap-2">
-                      <span className="text-brand-500 font-bold text-xs w-4">
-                        {isDivExpanded ? "−" : "+"}
-                      </span>
-                      <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                        DIV
-                      </span>
-                      {div.divisionName}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
-                      {formatCurrency(div.net_revenue)}
-                    </td>
-                    <td className="py-3 px-4">{div.sales_units.toLocaleString()}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                        {div.margin_pct}%
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{formatCurrency(div.closing_stock_value)}</td>
-                    <td className="py-3 px-4">{div.sell_through_pct}%</td>
-                    <td className="py-3 px-4 font-semibold">{div.woc} Wks</td>
-                  </tr>
+                return (
+                  <React.Fragment key={div.divisionName}>
+                    {/* Division Row */}
+                    <tr
+                      onClick={() => toggleDivision(div.divisionName)}
+                      className="bg-gray-100/70 dark:bg-gray-800/80 font-bold hover:bg-gray-200/60 dark:hover:bg-gray-700/60 cursor-pointer transition-colors"
+                    >
+                      <td className="py-3 px-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <span className="text-brand-500 font-bold text-xs w-4">
+                          {isDivExpanded ? "−" : "+"}
+                        </span>
+                        <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                          DIV
+                        </span>
+                        {formatDisplayValue(div.divisionName)}
+                      </td>
+                      <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
+                        {formatCurrency(div.net_revenue)}
+                      </td>
+                      <td className="py-3 px-4">{div.sales_units != null ? div.sales_units.toLocaleString() : "0"}</td>
+                      <td className="py-3 px-4">
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+                          {div.margin_pct}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">{div.closing_stock_value > 0 ? formatCurrency(div.closing_stock_value) : "N/A"}</td>
+                      <td className="py-3 px-4">{div.sell_through_pct > 0 ? `${div.sell_through_pct}%` : "N/A"}</td>
+                      <td className="py-3 px-4 font-semibold">{div.woc !== 999 && div.woc > 0 ? `${div.woc} Wks` : "N/A"}</td>
+                    </tr>
 
-                  {/* Section Rows */}
-                  {isDivExpanded &&
-                    Object.values(div.sections).map((sec) => {
-                      const secKey = `${div.divisionName}-${sec.sectionName}`;
-                      const isSecExpanded = !!expandedSections[secKey];
+                    {/* Section Rows */}
+                    {isDivExpanded &&
+                      Object.values(div.sections).map((sec) => {
+                        const secKey = `${div.divisionName}-${sec.sectionName}`;
+                        const isSecExpanded = !!expandedSections[secKey];
 
-                      return (
-                        <React.Fragment key={secKey}>
-                          <tr
-                            onClick={() => toggleSection(secKey)}
-                            className="bg-gray-50/80 dark:bg-gray-800/40 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800/70 cursor-pointer transition-colors"
-                          >
-                            <td className="py-2.5 px-4 text-gray-800 dark:text-gray-200 flex items-center gap-2 pl-8">
-                              <span className="text-gray-400 text-xs font-bold w-4">
-                                {isSecExpanded ? "−" : "+"}
-                              </span>
-                              <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold rounded bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
-                                SEC
-                              </span>
-                              {sec.sectionName}
-                            </td>
-                            <td className="py-2.5 px-4 font-semibold text-gray-900 dark:text-white">
-                              {formatCurrency(sec.net_revenue)}
-                            </td>
-                            <td className="py-2.5 px-4">{sec.sales_units.toLocaleString()}</td>
-                            <td className="py-2.5 px-4">{sec.margin_pct}%</td>
-                            <td className="py-2.5 px-4">{formatCurrency(sec.closing_stock_value)}</td>
-                            <td className="py-2.5 px-4">{sec.sell_through_pct}%</td>
-                            <td className="py-2.5 px-4">{sec.woc} Wks</td>
-                          </tr>
+                        return (
+                          <React.Fragment key={secKey}>
+                            <tr
+                              onClick={() => toggleSection(secKey)}
+                              className="bg-gray-50/80 dark:bg-gray-800/40 font-semibold hover:bg-gray-100 dark:hover:bg-gray-800/70 cursor-pointer transition-colors"
+                            >
+                              <td className="py-2.5 px-4 text-gray-800 dark:text-gray-200 flex items-center gap-2 pl-8">
+                                <span className="text-gray-400 text-xs font-bold w-4">
+                                  {isSecExpanded ? "−" : "+"}
+                                </span>
+                                <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold rounded bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+                                  SEC
+                                </span>
+                                {formatDisplayValue(sec.sectionName)}
+                              </td>
+                              <td className="py-2.5 px-4 font-semibold text-gray-900 dark:text-white">
+                                {formatCurrency(sec.net_revenue)}
+                              </td>
+                              <td className="py-2.5 px-4">{sec.sales_units != null ? sec.sales_units.toLocaleString() : "0"}</td>
+                              <td className="py-2.5 px-4">{sec.margin_pct}%</td>
+                              <td className="py-2.5 px-4">{sec.closing_stock_value > 0 ? formatCurrency(sec.closing_stock_value) : "N/A"}</td>
+                              <td className="py-2.5 px-4">{sec.sell_through_pct > 0 ? `${sec.sell_through_pct}%` : "N/A"}</td>
+                              <td className="py-2.5 px-4">{sec.woc !== 999 && sec.woc > 0 ? `${sec.woc} Wks` : "N/A"}</td>
+                            </tr>
 
-                          {/* Department Rows */}
-                          {isSecExpanded &&
-                            sec.departments.map((dept) => (
-                              <tr
-                                key={dept.department}
-                                className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-                              >
-                                <td className="py-2 px-4 text-gray-700 dark:text-gray-300 pl-14 font-medium flex items-center gap-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
-                                  {dept.department}
-                                </td>
-                                <td className="py-2 px-4 font-medium text-gray-900 dark:text-white">
-                                  {formatCurrency(dept.net_revenue)}
-                                </td>
-                                <td className="py-2 px-4">{dept.sales_units.toLocaleString()}</td>
-                                <td className="py-2 px-4 font-semibold text-emerald-600 dark:text-emerald-400">
-                                  {dept.margin_pct}%
-                                </td>
-                                <td className="py-2 px-4">{formatCurrency(dept.closing_stock_value)}</td>
-                                <td className="py-2 px-4 font-semibold">{dept.sell_through_pct}%</td>
-                                <td className="py-2 px-4 font-semibold text-amber-600 dark:text-amber-400">
-                                  {dept.woc} Wks
-                                </td>
-                              </tr>
-                            ))}
-                        </React.Fragment>
-                      );
-                    })}
-                </React.Fragment>
-              );
-            })}
+                            {/* Department Rows */}
+                            {isSecExpanded &&
+                              sec.departments.map((dept) => (
+                                <tr
+                                  key={dept.department}
+                                  className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                                >
+                                  <td className="py-2 px-4 text-gray-700 dark:text-gray-300 pl-14 font-medium flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                                    {formatDisplayValue(dept.department)}
+                                  </td>
+                                  <td className="py-2 px-4 font-medium text-gray-900 dark:text-white">
+                                    {formatCurrency(dept.net_revenue)}
+                                  </td>
+                                  <td className="py-2 px-4">{dept.sales_units != null ? dept.sales_units.toLocaleString() : "0"}</td>
+                                  <td className="py-2 px-4 font-semibold text-emerald-600 dark:text-emerald-400">
+                                    {dept.margin_pct != null ? `${dept.margin_pct}%` : "N/A"}
+                                  </td>
+                                  <td className="py-2 px-4">{dept.closing_stock_value != null && dept.closing_stock_value > 0 ? formatCurrency(dept.closing_stock_value) : "N/A"}</td>
+                                  <td className="py-2 px-4 font-semibold">{dept.sell_through_pct != null ? `${dept.sell_through_pct}%` : "N/A"}</td>
+                                  <td className="py-2 px-4 font-semibold text-amber-600 dark:text-amber-400">
+                                    {dept.woc != null ? `${dept.woc} Wks` : "N/A"}
+                                  </td>
+                                </tr>
+                              ))}
+                          </React.Fragment>
+                        );
+                      })}
+                  </React.Fragment>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

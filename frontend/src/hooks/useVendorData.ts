@@ -31,13 +31,16 @@ interface ApiResponse<T> {
   success: boolean;
   data?: T;
   message?: string;
+  supported?: boolean;
 }
 
 export function useVendorData() {
-  const { selectedStores, selectedMonths } = useOlapFilter();
+  const { selectedStores, selectedMonths, isLoadingLocations, isLoadingMonths } = useOlapFilter();
 
   const [scorecard, setScorecard] = useState<VendorListResponse>({ total_vendors: 0, items: [] });
   const [returnVendors, setReturnVendors] = useState<VendorScorecardItem[]>([]);
+  const [returnsSupported, setReturnsSupported] = useState<boolean>(true);
+  const [returnsMessage, setReturnsMessage] = useState<string | null>(null);
   const [topContributors, setTopContributors] = useState<VendorScorecardItem[]>([]);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -57,6 +60,11 @@ export function useVendorData() {
   }, [searchTerm]);
 
   const fetchData = useCallback(async () => {
+    // Prevent premature query before initial filter metadata loads
+    if (isLoadingLocations || isLoadingMonths) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -66,7 +74,7 @@ export function useVendorData() {
         months: selectedMonths,
       };
 
-      const [scorecardRes, returnsRes, topRes] = await Promise.all([
+      const results = await Promise.allSettled([
         apiClient<ApiResponse<VendorListResponse>>("/vendor/scorecard", {
           params: {
             ...filterParams,
@@ -90,9 +98,46 @@ export function useVendorData() {
         }),
       ]);
 
-      if (scorecardRes.success && scorecardRes.data) setScorecard(scorecardRes.data);
-      if (returnsRes.success && returnsRes.data) setReturnVendors(returnsRes.data);
-      if (topRes.success && topRes.data) setTopContributors(topRes.data);
+      const scorecardRes = results[0].status === "fulfilled" ? results[0].value : null;
+      const returnsRes = results[1].status === "fulfilled" ? results[1].value : null;
+      const topRes = results[2].status === "fulfilled" ? results[2].value : null;
+
+      if (scorecardRes?.success && scorecardRes.data) {
+        setScorecard({
+          total_vendors: scorecardRes.data.total_vendors ?? 0,
+          items: Array.isArray(scorecardRes.data.items) ? scorecardRes.data.items : [],
+        });
+      }
+
+      if (returnsRes) {
+        if (returnsRes.supported === false) {
+          setReturnsSupported(false);
+          setReturnsMessage(
+            returnsRes.message ||
+            "The current inventory dataset does not contain separate vendor-return transaction records, so return-risk analysis cannot be calculated reliably."
+          );
+        } else {
+          setReturnsSupported(true);
+          setReturnsMessage(null);
+        }
+
+        if (returnsRes.success && Array.isArray(returnsRes.data)) {
+          setReturnVendors(returnsRes.data);
+        } else {
+          setReturnVendors([]);
+        }
+      }
+
+      if (topRes?.success && Array.isArray(topRes.data)) {
+        setTopContributors(topRes.data);
+      }
+
+      // Check if all endpoints rejected
+      const allFailed = results.every((r) => r.status === "rejected");
+      if (allFailed) {
+        const firstErr = (results[0] as PromiseRejectedResult).reason;
+        setError(firstErr instanceof Error ? firstErr.message : "Failed to load vendor metrics");
+      }
     } catch (err: unknown) {
       console.error("Failed to load Vendor Performance data:", err);
       const msg = err instanceof Error ? err.message : "Failed to load vendor metrics";
@@ -100,7 +145,7 @@ export function useVendorData() {
     } finally {
       setLoading(false);
     }
-  }, [selectedStores, selectedMonths, debouncedSearch, sortBy, order]);
+  }, [selectedStores, selectedMonths, debouncedSearch, sortBy, order, isLoadingLocations, isLoadingMonths]);
 
   useEffect(() => {
     fetchData();
@@ -119,6 +164,8 @@ export function useVendorData() {
     scorecard,
     returnVendors,
     topContributors,
+    returnsSupported,
+    returnsMessage,
     searchTerm,
     setSearchTerm,
     sortBy,

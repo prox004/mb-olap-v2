@@ -45,7 +45,13 @@ interface ApiResponse<T> {
 }
 
 export function useCategoryData() {
-  const { selectedStores, selectedMonths, selectedDivision } = useOlapFilter();
+  const {
+    selectedStores,
+    selectedMonths,
+    selectedDivision,
+    isLoadingLocations,
+    isLoadingMonths,
+  } = useOlapFilter();
 
   const [hierarchy, setHierarchy] = useState<CategoryHierarchyItem[]>([]);
   const [matrix, setMatrix] = useState<CategoryMatrixItem[]>([]);
@@ -55,6 +61,11 @@ export function useCategoryData() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    // Prevent premature query before initial filter metadata loads
+    if (isLoadingLocations || isLoadingMonths) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -65,15 +76,35 @@ export function useCategoryData() {
         division: selectedDivision !== "All" ? selectedDivision : undefined,
       };
 
-      const [hierarchyRes, matrixRes, moversRes] = await Promise.all([
+      const results = await Promise.allSettled([
         apiClient<ApiResponse<CategoryHierarchyItem[]>>("/category/hierarchy", { params: { ...params, group_level: "department" } }),
         apiClient<ApiResponse<CategoryMatrixItem[]>>("/category/matrix", { params }),
         apiClient<ApiResponse<TopMoversData>>("/category/top-movers", { params: { ...params, limit: 5 } }),
       ]);
 
-      if (hierarchyRes.success && hierarchyRes.data) setHierarchy(hierarchyRes.data);
-      if (matrixRes.success && matrixRes.data) setMatrix(matrixRes.data);
-      if (moversRes.success && moversRes.data) setTopMovers(moversRes.data);
+      const hierarchyRes = results[0].status === "fulfilled" ? results[0].value : null;
+      const matrixRes = results[1].status === "fulfilled" ? results[1].value : null;
+      const moversRes = results[2].status === "fulfilled" ? results[2].value : null;
+
+      if (hierarchyRes?.success && Array.isArray(hierarchyRes.data)) {
+        setHierarchy(hierarchyRes.data);
+      }
+      if (matrixRes?.success && Array.isArray(matrixRes.data)) {
+        setMatrix(matrixRes.data);
+      }
+      if (moversRes?.success && moversRes.data) {
+        setTopMovers({
+          fastest_movers: Array.isArray(moversRes.data.fastest_movers) ? moversRes.data.fastest_movers : [],
+          underperformers: Array.isArray(moversRes.data.underperformers) ? moversRes.data.underperformers : [],
+        });
+      }
+
+      // Check if all endpoints rejected
+      const allFailed = results.every((r) => r.status === "rejected");
+      if (allFailed) {
+        const firstErr = (results[0] as PromiseRejectedResult).reason;
+        setError(firstErr instanceof Error ? firstErr.message : "Failed to load category metrics");
+      }
     } catch (err: unknown) {
       console.error("Failed to load Category Performance data:", err);
       const msg = err instanceof Error ? err.message : "Failed to load category metrics";
@@ -81,7 +112,7 @@ export function useCategoryData() {
     } finally {
       setLoading(false);
     }
-  }, [selectedStores, selectedMonths, selectedDivision]);
+  }, [selectedStores, selectedMonths, selectedDivision, isLoadingLocations, isLoadingMonths]);
 
   useEffect(() => {
     fetchData();

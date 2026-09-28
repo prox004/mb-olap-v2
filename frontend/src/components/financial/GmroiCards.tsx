@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { apiClient } from "@/utils/apiClient";
 import { useOlapFilter } from "@/context/OlapFilterContext";
+import { formatDisplayValue } from "@/utils";
 
 export type GmroiItem = {
   admsite_code: number | null;
@@ -60,6 +61,19 @@ export default function GmroiCards() {
     );
   }
 
+  if (data.length === 0) {
+    return (
+      <div className="rounded-2xl border border-gray-200 bg-gray-50/50 p-6 dark:border-gray-800 dark:bg-gray-900/20 text-center">
+        <h4 className="text-sm font-bold text-gray-800 dark:text-gray-300">
+          No GMROI Metrics Found
+        </h4>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          No inventory investment records found matching current store or department filters.
+        </p>
+      </div>
+    );
+  }
+
   // Calculate Chain Average GMROI = SUM(GP) / SUM(Avg Inventory)
   const totalGP = data.reduce((acc, curr) => acc + curr.total_gross_profit, 0);
   const totalInv = data.reduce((acc, curr) => acc + curr.avg_inventory_value, 0);
@@ -74,16 +88,21 @@ export default function GmroiCards() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Chain Average GMROI */}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-          Chain Average GMROI
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+            Chain Period GMROI
+          </span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400" title="Period GMROI using two-point opening/closing average inventory">
+            2-Point Avg Basis
+          </span>
+        </div>
         <div className="mt-2 flex items-baseline gap-2">
           <span className="text-2xl font-bold text-gray-900 dark:text-white">
             ₹{chainAvg.toFixed(2)}
           </span>
         </div>
         <p className="mt-1.5 text-xs text-gray-400">
-          Return per ₹1.00 stock value
+          Return per ₹1.00 two-point avg inventory [(Opening + Closing) / 2]
         </p>
       </div>
 
@@ -94,7 +113,7 @@ export default function GmroiCards() {
         </span>
         <div className="mt-2 flex items-baseline justify-between">
           <span className="text-md font-bold text-gray-900 dark:text-white truncate max-w-[180px]">
-            {topDept ? topDept.department : "N/A"}
+            {topDept ? formatDisplayValue(topDept.department) : "Others"}
           </span>
           <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
             {topDept ? `${topDept.gmroi_ratio.toFixed(2)}x` : "0.00x"}
@@ -112,7 +131,7 @@ export default function GmroiCards() {
         </span>
         <div className="mt-2 flex items-baseline justify-between">
           <span className="text-md font-bold text-gray-900 dark:text-white truncate max-w-[180px]">
-            {lowestDept ? lowestDept.department : "N/A"}
+            {lowestDept ? formatDisplayValue(lowestDept.department) : "Others"}
           </span>
           <span className="text-lg font-extrabold text-rose-600 dark:text-rose-400">
             {lowestDept ? `${lowestDept.gmroi_ratio.toFixed(2)}x` : "0.00x"}

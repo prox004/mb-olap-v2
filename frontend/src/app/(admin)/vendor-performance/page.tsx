@@ -10,6 +10,8 @@ export default function VendorPerformancePage() {
   const {
     scorecard,
     returnVendors,
+    returnsSupported,
+    returnsMessage,
     searchTerm,
     setSearchTerm,
     sortBy,
@@ -50,6 +52,8 @@ export default function VendorPerformancePage() {
       {/* Section 2: Goods Return Analysis Chart */}
       <VendorReturnChart
         returnVendors={returnVendors}
+        supported={returnsSupported}
+        message={returnsMessage}
         loading={loading}
       />
 

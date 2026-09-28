@@ -60,18 +60,25 @@ def _build_sku_base_query(where_clause: str) -> str:
     return f"""
     WITH filtered_fact AS (
         SELECT 
-            f.BARCODE,
-            f.ADMSITE_CODE,
-            f.START_DATE,
-            f.NET_SALE_AMOUNT,
-            f.NET_SALE_QUANTITY,
-            f.GP_AMOUNT,
-            f.CLOSING_STOCK_QUANTITY,
-            f.CLOSING_STOCK_AMOUNT,
-            f.OPENING_QUANTITY,
-            f.GOODS_RECEIVE_QUANTITY,
-            f.SITE_TRANSFER_IN_QUANTITY
-        FROM fact_cube_monthly f
+            v.BARCODE,
+            v.ADMSITE_CODE,
+            v.START_DATE,
+            v.NET_SALE_AMOUNT,
+            v.NET_SALE_QUANTITY,
+            v.GP_AMOUNT,
+            v.CLOSING_STOCK_QUANTITY,
+            v.CLOSING_STOCK_AMOUNT,
+            v.OPENING_QUANTITY,
+            v.GOODS_RECEIVE_QUANTITY,
+            v.SITE_TRANSFER_IN_QUANTITY,
+            v.DESC1 AS description,
+            v.Division AS division,
+            v.Section AS section,
+            v.Department AS department,
+            v.PARTYNAME AS vendor,
+            v.MRP AS mrp,
+            v.RATE AS cost_rate
+        FROM v_fact_item_location_monthly v
         {where_clause}
     ),
     period_meta AS (
@@ -80,47 +87,46 @@ def _build_sku_base_query(where_clause: str) -> str:
     )
     SELECT
         f.BARCODE AS barcode,
-        i.DESC1 AS description,
-        i.Division AS division,
-        i.Section AS section,
-        i.Department AS department,
-        i.PARTYNAME AS vendor,
-        i.MRP AS mrp,
-        i.RATE AS cost_rate,
+        f.description AS description,
+        f.division AS division,
+        f.section AS section,
+        f.department AS department,
+        f.vendor AS vendor,
+        f.mrp AS mrp,
+        f.cost_rate AS cost_rate,
         SUM(f.NET_SALE_AMOUNT) AS net_revenue,
-        SUM(ABS(f.NET_SALE_QUANTITY)) AS sales_units,
+        SUM(f.NET_SALE_QUANTITY) AS sales_units,
         SUM(f.GP_AMOUNT) AS gross_profit,
         SUM(f.CLOSING_STOCK_QUANTITY) AS closing_stock_units,
         SUM(f.CLOSING_STOCK_AMOUNT) AS closing_stock_value,
         CASE 
             WHEN (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY)) > 0 
-            THEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0
+            THEN (SUM(f.NET_SALE_QUANTITY) / (SUM(f.OPENING_QUANTITY) + SUM(f.GOODS_RECEIVE_QUANTITY) + SUM(f.SITE_TRANSFER_IN_QUANTITY))) * 100.0
             ELSE 0.0 
         END AS sell_through_pct,
         -- Weeks of Cover (WOC) = Closing Stock / Weekly Sales Rate
         CASE 
-            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
-            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))
+            WHEN (SUM(f.NET_SALE_QUANTITY) / (MAX(pm.num_months) * 4.33)) > 0 
+            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / (MAX(pm.num_months) * 4.33))
             ELSE 999.0 
         END AS woc,
         -- Months of Inventory (MOI) = Closing Stock / Monthly Sales Rate
         CASE 
-            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / MAX(pm.num_months)) > 0 
-            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / MAX(pm.num_months))
+            WHEN (SUM(f.NET_SALE_QUANTITY) / MAX(pm.num_months)) > 0 
+            THEN SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / MAX(pm.num_months))
             ELSE 999.0 
         END AS moi,
         CASE
-            WHEN SUM(ABS(f.NET_SALE_QUANTITY)) = 0 AND SUM(f.CLOSING_STOCK_QUANTITY) > 0 THEN 'DEAD_STOCK'
-            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
-                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))) < 4.0 THEN 'FAST_MOVER'
-            WHEN (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33)) > 0 
-                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(ABS(f.NET_SALE_QUANTITY)) / (MAX(pm.num_months) * 4.33))) BETWEEN 4.0 AND 12.0 THEN 'MEDIUM_MOVER'
+            WHEN SUM(f.NET_SALE_QUANTITY) = 0 AND SUM(f.CLOSING_STOCK_QUANTITY) > 0 THEN 'DEAD_STOCK'
+            WHEN (SUM(f.NET_SALE_QUANTITY) / (MAX(pm.num_months) * 4.33)) > 0 
+                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / (MAX(pm.num_months) * 4.33))) < 4.0 THEN 'FAST_MOVER'
+            WHEN (SUM(f.NET_SALE_QUANTITY) / (MAX(pm.num_months) * 4.33)) > 0 
+                 AND (SUM(f.CLOSING_STOCK_QUANTITY) / (SUM(f.NET_SALE_QUANTITY) / (MAX(pm.num_months) * 4.33))) BETWEEN 4.0 AND 12.0 THEN 'MEDIUM_MOVER'
             ELSE 'SLOW_MOVER'
         END AS velocity_status
     FROM filtered_fact f
     CROSS JOIN period_meta pm
-    LEFT JOIN dim_item i ON f.BARCODE = i.ICODE
-    GROUP BY f.BARCODE, i.DESC1, i.Division, i.Section, i.Department, i.PARTYNAME, i.MRP, i.RATE
+    GROUP BY f.BARCODE, f.description, f.division, f.section, f.department, f.vendor, f.mrp, f.cost_rate
     """
 
 
@@ -147,7 +153,7 @@ def get_sku_velocity_list(
         months=months,
         division=division,
         department=department,
-        table_prefix="f"
+        table_prefix="v"
     )
 
     base_query = _build_sku_base_query(where_clause)
@@ -222,7 +228,7 @@ def get_dead_stock_candidates(
         months=months,
         division=division,
         department=department,
-        table_prefix="f"
+        table_prefix="v"
     )
 
     base_query = _build_sku_base_query(where_clause)
@@ -276,7 +282,7 @@ def get_velocity_breakdown(
         months=months,
         division=division,
         department=department,
-        table_prefix="f"
+        table_prefix="v"
     )
 
     base_query = _build_sku_base_query(where_clause)

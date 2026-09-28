@@ -1,6 +1,14 @@
-import { ExecutiveKPIs } from "@/hooks/useExecutiveData";
-
 export type KpiFormat = "currency" | "number" | "percent";
+
+export type NumericKpiKey =
+  | "total_revenue"
+  | "total_sales_units"
+  | "total_gross_profit"
+  | "gross_margin_pct"
+  | "total_inventory_value"
+  | "total_inventory_units"
+  | "sell_through_pct"
+  | "average_woc";
 
 export interface KpiMeta {
   label: string;
@@ -8,7 +16,7 @@ export interface KpiMeta {
   description?: string;
 }
 
-export const KPI_METADATA: Record<keyof ExecutiveKPIs, KpiMeta> = {
+export const KPI_METADATA: Record<NumericKpiKey, KpiMeta> = {
   total_revenue: { label: "Total Sales Revenue", format: "currency" },
   total_sales_units: { label: "Quantity Sold", format: "number" },
   total_gross_profit: { label: "Gross Profit", format: "currency" },
@@ -19,6 +27,7 @@ export const KPI_METADATA: Record<keyof ExecutiveKPIs, KpiMeta> = {
   average_woc: { label: "Weeks of Cover", format: "number" },
 };
 
-export function getKpiKeys(): (keyof ExecutiveKPIs)[] {
-  return Object.keys(KPI_METADATA) as (keyof ExecutiveKPIs)[];
+export function getKpiKeys(): NumericKpiKey[] {
+  return Object.keys(KPI_METADATA) as NumericKpiKey[];
 }
+
