@@ -22,20 +22,11 @@ def get_recommendation_feed(
     department: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    db: DuckDBPyConnection = Depends(get_db),
+    db = Depends(get_db),
 ):
     """
     Returns Machine Learning generated actionable recommendation feed with confidence scores and predicted financial impact.
     """
-    from backend.app.config import settings
-    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
-        return StandardResponse(
-            success=False,
-            supported=False,
-            message="AI inventory recommendations require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset.",
-            data=None,
-            meta=None,
-        )
 
     conditions = []
     params = []
@@ -110,20 +101,10 @@ def get_recommendation_feed(
 
 
 @router.get("/summary", response_model=StandardResponse[Optional[RecommendationSummaryResponse]])
-def get_recommendation_summary(db: DuckDBPyConnection = Depends(get_db)):
+def get_recommendation_summary(db = Depends(get_db)):
     """
     Returns overall Machine Learning model performance metrics, recommendation category breakdown, and financial impact.
     """
-    from backend.app.config import settings
-    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
-        return StandardResponse(
-            success=False,
-            supported=False,
-            message="AI inventory recommendations require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset.",
-            data=None,
-            meta=None,
-        )
-
     query = """
     SELECT
         COUNT(*) AS total_count,
@@ -137,12 +118,12 @@ def get_recommendation_summary(db: DuckDBPyConnection = Depends(get_db)):
 
     row = db.execute(query).fetchone()
     summary = RecommendationSummaryResponse(
-        total_recommendations=int(row[0]),
-        reorder_count=int(row[1]),
-        transfer_count=int(row[2]),
-        markdown_count=int(row[3]),
-        avg_confidence_score=float(row[4]),
-        total_financial_impact=float(row[5]),
+        total_recommendations=int(row[0]) if row and row[0] is not None else 0,
+        reorder_count=int(row[1]) if row and row[1] is not None else 0,
+        transfer_count=int(row[2]) if row and row[2] is not None else 0,
+        markdown_count=int(row[3]) if row and row[3] is not None else 0,
+        avg_confidence_score=float(row[4]) if row and row[4] is not None else 0.0,
+        total_financial_impact=float(row[5]) if row and row[5] is not None else 0.0,
     )
 
     return StandardResponse(success=True, data=summary)
@@ -151,7 +132,7 @@ def get_recommendation_summary(db: DuckDBPyConnection = Depends(get_db)):
 @router.post("/apply-action", response_model=StandardResponse[ActionApplyResponse])
 def apply_recommendation_action(
     request: ActionApplyRequest,
-    db: DuckDBPyConnection = Depends(get_db),
+    db = Depends(get_db),
 ):
     """
     Simulates executing an ML inventory recommendation trigger (generating Purchase Orders, STO Transfer Orders, or Markdown Schedules).

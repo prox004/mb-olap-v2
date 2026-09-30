@@ -1,3 +1,4 @@
+
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from duckdb import DuckDBPyConnection
@@ -17,6 +18,7 @@ def get_gmroi_analysis(
     group_by: str = Query("store", enum=["store", "department", "vendor", "sku"]),
     store_ids: Optional[List[int]] = Query(None),
     department: Optional[str] = Query(None),
+    limit: Optional[int] = Query(None, ge=1, le=1000),
     db = Depends(get_db),
 ):
     """
@@ -159,6 +161,8 @@ def get_gmroi_analysis(
             select_cols = "NULL AS admsite_code, 'ALL' AS store_name, COALESCE(s.division, 'UNKNOWN') AS division, COALESCE(s.department, 'UNKNOWN') AS department, COALESCE(s.vendor_name, 'UNKNOWN') AS vendor_name, k.item_code AS barcode, COALESCE(s.item_name, k.item_code) AS item_name"
             join_clause = "k.item_code = s.item_code LEFT JOIN inv i ON k.item_code = i.item_code"
 
+        limit_clause = f"LIMIT {limit}" if limit else ("LIMIT 100" if group_by == "sku" else "")
+
         query = f"""
         WITH sales AS ({sales_cte}),
         inv AS ({inv_cte}),
@@ -176,6 +180,7 @@ def get_gmroi_analysis(
         FROM all_keys k
         LEFT JOIN sales s ON {join_clause}
         ORDER BY gmroi_ratio DESC
+        {limit_clause}
         """
         all_params = params + inv_params
         rows = db.execute(query, all_params).fetchall()
@@ -207,6 +212,8 @@ def get_gmroi_analysis(
             select_cols = "NULL AS admsite_code, 'ALL' AS store_name, 'ALL' AS division, 'ALL' AS department, 'ALL' AS vendor_name, barcode, item_name"
             group_cols = "barcode, item_name"
 
+        limit_clause = f"LIMIT {limit}" if limit else ("LIMIT 100" if group_by == "sku" else "")
+
         query = f"""
         SELECT
             {select_cols},
@@ -222,6 +229,7 @@ def get_gmroi_analysis(
         {where_clause}
         GROUP BY {group_cols}
         ORDER BY gmroi_ratio DESC
+        {limit_clause}
         """
         rows = db.execute(query, params).fetchall()
 

@@ -209,7 +209,7 @@ def get_store_rankings(
         ),
         inv AS (
             SELECT
-                admsite_code,
+                admsite_code AS inv_admsite_code,
                 SUM(closing_amt) AS store_stock_value,
                 SUM(closing_qty) AS store_stock_units,
                 SUM(final_sale_qty) AS store_final_sale_qty,
@@ -233,7 +233,7 @@ def get_store_rankings(
             COALESCE(i.store_stock_units, 0.0) AS store_stock_units,
             COALESCE(i.store_woc, 999.0) AS store_woc
         FROM sales s
-        LEFT JOIN inv i ON s.admsite_code = i.admsite_code
+        LEFT JOIN inv i ON s.admsite_code = i.inv_admsite_code
         ORDER BY {sort_col} {sort_dir};
         """
         all_params = params + inv_params
@@ -339,7 +339,7 @@ def get_top_bottom_skus(
         ),
         inv AS (
             SELECT
-                item_code,
+                item_code AS inv_item_code,
                 SUM(closing_qty) AS current_stock_units
             FROM v_fact_inventory_enriched
             {inv_where_clause}
@@ -355,7 +355,7 @@ def get_top_bottom_skus(
             s.sku_gross_profit,
             COALESCE(i.current_stock_units, 0) AS current_stock_units
         FROM sales s
-        LEFT JOIN inv i ON s.barcode = i.item_code
+        LEFT JOIN inv i ON s.barcode = i.inv_item_code
         ORDER BY s.sku_revenue DESC
         LIMIT {limit};
         """
@@ -376,7 +376,7 @@ def get_top_bottom_skus(
         ),
         inv AS (
             SELECT
-                item_code,
+                item_code AS inv_item_code,
                 SUM(closing_qty) AS current_stock_units
             FROM v_fact_inventory_enriched
             {inv_where_clause}
@@ -392,7 +392,7 @@ def get_top_bottom_skus(
             s.sku_gross_profit,
             COALESCE(i.current_stock_units, 0) AS current_stock_units
         FROM sales s
-        LEFT JOIN inv i ON s.barcode = i.item_code
+        LEFT JOIN inv i ON s.barcode = i.inv_item_code
         WHERE COALESCE(i.current_stock_units, 0) > 0
         ORDER BY s.sku_revenue ASC
         LIMIT {limit};

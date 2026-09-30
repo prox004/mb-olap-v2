@@ -99,8 +99,8 @@ def get_vendor_scorecard(
                 COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
                 SUM(i.closing_qty) AS current_stock_units,
                 SUM(i.closing_amt) AS current_stock_value,
-                SUM(i.purchase_net_qty) AS receive_units,
-                SUM(i.purchase_net_amt) AS receive_value,
+                SUM(i.purchase_net_qty + i.transfer_in_qty) AS receive_units,
+                SUM(i.purchase_net_amt + i.transfer_in_amt) AS receive_value,
                 SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) AS available_units,
                 SUM(i.final_sale_qty) AS sum_final_sale_qty,
                 CASE
@@ -490,8 +490,8 @@ def get_top_contributor_vendors(
                 COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
                 SUM(i.closing_qty) AS current_stock_units,
                 SUM(i.closing_amt) AS current_stock_value,
-                SUM(i.purchase_net_qty) AS receive_units,
-                SUM(i.purchase_net_amt) AS receive_value,
+                SUM(i.purchase_net_qty + i.transfer_in_qty) AS receive_units,
+                SUM(i.purchase_net_amt + i.transfer_in_amt) AS receive_value,
                 SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) AS available_units,
                 SUM(i.final_sale_qty) AS sum_final_sale_qty,
                 CASE

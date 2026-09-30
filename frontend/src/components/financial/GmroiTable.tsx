@@ -18,6 +18,9 @@ export default function GmroiTable() {
       try {
         setLoading(true);
         const params: Record<string, unknown> = { group_by: groupBy };
+        if (groupBy === "sku") {
+          params.limit = 100;
+        }
         if (selectedDepartment && selectedDepartment !== "All") {
           params.department = selectedDepartment;
         }
@@ -63,8 +66,13 @@ export default function GmroiTable() {
     <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 flex items-center gap-2">
             Period GMROI Comparison & Rank Table
+            {groupBy === "sku" && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400">
+                Top 100 SKUs
+              </span>
+            )}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Period Gross Margin Return on Investment ratio using two-point average inventory [(Opening + Closing) / 2]
