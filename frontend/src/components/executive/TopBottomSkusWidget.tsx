@@ -3,24 +3,29 @@
 import React, { useState } from "react";
 import { SKURankingItem } from "@/hooks/useExecutiveData";
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
+import { formatDisplayValue } from "@/utils";
 
-function formatCurrency(val: number): string {
-  if (val >= 1e7) {
-    return `₹${(val / 1e7).toFixed(2)} Cr`;
-  } else if (val >= 1e5) {
-    return `₹${(val / 1e5).toFixed(2)} L`;
+function formatCurrency(val: number | null | undefined): string {
+  if (val == null || isNaN(Number(val))) return "N/A";
+  const num = Number(val);
+  const abs = Math.abs(num);
+  const sign = num < 0 ? "-" : "";
+  if (abs >= 1e7) {
+    return `${sign}₹${(abs / 1e7).toFixed(2)} Cr`;
+  } else if (abs >= 1e5) {
+    return `${sign}₹${(abs / 1e5).toFixed(2)} L`;
   } else {
-    return `₹${val.toLocaleString("en-IN")}`;
+    return `${sign}₹${abs.toLocaleString("en-IN")}`;
   }
 }
 
 export function TopBottomSkusWidget({
-  topSkus,
-  bottomSkus,
+  topSkus = [],
+  bottomSkus = [],
   loading,
 }: {
-  topSkus: SKURankingItem[];
-  bottomSkus: SKURankingItem[];
+  topSkus?: SKURankingItem[];
+  bottomSkus?: SKURankingItem[];
   loading: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<"top" | "bottom">("top");
@@ -31,7 +36,8 @@ export function TopBottomSkusWidget({
     );
   }
 
-  const listData = activeTab === "top" ? topSkus : bottomSkus;
+  const rawList = activeTab === "top" ? topSkus : bottomSkus;
+  const listData = Array.isArray(rawList) ? rawList : [];
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 mb-6 shadow-xs">
@@ -41,7 +47,7 @@ export function TopBottomSkusWidget({
             SKU Performance Highlights
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Top revenue-generating barcodes vs slow-moving liquidation candidates
+            Top revenue-generating barcodes vs slow-moving liquidation candidates (Apr 2025 – Sep 2026)
           </p>
         </div>
 
@@ -93,12 +99,19 @@ export function TopBottomSkusWidget({
               <th className="py-3 px-4">Department</th>
               <th className="py-3 px-4">Sales Units</th>
               <th className="py-3 px-4">Net Revenue (₹)</th>
-              <th className="py-3 px-4">Stock On-Hand</th>
+              <th className="py-3 px-4">Stock On-Hand (SOH)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {listData.map((item, index) => (
-              <tr key={item.barcode} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+            {listData.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center text-gray-400">
+                  No SKU records found matching current filters.
+                </td>
+              </tr>
+            ) : (
+              listData.map((item, index) => (
+                <tr key={item.barcode} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
                 <td className="py-3 px-4 font-mono text-xs text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] flex items-center justify-center font-bold">
                     {index + 1}
@@ -107,32 +120,36 @@ export function TopBottomSkusWidget({
                 </td>
                 <td className="py-3 px-4">
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {item.item_description || item.barcode}
+                    {item.item_description ? formatDisplayValue(item.item_description) : (item.barcode || "Others")}
                   </div>
-                  <div className="text-[11px] text-gray-400">{item.division}</div>
+                  <div className="text-[11px] text-gray-400">{formatDisplayValue(item.division)}</div>
                 </td>
                 <td className="py-3 px-4 font-medium text-gray-800 dark:text-gray-200">
-                  {item.department}
+                  {formatDisplayValue(item.department)}
                 </td>
                 <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white">
-                  {item.sku_sales_units.toLocaleString()}
+                  {item.sku_sales_units != null ? item.sku_sales_units.toLocaleString() : "0"}
                 </td>
                 <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
                   {formatCurrency(item.sku_revenue)}
                 </td>
                 <td className="py-3 px-4 font-medium">
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                      item.sku_sales_units === 0 && item.current_stock_units > 0
-                        ? "bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400"
-                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                    }`}
-                  >
-                    {item.current_stock_units.toLocaleString()} Units
-                  </span>
+                  {item.current_stock_units != null ? (
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                        item.sku_sales_units === 0 && item.current_stock_units > 0
+                          ? "bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400"
+                          : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                      }`}
+                    >
+                      {item.current_stock_units.toLocaleString()} Units
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 dark:text-gray-500 text-xs font-normal">N/A</span>
+                  )}
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>

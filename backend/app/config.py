@@ -73,6 +73,14 @@ class Settings(BaseSettings):
         "*",
     ]
 
+    # ClickHouse Warehouse Settings
+    CLICKHOUSE_HOST: str = os.getenv("CLICKHOUSE_HOST", "localhost")
+    CLICKHOUSE_PORT: int = int(os.getenv("CLICKHOUSE_PORT", "8123"))
+    CLICKHOUSE_DATABASE: str = os.getenv("CLICKHOUSE_DATABASE", "mb_olap_v2")
+    CLICKHOUSE_USER: str = os.getenv("CLICKHOUSE_USER", "default")
+    CLICKHOUSE_PASSWORD: str = os.getenv("CLICKHOUSE_PASSWORD", "")
+    WAREHOUSE_BACKEND: str = os.getenv("WAREHOUSE_BACKEND", "clickhouse")
+
     class Config:
         case_sensitive = True
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useOlapFilter } from "@/context/OlapFilterContext";
+import { formatDisplayValue } from "@/utils";
 
 export function OlapFilterBar() {
   const {
@@ -11,6 +12,8 @@ export function OlapFilterBar() {
     selectedDepartment,
     availableStores,
     availableMonths,
+    availableDivisions,
+    availableDepartments,
     isLoadingLocations,
     setSelectedStores,
     setSelectedMonths,
@@ -167,10 +170,11 @@ export function OlapFilterBar() {
                 className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-brand-500"
               >
                 <option value="All">All Divisions</option>
-                <option value="MENS">MENS</option>
-                <option value="LADIES">LADIES</option>
-                <option value="KIDS">KIDS</option>
-                <option value="NON-APPAREL">NON-APPAREL</option>
+                {availableDivisions.map((div) => (
+                  <option key={div} value={div}>
+                    {formatDisplayValue(div)}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -183,10 +187,11 @@ export function OlapFilterBar() {
                 className="w-full h-8 px-2.5 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-brand-500"
               >
                 <option value="All">All Departments</option>
-                <option value="MENS SHIRTS">MENS SHIRTS</option>
-                <option value="MENS DENIMS">MENS DENIMS</option>
-                <option value="LADIES TOPS">LADIES TOPS</option>
-                <option value="KIDS WEAR">KIDS WEAR</option>
+                {availableDepartments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {formatDisplayValue(dept)}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

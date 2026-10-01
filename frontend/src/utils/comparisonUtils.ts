@@ -2,15 +2,29 @@ export type ComparisonDirection = "up" | "down" | "neutral";
 export type ComparisonWinner = "left" | "right" | "tie";
 
 export interface ComparisonResult {
-  left: number;
-  right: number;
-  difference: number;
+  left: number | null;
+  right: number | null;
+  difference: number | null;
   percentChange: number | null;
   direction: ComparisonDirection;
   winner: ComparisonWinner;
 }
 
-export function computeComparison(left: number, right: number): ComparisonResult {
+export function computeComparison(
+  left: number | null | undefined,
+  right: number | null | undefined
+): ComparisonResult {
+  if (left === null || left === undefined || right === null || right === undefined) {
+    return {
+      left: left ?? null,
+      right: right ?? null,
+      difference: null,
+      percentChange: null,
+      direction: "neutral",
+      winner: "tie",
+    };
+  }
+
   const difference = right - left;
   let percentChange: number | null = null;
   if (left === 0) {
@@ -28,12 +42,13 @@ export function computeComparison(left: number, right: number): ComparisonResult
 }
 
 export function formatComparisonValue(
-  value: number,
+  value: number | null | undefined,
   format: "currency" | "number" | "percent"
 ): string {
+  if (value === null || value === undefined) return "N/A";
   if (format === "currency") {
-    if (value >= 1e7) return `₹${(value / 1e7).toFixed(2)} Cr`;
-    if (value >= 1e5) return `₹${(value / 1e5).toFixed(2)} L`;
+    if (Math.abs(value) >= 1e7) return `₹${(value / 1e7).toFixed(2)} Cr`;
+    if (Math.abs(value) >= 1e5) return `₹${(value / 1e5).toFixed(2)} L`;
     return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
   }
   if (format === "percent") return `${value.toFixed(2)}%`;

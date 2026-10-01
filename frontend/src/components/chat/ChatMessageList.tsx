@@ -62,7 +62,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, isLo
               <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
 
               {/* Render Reports for Assistant Messages */}
-              {!isUser && msg.data && msg.columns && msg.visualization_type && (
+              {!isUser && msg.data && msg.data.length > 0 && msg.columns && msg.columns.length > 0 && msg.visualization_type && msg.visualization_type !== "TEXT_ONLY" && (
                 <DynamicReportRenderer
                   visualizationType={msg.visualization_type}
                   columns={msg.columns}
@@ -93,10 +93,11 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, isLo
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce" />
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce delay-150" />
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce delay-300" />
-            <span className="text-xs text-gray-400 ml-2 font-medium">Translating to DuckDB SQL...</span>
+            <span className="text-xs text-gray-400 ml-2 font-medium">Translating to Analytical SQL...</span>
           </div>
         </div>
       )}
+
     </div>
   );
 };

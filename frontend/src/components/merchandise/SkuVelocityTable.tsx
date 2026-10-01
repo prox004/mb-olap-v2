@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { SkuVelocityItem } from "@/hooks/useMerchandiseData";
 import { ExportCsvButton } from "@/components/common/ExportCsvButton";
+import { formatDisplayValue } from "@/utils";
 
 interface SkuVelocityTableProps {
   items: SkuVelocityItem[];
@@ -143,12 +144,12 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
                   className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
                 >
                   <td className="p-3 font-mono font-bold text-gray-900 dark:text-white">{item.barcode}</td>
-                  <td className="p-3 max-w-xs truncate font-medium text-gray-900 dark:text-white" title={item.description}>
-                    {item.description || "N/A"}
+                  <td className="p-3 max-w-xs truncate font-medium text-gray-900 dark:text-white" title={formatDisplayValue(item.description)}>
+                    {formatDisplayValue(item.description)}
                   </td>
-                  <td className="p-3 text-gray-500">{item.department || "N/A"}</td>
-                  <td className="p-3 max-w-[120px] truncate text-gray-500" title={item.vendor}>
-                    {item.vendor || "N/A"}
+                  <td className="p-3 text-gray-500">{formatDisplayValue(item.department)}</td>
+                  <td className="p-3 max-w-[120px] truncate text-gray-500" title={formatDisplayValue(item.vendor)}>
+                    {formatDisplayValue(item.vendor)}
                   </td>
                   <td className="p-3 font-bold text-gray-900 dark:text-white">
                     ₹{item.net_revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -221,20 +222,20 @@ export const SkuVelocityTable: React.FC<SkuVelocityTableProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
                 <div>
                   <span className="text-gray-400">Division</span>
-                  <p className="font-semibold text-gray-900 dark:text-white">{selectedSku.division || "N/A"}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{formatDisplayValue(selectedSku.division)}</p>
                 </div>
                 <div>
                   <span className="text-gray-400">Section</span>
-                  <p className="font-semibold text-gray-900 dark:text-white">{selectedSku.section || "N/A"}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{formatDisplayValue(selectedSku.section)}</p>
                 </div>
                 <div>
                   <span className="text-gray-400">Department</span>
-                  <p className="font-semibold text-gray-900 dark:text-white">{selectedSku.department || "N/A"}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{formatDisplayValue(selectedSku.department)}</p>
                 </div>
                 <div>
                   <span className="text-gray-400">Vendor</span>
-                  <p className="font-semibold text-gray-900 dark:text-white truncate" title={selectedSku.vendor}>
-                    {selectedSku.vendor || "N/A"}
+                  <p className="font-semibold text-gray-900 dark:text-white truncate" title={formatDisplayValue(selectedSku.vendor)}>
+                    {formatDisplayValue(selectedSku.vendor)}
                   </p>
                 </div>
                 <div>

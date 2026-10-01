@@ -16,11 +16,18 @@ function formatCurrency(val: number): string {
 export function RecommendationSummaryCards({
   summary,
   loading,
+  isSupported = true,
 }: {
   summary: RecommendationSummaryData | null;
   loading: boolean;
+  isSupported?: boolean;
 }) {
+  if (!isSupported) {
+    return null;
+  }
+
   if (loading || !summary) {
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[1, 2, 3, 4].map((i) => (

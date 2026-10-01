@@ -37,12 +37,134 @@ def get_vendor_scorecard(
     order: str = Query("desc", enum=["asc", "desc"]),
     limit: int = Query(100, ge=1, le=5000),
     offset: int = Query(0, ge=0),
-    db: DuckDBPyConnection = Depends(get_db),
+    db = Depends(get_db),
 ):
     """
     Returns vendor performance scorecard items with dynamic search, filtering by min_score, store_ids, and sorting.
     """
-    if store_ids or months:
+    from backend.app.config import settings
+    is_clickhouse = settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse"
+
+    if is_clickhouse:
+        conditions = []
+        params = []
+        inv_conditions = []
+        inv_params = []
+
+        if store_ids:
+            placeholders = ", ".join(["?"] * len(store_ids))
+            conditions.append(f"l.admsite_code IN ({placeholders})")
+            inv_conditions.append(f"l.admsite_code IN ({placeholders})")
+            params.extend(store_ids)
+            inv_params.extend(store_ids)
+
+        if months:
+            month_conds = []
+            for m in months:
+                month_conds.append("formatDateTime(f.period_start_date, '%Y-%m') = ?")
+                params.append(m)
+            if month_conds:
+                conditions.append(f"({' OR '.join(month_conds)})")
+
+        where_sales = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+        where_inv = f"WHERE {' AND '.join(inv_conditions)}" if inv_conditions else ""
+
+        where_post_conditions = []
+        post_params = []
+        if min_score is not None:
+            where_post_conditions.append("vendor_score >= ?")
+            post_params.append(min_score)
+        if search_name and search_name.strip():
+            where_post_conditions.append("UPPER(vendor_name) LIKE ?")
+            post_params.append(f"%{search_name.strip().upper()}%")
+        where_post_clause = ("WHERE " + " AND ".join(where_post_conditions)) if where_post_conditions else ""
+
+        query_base = f"""
+        WITH sales AS (
+            SELECT
+                COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
+                count(DISTINCT f.item_code) AS total_skus_supplied,
+                sum(f.bill_qty) AS sales_units,
+                round(sum(f.net_amount), 2) AS net_revenue,
+                round(sum(f.gross_profit), 2) AS gross_profit,
+                CASE WHEN sum(f.net_amount) > 0 THEN round((sum(f.gross_profit) / sum(f.net_amount)) * 100.0, 2) ELSE 0.0 END AS margin_pct
+            FROM fact_sales_monthly f
+            LEFT JOIN dim_product p ON f.item_code = p.item_code
+            LEFT JOIN dim_location l ON f.store_code = l.store_code
+            {where_sales}
+            GROUP BY p.vendor_name
+        ),
+        inv AS (
+            SELECT
+                COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
+                SUM(i.closing_qty) AS current_stock_units,
+                SUM(i.closing_amt) AS current_stock_value,
+                SUM(i.purchase_net_qty + i.transfer_in_qty) AS receive_units,
+                SUM(i.purchase_net_amt + i.transfer_in_amt) AS receive_value,
+                SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) AS available_units,
+                SUM(i.final_sale_qty) AS sum_final_sale_qty,
+                CASE
+                    WHEN SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) > 0
+                    THEN ROUND((SUM(i.final_sale_qty) / SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty)) * 100.0, 2)
+                    ELSE 0.0
+                END AS sell_through_pct
+            FROM fact_inventory i
+            LEFT JOIN dim_product p ON i.item_code = p.item_code
+            LEFT JOIN dim_location l ON i.store_code = l.store_code
+            {where_inv}
+            GROUP BY p.vendor_name
+        ),
+        vendor_combined AS (
+            SELECT
+                s.vendor_name AS vendor_name,
+                s.total_skus_supplied AS total_skus_supplied,
+                COALESCE(i.receive_units, 0.0) AS receive_units,
+                COALESCE(i.receive_value, 0.0) AS receive_value,
+                0.0 AS return_units,
+                0.0 AS return_value,
+                s.sales_units AS sales_units,
+                s.net_revenue AS net_revenue,
+                s.gross_profit AS gross_profit,
+                COALESCE(i.current_stock_units, 0.0) AS current_stock_units,
+                COALESCE(i.current_stock_value, 0.0) AS current_stock_value,
+                COALESCE(i.sell_through_pct, 0.0) AS sell_through_pct,
+                s.margin_pct AS margin_pct,
+                0.0 AS return_rate_pct
+            FROM sales s
+            LEFT JOIN inv i ON s.vendor_name = i.vendor_name
+        ),
+        ranked_vendors AS (
+            SELECT
+                *,
+                PERCENT_RANK() OVER (ORDER BY net_revenue ASC) AS rev_rank,
+                PERCENT_RANK() OVER (ORDER BY sell_through_pct ASC) AS st_rank,
+                PERCENT_RANK() OVER (ORDER BY margin_pct ASC) AS margin_rank
+            FROM vendor_combined
+        ),
+        vendor_scored AS (
+            SELECT
+                vendor_name,
+                total_skus_supplied,
+                receive_units,
+                receive_value,
+                return_units,
+                return_value,
+                sales_units,
+                net_revenue,
+                gross_profit,
+                current_stock_units,
+                current_stock_value,
+                sell_through_pct,
+                margin_pct,
+                return_rate_pct,
+                ROUND(((rev_rank * 0.50) + (st_rank * 0.30) + (margin_rank * 0.20)) * 100.0, 1) AS vendor_score
+            FROM ranked_vendors
+        )
+        SELECT * FROM vendor_scored
+        {where_post_clause}
+        """
+        params = params + inv_params + post_params
+    elif store_ids or months:
         # Include Central Warehouse (1070) so vendor receive_units and sell_through_pct calculate correctly
         effective_store_ids = list(store_ids) if store_ids else None
         if effective_store_ids and 1070 not in effective_store_ids:
@@ -201,6 +323,15 @@ def get_high_return_vendors(
     """
     Returns vendors with high return rates (default return_rate_pct > 5.0%), returning total returned units and monetary value.
     """
+    from backend.app.config import settings
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        return StandardResponse(
+            success=True,
+            supported=False,
+            message="The current inventory dataset does not contain separate vendor-return transaction records, so return-risk analysis cannot be calculated reliably.",
+            data=[]
+        )
+
     if store_ids or months:
         # Note: Vendor receipts & returns are logged at Central Warehouse (1070).
         # We ensure 1070 is included or return metrics are aggregated cleanly.
@@ -312,7 +443,117 @@ def get_top_contributor_vendors(
     """
     Returns top N vendors contributing highest net revenue and gross profit.
     """
-    if store_ids or months:
+    from backend.app.config import settings
+    is_clickhouse = settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse"
+
+    if is_clickhouse:
+        conditions = []
+        params = []
+        inv_conditions = []
+        inv_params = []
+
+        if store_ids:
+            placeholders = ", ".join(["?"] * len(store_ids))
+            conditions.append(f"l.admsite_code IN ({placeholders})")
+            inv_conditions.append(f"l.admsite_code IN ({placeholders})")
+            params.extend(store_ids)
+            inv_params.extend(store_ids)
+
+        if months:
+            month_conds = []
+            for m in months:
+                month_conds.append("formatDateTime(f.period_start_date, '%Y-%m') = ?")
+                params.append(m)
+            if month_conds:
+                conditions.append(f"({' OR '.join(month_conds)})")
+
+        where_sales = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+        where_inv = f"WHERE {' AND '.join(inv_conditions)}" if inv_conditions else ""
+
+        query = f"""
+        WITH sales AS (
+            SELECT
+                COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
+                count(DISTINCT f.item_code) AS total_skus_supplied,
+                sum(f.bill_qty) AS sales_units,
+                round(sum(f.net_amount), 2) AS net_revenue,
+                round(sum(f.gross_profit), 2) AS gross_profit,
+                CASE WHEN sum(f.net_amount) > 0 THEN round((sum(f.gross_profit) / sum(f.net_amount)) * 100.0, 2) ELSE 0.0 END AS margin_pct
+            FROM fact_sales_monthly f
+            LEFT JOIN dim_product p ON f.item_code = p.item_code
+            LEFT JOIN dim_location l ON f.store_code = l.store_code
+            {where_sales}
+            GROUP BY p.vendor_name
+        ),
+        inv AS (
+            SELECT
+                COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
+                SUM(i.closing_qty) AS current_stock_units,
+                SUM(i.closing_amt) AS current_stock_value,
+                SUM(i.purchase_net_qty + i.transfer_in_qty) AS receive_units,
+                SUM(i.purchase_net_amt + i.transfer_in_amt) AS receive_value,
+                SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) AS available_units,
+                SUM(i.final_sale_qty) AS sum_final_sale_qty,
+                CASE
+                    WHEN SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) > 0
+                    THEN ROUND((SUM(i.final_sale_qty) / SUM(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty)) * 100.0, 2)
+                    ELSE 0.0
+                END AS sell_through_pct
+            FROM fact_inventory i
+            LEFT JOIN dim_product p ON i.item_code = p.item_code
+            LEFT JOIN dim_location l ON i.store_code = l.store_code
+            {where_inv}
+            GROUP BY p.vendor_name
+        ),
+        vendor_combined AS (
+            SELECT
+                s.vendor_name AS vendor_name,
+                s.total_skus_supplied AS total_skus_supplied,
+                COALESCE(i.receive_units, 0.0) AS receive_units,
+                COALESCE(i.receive_value, 0.0) AS receive_value,
+                0.0 AS return_units,
+                0.0 AS return_value,
+                s.sales_units AS sales_units,
+                s.net_revenue AS net_revenue,
+                s.gross_profit AS gross_profit,
+                COALESCE(i.current_stock_units, 0.0) AS current_stock_units,
+                COALESCE(i.current_stock_value, 0.0) AS current_stock_value,
+                COALESCE(i.sell_through_pct, 0.0) AS sell_through_pct,
+                s.margin_pct AS margin_pct,
+                0.0 AS return_rate_pct
+            FROM sales s
+            LEFT JOIN inv i ON s.vendor_name = i.vendor_name
+        ),
+        ranked_vendors AS (
+            SELECT
+                *,
+                PERCENT_RANK() OVER (ORDER BY net_revenue ASC) AS rev_rank,
+                PERCENT_RANK() OVER (ORDER BY sell_through_pct ASC) AS st_rank,
+                PERCENT_RANK() OVER (ORDER BY margin_pct ASC) AS margin_rank
+            FROM vendor_combined
+        )
+        SELECT
+            vendor_name,
+            total_skus_supplied,
+            receive_units,
+            receive_value,
+            return_units,
+            return_value,
+            sales_units,
+            net_revenue,
+            gross_profit,
+            current_stock_units,
+            current_stock_value,
+            sell_through_pct,
+            margin_pct,
+            return_rate_pct,
+            ROUND(((rev_rank * 0.50) + (st_rank * 0.30) + (margin_rank * 0.20)) * 100.0, 1) AS vendor_score
+        FROM ranked_vendors
+        ORDER BY net_revenue DESC, gross_profit DESC
+        LIMIT {limit};
+        """
+        params_list = params + inv_params
+    elif store_ids or months:
         effective_store_ids = list(store_ids) if store_ids else None
         if effective_store_ids and 1070 not in effective_store_ids:
             effective_store_ids.append(1070)

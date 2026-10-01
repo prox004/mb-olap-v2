@@ -33,6 +33,11 @@ async def global_exception_handler(request: Request, exc: Exception):
             "message": f"Server Error: {str(exc)}",
             "data": None,
             "meta": None
+        },
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
         }
     )
 

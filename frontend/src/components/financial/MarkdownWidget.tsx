@@ -49,10 +49,23 @@ export default function MarkdownWidget() {
     loadMarkdown();
   }, [selectedStores, selectedDepartment]);
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <div className="flex h-72 items-center justify-center border border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.03] rounded-2xl p-6">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-6 dark:border-amber-900/50 dark:bg-amber-950/20 text-center flex flex-col justify-center items-center h-80">
+        <h4 className="text-sm font-bold text-amber-800 dark:text-amber-300">
+          Markdown & Discount Impact Unavailable
+        </h4>
+        <p className="mt-2 text-xs text-amber-700 dark:text-amber-400 max-w-sm">
+          Not available — requires promotional markdown breakdown data (the 2025 sales ledger records net billed amounts).
+        </p>
       </div>
     );
   }

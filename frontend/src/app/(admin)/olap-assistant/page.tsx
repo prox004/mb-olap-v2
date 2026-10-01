@@ -11,7 +11,7 @@ export default function OlapAssistantPage() {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Welcome to the Wren AI GenBI Assistant workspace! Ask any natural language question to generate governed DuckDB SQL, dynamic charts, and executive insights.",
+      text: "👋 Welcome to the Wren AI GenBI Assistant workspace! Ask any natural language question to generate governed Analytical SQL, dynamic charts, and executive insights.",
       timestamp: ""
     }
   ]);
@@ -53,7 +53,8 @@ export default function OlapAssistantPage() {
         };
         setMessages((prev) => [...prev, assistantMsg]);
       } else {
-        throw new Error(json.message || "Failed to execute query.");
+        const errDetail = json.detail || json.message || "Failed to execute query.";
+        throw new Error(errDetail);
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unable to reach Wren AI backend.";
@@ -82,7 +83,7 @@ export default function OlapAssistantPage() {
               Wren AI GenBI Conversational Workspace
             </h1>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Grounded in Wren AI 5-Layer MDL Engine & DuckDB Analytical Warehouse
+              Grounded in Wren AI 5-Layer MDL Engine & ClickHouse Analytical Warehouse
             </p>
           </div>
         </div>
@@ -92,6 +93,7 @@ export default function OlapAssistantPage() {
           Engine Online
         </span>
       </div>
+
 
       {/* Main Conversational Feed */}
       <div className="flex-1 overflow-y-auto p-6 no-scrollbar">

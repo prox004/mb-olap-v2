@@ -8,7 +8,7 @@ import { RebalanceTable } from "@/components/allocation/RebalanceTable";
 import { StoreStockCoverTable } from "@/components/allocation/StoreStockCoverTable";
 
 export default function StoreAllocationPage() {
-  const { coverItems, recommendations, historyItems, loading, error } = useAllocationData();
+  const { coverItems, recommendations, historyItems, loading, error, supported, unsupportedMessage } = useAllocationData();
 
   return (
     <div className="space-y-6">
@@ -28,6 +28,19 @@ export default function StoreAllocationPage() {
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
           Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+        </div>
+      )}
+
+      {/* Graceful Unsupported / SOH Notice */}
+      {!loading && !supported && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Allocation & Rebalancing Notice:</span>
+            <span>{unsupportedMessage || "Allocation recommendations require stock-on-hand (SOH) inventory data, which is unavailable in the current POS sales ledger dataset."}</span>
+          </div>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-amber-200/70 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 shrink-0">
+            SOH Data Unavailable
+          </span>
         </div>
       )}
 

@@ -10,9 +10,9 @@ class ColourPerformanceItem(BaseModel):
     net_revenue: float
     gross_profit: float
     margin_pct: float
-    current_stock_units: float
-    current_stock_value: float
-    sell_through_pct: float
+    current_stock_units: Optional[float] = None
+    current_stock_value: Optional[float] = None
+    sell_through_pct: Optional[float] = None
 
 class ColourSummaryResponse(BaseModel):
     total_colours: int

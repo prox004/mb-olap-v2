@@ -16,6 +16,8 @@ export type OlapFilterState = {
   selectedDepartment: string;
   availableStores: LocationOption[];
   availableMonths: string[];
+  availableDivisions: string[];
+  availableDepartments: string[];
   isLoadingLocations: boolean;
   isLoadingMonths: boolean;
 };
@@ -28,6 +30,15 @@ export type OlapFilterContextType = OlapFilterState & {
   resetFilters: () => void;
 };
 
+const DEFAULT_DIVISIONS = [
+  "Accessories 1",
+  "Accessories 2",
+  "Kids Wear",
+  "Ladies Wear",
+  "Mens Wear",
+  "Winter Garments",
+];
+
 const OlapFilterContext = createContext<OlapFilterContextType | undefined>(undefined);
 
 export function OlapFilterProvider({ children }: { children: React.ReactNode }) {
@@ -38,6 +49,8 @@ export function OlapFilterProvider({ children }: { children: React.ReactNode }) 
   
   const [availableStores, setAvailableStores] = useState<LocationOption[]>([]);
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [availableDivisions, setAvailableDivisions] = useState<string[]>(DEFAULT_DIVISIONS);
+  const [hierarchyData, setHierarchyData] = useState<{ division: string; department: string }[]>([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState<boolean>(true);
   const [isLoadingMonths, setIsLoadingMonths] = useState<boolean>(true);
 
@@ -47,20 +60,33 @@ export function OlapFilterProvider({ children }: { children: React.ReactNode }) 
         setIsLoadingLocations(true);
         setIsLoadingMonths(true);
         
-        const [locRes, monthRes] = await Promise.all([
+        const results = await Promise.allSettled([
           apiClient<{ success: boolean; data: LocationOption[] }>("/locations"),
-          apiClient<{ success: boolean; data: string[] }>("/months")
+          apiClient<{ success: boolean; data: string[] }>("/months"),
+          apiClient<{ success: boolean; data: { division: string; department: string }[] }>("/category/hierarchy"),
         ]);
 
-        if (locRes.success && Array.isArray(locRes.data)) {
+        const locRes = results[0].status === "fulfilled" ? results[0].value : null;
+        const monthRes = results[1].status === "fulfilled" ? results[1].value : null;
+        const hierRes = results[2].status === "fulfilled" ? results[2].value : null;
+
+        if (locRes?.success && Array.isArray(locRes.data)) {
           setAvailableStores(locRes.data);
           const allStoreIds = locRes.data.map((loc: LocationOption) => loc.admsite_code);
           setSelectedStores(allStoreIds);
         }
 
-        if (monthRes.success && Array.isArray(monthRes.data)) {
+        if (monthRes?.success && Array.isArray(monthRes.data)) {
           setAvailableMonths(monthRes.data);
           setSelectedMonths(monthRes.data);
+        }
+
+        if (hierRes?.success && Array.isArray(hierRes.data)) {
+          setHierarchyData(hierRes.data);
+          const divs = Array.from(new Set(hierRes.data.map((h) => h.division).filter(Boolean))).sort();
+          if (divs.length > 0) {
+            setAvailableDivisions(divs);
+          }
         }
       } catch (err) {
         console.error("Failed to load filter metadata:", err);
@@ -72,6 +98,20 @@ export function OlapFilterProvider({ children }: { children: React.ReactNode }) 
 
     loadMasterData();
   }, []);
+
+  // Compute available departments based on selectedDivision
+  const availableDepartments = React.useMemo(() => {
+    if (hierarchyData.length === 0) return [];
+    const filtered = selectedDivision === "All"
+      ? hierarchyData
+      : hierarchyData.filter((h) => h.division === selectedDivision);
+    return Array.from(new Set(filtered.map((h) => h.department).filter(Boolean))).sort();
+  }, [hierarchyData, selectedDivision]);
+
+  const handleSetDivision = (division: string) => {
+    setSelectedDivision(division);
+    setSelectedDepartment("All");
+  };
 
   const resetFilters = () => {
     const allStoreIds = availableStores.map((loc) => loc.admsite_code);
@@ -90,11 +130,13 @@ export function OlapFilterProvider({ children }: { children: React.ReactNode }) 
         selectedDepartment,
         availableStores,
         availableMonths,
+        availableDivisions,
+        availableDepartments,
         isLoadingLocations,
         isLoadingMonths,
         setSelectedStores,
         setSelectedMonths,
-        setSelectedDivision,
+        setSelectedDivision: handleSetDivision,
         setSelectedDepartment,
         resetFilters,
       }}

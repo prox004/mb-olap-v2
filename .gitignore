@@ -9,6 +9,8 @@
 
 # next.js
 /.next/
+/.next-duckdb/
+.next-duckdb/
 /out/
 
 # production

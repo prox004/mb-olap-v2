@@ -1,4 +1,15 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+export function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  if (typeof window !== "undefined") {
+    if (window.location.port === "3001") {
+      return `http://${window.location.hostname}:8001/api/v1`;
+    }
+    return `http://${window.location.hostname}:8000/api/v1`;
+  }
+  return "http://localhost:8000/api/v1";
+}
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, unknown>;
@@ -28,7 +39,8 @@ function isNetworkError(error: unknown): boolean {
 export async function apiClient<T = unknown>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { params, headers, quiet = false, retries = 3, ...customConfig } = options;
 
-  let url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getApiBaseUrl();
+  let url = `${baseUrl}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
   if (params) {
     const searchParams = new URLSearchParams();

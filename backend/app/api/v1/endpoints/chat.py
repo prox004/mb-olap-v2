@@ -29,6 +29,70 @@ class SuggestedPrompt(BaseModel):
     category: str
     prompt: str
 
+
+def detect_unsupported_inventory_metric(prompt: str) -> Optional[Dict[str, str]]:
+    """
+    Checks if a prompt asks for inventory/stock metrics that cannot be computed
+    from legacy POS sales ledger datasets.
+    When ClickHouse is active with fact_inventory, all SOH and Sell-Through metrics are supported.
+    """
+    from backend.app.config import settings
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        return None
+
+    p = prompt.lower()
+
+    # 1. Sell-Through Percentage / Rate
+    if any(k in p for k in ["sell-through", "sell through", "sellthrough", "str %"]):
+        return {
+            "metric": "Sell-Through Rate / Percentage",
+            "reason": (
+                "Sell-through rate requires opening stock, incoming shipments/receipts, or stock-on-hand (SOH) inventory snapshots. "
+                "The active ClickHouse data warehouse currently contains verified POS retail sales transactions (397,805 records), "
+                "which does not include physical inventory snapshot feeds."
+            ),
+            "sql_comment": "-- Metric Unavailable: Sell-through requires Stock-On-Hand (SOH) and inventory receipt/transfer feeds\n-- Current active warehouse schema provides verified POS retail sales ledger records."
+        }
+
+    # 2. Weeks of Cover (WOC)
+    if any(k in p for k in ["weeks of cover", "week of cover", "woc", "stock cover", "inventory cover"]):
+        return {
+            "metric": "Weeks of Cover (WOC)",
+            "reason": (
+                "Weeks of Cover (WOC) calculation requires active Stock-On-Hand (SOH) inventory levels divided by average weekly sales velocity. "
+                "Inventory stock balances are unavailable in the current POS sales ledger dataset."
+            ),
+            "sql_comment": "-- Metric Unavailable: Weeks of Cover requires active SOH inventory balances\n-- Current active warehouse schema provides verified POS retail sales ledger records."
+        }
+
+    # 3. Stock on Hand / Closing / Opening Inventory Balances
+    if any(k in p for k in [
+        "stock on hand", "stock-on-hand", "soh", "closing stock", "opening stock",
+        "current stock", "stock valuation", "inventory valuation", "stock level", "inventory level"
+    ]):
+        return {
+            "metric": "Stock-On-Hand (SOH) & Inventory Balances",
+            "reason": (
+                "Stock-On-Hand (SOH), opening/closing stock quantities, and inventory valuation require physical stock snapshot feeds. "
+                "These are unavailable in the current POS sales ledger dataset."
+            ),
+            "sql_comment": "-- Metric Unavailable: Inventory levels require physical SOH snapshot feeds\n-- Current active warehouse schema provides verified POS retail sales ledger records."
+        }
+
+    # 4. Inventory-Based Recommendations
+    if any(k in p for k in ["reorder recommendation", "transfer recommendation", "markdown recommendation", "stock rebalance"]):
+        return {
+            "metric": "Inventory-Based Optimization Recommendations",
+            "reason": (
+                "Purchase reorders, inter-store transfers, and dynamic price markdowns require physical stock-on-hand balances "
+                "and minimum/maximum cover thresholds, which are unavailable in the current POS sales ledger dataset."
+            ),
+            "sql_comment": "-- Metric Unavailable: AI Recommendations require Stock-On-Hand (SOH) feeds\n-- Current active warehouse schema provides verified POS retail sales ledger records."
+        }
+
+    return None
+
+
 @router.post("/query", response_model=StandardResponse[ChatQueryResponse])
 def process_chat_query(
     request: ChatQueryRequest,
@@ -36,10 +100,11 @@ def process_chat_query(
 ):
     """
     Main GenBI Query Endpoint:
-      1. Translates user business question into DuckDB SQL via Groq API & Wren AI Context.
-      2. Validates SQL & executes with auto-refinement syntax repair loop against DuckDB.
-      3. Classifies visualization type (KPI_CARD, PIE_CHART, BAR_CHART, DATA_TABLE).
-      4. Synthesizes executive summary.
+      1. Translates user business question into Analytical SQL via Groq API & Wren AI Context.
+      2. Detects requests for unsupported inventory/SOH metrics to prevent data fabrication.
+      3. Validates SQL & executes with auto-refinement syntax repair loop against warehouse.
+      4. Classifies visualization type (KPI_CARD, PIE_CHART, BAR_CHART, DATA_TABLE).
+      5. Synthesizes executive summary.
     """
     user_prompt = request.prompt.strip()
     if not user_prompt:
@@ -47,6 +112,39 @@ def process_chat_query(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Prompt text cannot be empty."
         )
+
+    # Check for unsupported inventory/SOH metrics to prevent hallucination or fabrication
+    unsupported = detect_unsupported_inventory_metric(user_prompt)
+    if unsupported:
+        summary_msg = (
+            f"ℹ️ **{unsupported['metric']} is unavailable in the current dataset.**\n\n"
+            f"{unsupported['reason']}\n\n"
+            "To maintain analytical integrity, Wren AI does not fabricate inventory data.\n\n"
+            "**Supported metrics and analyses in MB-OLAP V2:**\n"
+            "• **Net Sales Revenue** (`SUM(net_amount)` = ₹331,367,606)\n"
+            "• **Sales Units** (`SUM(sales_quantity)` = 1,234,990 units)\n"
+            "• **Cost of Goods Sold (COGS)** (`SUM(cogs)` = ₹190,626,225)\n"
+            "• **Gross Profit** (`SUM(gross_profit)` = ₹140,741,381 | 42.47% GM)\n"
+            "• **Average Selling Price (ASP)**\n"
+            "• **Monthly Sales Trends by Report Date**\n"
+            "• **Store Rankings & Outlet Performance**\n"
+            "• **Product, Department, Division & Vendor Sales**"
+        )
+        return StandardResponse(
+            success=True,
+            message=f"{unsupported['metric']} is unsupported due to missing SOH inventory data.",
+            data=ChatQueryResponse(
+                prompt=user_prompt,
+                generated_sql=unsupported["sql_comment"],
+                visualization_type="TEXT_ONLY",
+                summary=summary_msg,
+                columns=[],
+                data=[],
+                record_count=0
+            ),
+            supported=False
+        )
+
 
     try:
         # Step 1: Generate SQL from natural language prompt

@@ -4,6 +4,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { CategoryMatrixItem } from "@/hooks/useCategoryData";
 import { ApexOptions } from "apexcharts";
+import { formatDisplayValue } from "@/utils";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -14,21 +15,23 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
     );
   }
 
-  const winners = matrix
+  const safeMatrix = Array.isArray(matrix) ? matrix : [];
+
+  const winners = safeMatrix
     .filter((m) => m.performance_quadrant === "WINNER")
-    .map((m) => ({ x: m.sell_through_pct, y: m.margin_pct, name: m.department }));
+    .map((m) => ({ x: m.sell_through_pct ?? 0, y: m.margin_pct ?? 0, name: formatDisplayValue(m.department) }));
 
-  const highMarginSlow = matrix
+  const highMarginSlow = safeMatrix
     .filter((m) => m.performance_quadrant === "HIGH_MARGIN_SLOW")
-    .map((m) => ({ x: m.sell_through_pct, y: m.margin_pct, name: m.department }));
+    .map((m) => ({ x: m.sell_through_pct ?? 0, y: m.margin_pct ?? 0, name: formatDisplayValue(m.department) }));
 
-  const volumeDrivers = matrix
+  const volumeDrivers = safeMatrix
     .filter((m) => m.performance_quadrant === "VOLUME_DRIVER")
-    .map((m) => ({ x: m.sell_through_pct, y: m.margin_pct, name: m.department }));
+    .map((m) => ({ x: m.sell_through_pct ?? 0, y: m.margin_pct ?? 0, name: formatDisplayValue(m.department) }));
 
-  const underperformers = matrix
+  const underperformers = safeMatrix
     .filter((m) => m.performance_quadrant === "OVERSTOCKED_UNDERPERFORMER")
-    .map((m) => ({ x: m.sell_through_pct, y: m.margin_pct, name: m.department }));
+    .map((m) => ({ x: m.sell_through_pct ?? 0, y: m.margin_pct ?? 0, name: formatDisplayValue(m.department) }));
 
   const series = [
     { name: "Winners (Star Performers)", data: winners },
@@ -52,13 +55,13 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
       },
     },
     xaxis: {
-      title: { text: "Sell-Through Rate %" },
+      title: { text: "Sell-Through Rate % (Final Sale Qty Basis)" },
       tickAmount: 10,
-      labels: { formatter: (val) => `${Number(val).toFixed(1)}%` },
+      labels: { formatter: (val) => (isNaN(Number(val)) ? "" : `${Number(val).toFixed(1)}%`) },
     },
     yaxis: {
       title: { text: "Gross Margin %" },
-      labels: { formatter: (val) => `${Number(val).toFixed(1)}%` },
+      labels: { formatter: (val) => (isNaN(Number(val)) ? "" : `${Number(val).toFixed(1)}%`) },
     },
     tooltip: {
       custom: function ({ seriesIndex, dataPointIndex, w }) {
@@ -68,8 +71,8 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
           <div className="p-2.5 text-xs font-sans bg-gray-900 text-white rounded-lg shadow-lg border border-gray-700">
             <strong className="text-brand-400 text-sm">${item.name}</strong>
             <div className="mt-1">
-              <span>Sell-Through: <b>${item.x}%</b></span><br/>
-              <span>Gross Margin: <b>${item.y}%</b></span>
+              <span>Sell-Through: <b>${item.x != null ? `${item.x}%` : "N/A"}</b></span><br/>
+              <span>Gross Margin: <b>${item.y != null ? `${item.y}%` : "N/A"}</b></span>
             </div>
           </div>
         `;
@@ -85,7 +88,7 @@ export function CategoryMatrixChart({ matrix, loading }: { matrix: CategoryMatri
             Category Performance Matrix (4-Quadrant Scatter Plot)
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Categorizes departments by Sell-Through Rate % (X-axis) vs Gross Margin % (Y-axis)
+            Categorizes departments by Sell-Through Rate % (Final Sale Qty basis, Apr 1 – Sep 15) vs Gross Margin %
           </p>
         </div>
       </div>

@@ -30,18 +30,35 @@ api_router.include_router(recommendations_router, prefix="/recommendations", tag
 api_router.include_router(chat_router, prefix="/chat", tags=["Wren AI Semantic Assistant"])
 api_router.include_router(reporting_router, prefix="/reporting", tags=["Self-Service Report Builder"])
 
+from backend.app.config import settings
+
 @api_router.get("/health", response_model=StandardResponse[dict], tags=["System Health"])
-def health_check(db: DuckDBPyConnection = Depends(get_db)):
+def health_check(db = Depends(get_db)):
     """
-    Health check endpoint verifying FastAPI server and DuckDB connection status.
+    Health check endpoint verifying FastAPI server and active warehouse connection status.
     """
-    total_fact_rows = db.execute("SELECT count(*) FROM fact_cube_monthly").fetchone()[0]
+    backend_mode = settings.WAREHOUSE_BACKEND.lower().strip()
+    if backend_mode == "clickhouse":
+        try:
+            total_fact_rows = db.execute("SELECT count(*) FROM fact_sales_monthly").fetchone()[0]
+            db_status = "online"
+            db_desc = f"ClickHouse connected ({settings.CLICKHOUSE_HOST}:{settings.CLICKHOUSE_PORT})"
+        except Exception as e:
+            total_fact_rows = 0
+            db_status = "degraded"
+            db_desc = f"ClickHouse connection failed ({e})"
+    else:
+        total_fact_rows = db.execute("SELECT count(*) FROM fact_cube_monthly").fetchone()[0]
+        db_status = "online"
+        db_desc = "DuckDB connected (read-only)"
+
     return StandardResponse(
         success=True,
         message="MB-OLAP V2 Analytical API is healthy",
         data={
-            "status": "online",
-            "database": "DuckDB connected (read-only)",
+            "status": db_status,
+            "warehouse_backend": backend_mode,
+            "database": db_desc,
             "fact_records": total_fact_rows
         }
     )
@@ -118,8 +135,10 @@ def add_location(payload: CreateStoreLocationRequest):
 
     threading.Thread(target=trigger_etl_pipeline, daemon=True).start()
 
-    # 4. Persist to source Excel file data/locations.xlsx for ETL repeatability
-    excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../data/locations.xlsx"))
+    # 4. Persist to source Excel file for ETL repeatability
+    excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../database/data/locations.xlsx"))
+    if not os.path.exists(excel_path):
+        excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../data/locations.xlsx"))
     if os.path.exists(excel_path):
         try:
             excel_df = pd.read_excel(excel_path)
@@ -182,8 +201,10 @@ def update_location(admsite_code: int, payload: UpdateStoreLocationRequest):
 
     threading.Thread(target=trigger_etl_pipeline, daemon=True).start()
 
-    # Persist to source Excel file data/locations.xlsx
-    excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../data/locations.xlsx"))
+    # Persist to source Excel file
+    excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../database/data/locations.xlsx"))
+    if not os.path.exists(excel_path):
+        excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../data/locations.xlsx"))
     if os.path.exists(excel_path):
         try:
             excel_df = pd.read_excel(excel_path)
@@ -242,8 +263,10 @@ def delete_location(admsite_code: int):
 
     threading.Thread(target=trigger_etl_pipeline, daemon=True).start()
 
-    # Update source Excel file data/locations.xlsx
-    excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../data/locations.xlsx"))
+    # Update source Excel file
+    excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../database/data/locations.xlsx"))
+    if not os.path.exists(excel_path):
+        excel_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../data/locations.xlsx"))
     if os.path.exists(excel_path):
         try:
             excel_df = pd.read_excel(excel_path)
@@ -263,13 +286,13 @@ def delete_location(admsite_code: int):
 
 
 @api_router.get("/months", response_model=StandardResponse[list], tags=["Master Lookups"])
-def get_months(db: DuckDBPyConnection = Depends(get_db)):
+def get_months(db = Depends(get_db)):
     """
     Returns dynamic list of distinct operational months [YYYY-MM] present in the OLAP database.
     """
     query = """
     SELECT DISTINCT strftime(START_DATE, '%Y-%m') AS month_code
-    FROM fact_cube_monthly
+    FROM v_fact_item_location_monthly
     WHERE START_DATE IS NOT NULL
     ORDER BY month_code ASC
     """

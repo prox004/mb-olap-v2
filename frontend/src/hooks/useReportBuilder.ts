@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { apiClient } from "@/utils/apiClient";
+import { apiClient, getApiBaseUrl } from "@/utils/apiClient";
 import {
   AggregationType,
   createValueField,
@@ -260,7 +260,7 @@ export function useReportBuilder(initialReportId?: string | null) {
   }, [savedReportId, loadSavedReports]);
 
   const exportCsv = useCallback(async () => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+    const baseUrl = getApiBaseUrl();
     const payload = normalizeReport({
       ...reportRef.current,
       measures: reportRef.current.value_fields.map((v) => v.field_id),

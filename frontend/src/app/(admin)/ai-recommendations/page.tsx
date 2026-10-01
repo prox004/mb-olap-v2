@@ -7,7 +7,7 @@ import { RecommendationFeed } from "@/components/recommendations/RecommendationF
 import { ActionModal } from "@/components/recommendations/ActionModal";
 
 export default function AIRecommendationsPage() {
-  const { summary, feedItems, loading, error, refresh } = useRecommendationsData();
+  const { summary, feedItems, loading, error, isSupported, unsupportedMessage, refresh } = useRecommendationsData();
   const [selectedItem, setSelectedItem] = useState<RecommendationItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -50,13 +50,20 @@ export default function AIRecommendationsPage() {
       )}
 
       {/* 1. Summary Metric Cards */}
-      <RecommendationSummaryCards summary={summary} loading={loading} />
+      <RecommendationSummaryCards summary={summary} loading={loading} isSupported={isSupported} />
 
       {/* 2. Actionable ML Feed */}
-      <RecommendationFeed items={feedItems} loading={loading} onExecute={handleExecute} />
+      <RecommendationFeed
+        items={feedItems}
+        loading={loading}
+        isSupported={isSupported}
+        unsupportedMessage={unsupportedMessage}
+        onExecute={handleExecute}
+      />
 
       {/* 3. Action Execution Confirmation Modal */}
       <ActionModal item={selectedItem} onClose={() => setSelectedItem(null)} onSuccess={handleSuccess} />
     </div>
   );
 }
+

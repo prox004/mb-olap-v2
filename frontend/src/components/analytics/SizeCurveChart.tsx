@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
 import { apiClient } from "@/utils/apiClient";
+import { formatDisplayValue } from "@/utils";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -138,7 +139,7 @@ export default function SizeCurveChart() {
     ];
   }, [data, showAllSizes, selectedDivision, selectedDepartment]);
 
-  const categories = useMemo(() => chartData.map((item) => item.size_code), [chartData]);
+  const categories = useMemo(() => chartData.map((item) => formatDisplayValue(item.size_code)), [chartData]);
   const contributions = useMemo(() => chartData.map((item) => item.size_contribution_pct), [chartData]);
   const barCount = chartData.length;
   const chartHeight = Math.max(280, barCount * 34 + 60);
@@ -240,7 +241,7 @@ export default function SizeCurveChart() {
               className="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-hidden"
             >
               {divisions.map((div) => (
-                <option key={div} value={div}>{div}</option>
+                <option key={div} value={div}>{formatDisplayValue(div)}</option>
               ))}
             </select>
           </div>
@@ -253,7 +254,7 @@ export default function SizeCurveChart() {
               className="text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-hidden"
             >
               {departments.map((dept) => (
-                <option key={dept} value={dept}>{dept}</option>
+                <option key={dept} value={dept}>{formatDisplayValue(dept)}</option>
               ))}
             </select>
           </div>

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { StoreStockCoverItem } from "@/hooks/useAllocationData";
+import { formatDisplayValue } from "@/utils";
 
 function formatCurrency(val: number): string {
   if (val >= 1e7) {
@@ -98,8 +99,22 @@ export function StoreStockCoverTable({ items, loading }: { items: StoreStockCove
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {filteredItems.slice(0, 50).map((item, idx) => (
-              <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+            {filteredItems.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-gray-500 dark:text-gray-400">
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Store stock cover data unavailable
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      Requires stock-on-hand (SOH) inventory position data.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredItems.slice(0, 50).map((item, idx) => (
+                <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
                 <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <span
                     className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded ${
@@ -110,10 +125,10 @@ export function StoreStockCoverTable({ items, loading }: { items: StoreStockCove
                   >
                     {item.site_type === "CENTRAL_WAREHOUSE" ? "DC" : "STORE"}
                   </span>
-                  {item.store_name}
+                  {formatDisplayValue(item.store_name)}
                 </td>
                 <td className="py-3 px-4 font-medium text-gray-800 dark:text-gray-200">
-                  {item.department}
+                  {formatDisplayValue(item.department)}
                 </td>
                 <td className="py-3 px-4 font-medium">{item.sales_units.toLocaleString()}</td>
                 <td className="py-3 px-4 font-bold text-gray-900 dark:text-white">
@@ -152,7 +167,7 @@ export function StoreStockCoverTable({ items, loading }: { items: StoreStockCove
                   </span>
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>
