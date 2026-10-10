@@ -11,7 +11,7 @@ export default function OlapAssistantPage() {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Welcome to the Wren AI GenBI Assistant workspace! Ask any natural language question to generate governed Analytical SQL, dynamic charts, and executive insights.",
+      text: "👋 Welcome to your Retail AI Assistant workspace! Ask any business question to generate dynamic charts, sales breakdowns, and executive insights.",
       timestamp: ""
     }
   ]);
@@ -80,10 +80,10 @@ export default function OlapAssistantPage() {
           </div>
           <div>
             <h1 className="text-base font-bold text-gray-900 dark:text-white">
-              Wren AI GenBI Conversational Workspace
+              Smart Retail AI Assistant
             </h1>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Grounded in Wren AI 5-Layer MDL Engine & ClickHouse Analytical Warehouse
+              Conversational analytics for sales, inventory, and category performance
             </p>
           </div>
         </div>

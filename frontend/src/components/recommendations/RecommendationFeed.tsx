@@ -46,16 +46,16 @@ export function RecommendationFeed({
             Recommendations Unavailable
           </h3>
           <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-            Requires inventory / SOH data
+            Requires store inventory data
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
             {unsupportedMessage ||
-              "AI inventory recommendations (Purchase Reorders, Store Transfers, and Dynamic Markdowns) require stock-on-hand inventory data, which is unavailable in the current POS sales ledger dataset."}
+              "AI inventory recommendations (Purchase Reorders, Store Transfers, and Markdowns) require store inventory data, which is currently unavailable."}
           </p>
         </div>
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          <span>Active Warehouse: ClickHouse (mb_olap_v2 POS sales transactions)</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Data Source: Retail Sales Transactions</span>
         </div>
       </div>
     );

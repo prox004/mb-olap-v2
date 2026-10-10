@@ -64,7 +64,7 @@ export default function MarkdownWidget() {
           Markdown & Discount Impact Unavailable
         </h4>
         <p className="mt-2 text-xs text-amber-700 dark:text-amber-400 max-w-sm">
-          Not available — requires promotional markdown breakdown data (the 2025 sales ledger records net billed amounts).
+          Promotional markdown and discount breakdown data is currently unavailable.
         </p>
       </div>
     );

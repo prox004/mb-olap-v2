@@ -19,6 +19,14 @@ class SkuVelocityItem(BaseModel):
     woc: float
     moi: float
     velocity_status: str # FAST_MOVER, MEDIUM_MOVER, SLOW_MOVER, DEAD_STOCK
+    category1: Optional[str] = None
+    category2: Optional[str] = None
+    category3: Optional[str] = None
+    category4: Optional[str] = None
+    category5: Optional[str] = None
+    category6: Optional[str] = None
+    colour: Optional[str] = None
+    style_code: Optional[str] = None
 
 class SkuVelocityResponse(BaseModel):
     total_records: int

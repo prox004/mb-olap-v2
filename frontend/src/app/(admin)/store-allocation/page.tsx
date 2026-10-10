@@ -19,7 +19,7 @@ export default function StoreAllocationPage() {
             Store Allocation & Inter-Store Rebalancing
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Min-Max Weeks of Cover (WOC) optimization, stockout prevention, and STO transfer generation
+            Weeks of Cover (WOC) optimization, stockout prevention, and inter-store rebalancing recommendations
           </p>
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function StoreAllocationPage() {
       {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
-          Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+          Unable to load data at this moment. Please check your network connection or refresh the page.
         </div>
       )}
 
@@ -35,11 +35,11 @@ export default function StoreAllocationPage() {
       {!loading && !supported && (
         <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">Allocation & Rebalancing Notice:</span>
-            <span>{unsupportedMessage || "Allocation recommendations require stock-on-hand (SOH) inventory data, which is unavailable in the current POS sales ledger dataset."}</span>
+            <span className="font-semibold">Allocation &amp; Rebalancing Notice:</span>
+            <span>{unsupportedMessage || "Allocation recommendations require store inventory data, which is currently unavailable."}</span>
           </div>
           <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-amber-200/70 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 shrink-0">
-            SOH Data Unavailable
+            Inventory Data Unavailable
           </span>
         </div>
       )}

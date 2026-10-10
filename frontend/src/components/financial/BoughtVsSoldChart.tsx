@@ -70,7 +70,7 @@ export default function BoughtVsSoldChart() {
           Procurement Realization Unavailable
         </h4>
         <p className="mt-2 text-xs text-amber-700 dark:text-amber-400 max-w-sm">
-          Not available — requires inventory/SOH data (procurement PO goods received and unsold inventory balances are absent in the 2025 sales ledger).
+          Procurement goods received and inventory balance data is currently unavailable.
         </p>
       </div>
     );

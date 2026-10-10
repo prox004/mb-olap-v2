@@ -7,7 +7,7 @@ import { CategoryMatrixChart } from "@/components/category/CategoryMatrixChart";
 import { CategoryTopMovers } from "@/components/category/CategoryTopMovers";
 
 export default function CategoryPerformancePage() {
-  const { hierarchy, matrix, topMovers, loading, error } = useCategoryData();
+  const { hierarchy, matrix, topMovers, loading, error, fetchDepartmentSkus } = useCategoryData();
   const [activeTab, setActiveTab] = useState<"tree" | "matrix">("tree");
 
   return (
@@ -16,10 +16,10 @@ export default function CategoryPerformancePage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-            Category & Product Hierarchy Performance
+            Category &amp; Product Performance
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Multi-level hierarchy analysis (Division → Section → Department) & Category Performance Matrix
+            Explore sales, gross margins, and inventory performance by category and product
           </p>
         </div>
 
@@ -33,7 +33,7 @@ export default function CategoryPerformancePage() {
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-             Hierarchy Tree View
+            📂 Category &amp; Division View
           </button>
           <button
             onClick={() => setActiveTab("matrix")}
@@ -43,7 +43,7 @@ export default function CategoryPerformancePage() {
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             }`}
           >
-             Performance Matrix (Scatter)
+            📊 Performance Matrix
           </button>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function CategoryPerformancePage() {
       {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
-           Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+          Unable to load data at this moment. Please check your network connection or refresh the page.
         </div>
       )}
 
@@ -60,7 +60,7 @@ export default function CategoryPerformancePage() {
 
       {/* Primary Tab Views */}
       {activeTab === "tree" ? (
-        <CategoryTreeTable items={hierarchy} loading={loading} />
+        <CategoryTreeTable items={hierarchy} loading={loading} fetchDepartmentSkus={fetchDepartmentSkus} />
       ) : (
         <CategoryMatrixChart matrix={matrix} loading={loading} />
       )}

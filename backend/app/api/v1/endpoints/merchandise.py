@@ -53,6 +53,14 @@ def map_sku_row(row) -> SkuVelocityItem:
         woc=float(row[14] or 0.0),
         moi=float(row[15] or 0.0),
         velocity_status=row[16] or "UNKNOWN",
+        category1=row[17] if len(row) > 17 and row[17] is not None and str(row[17]).strip().upper() != 'NA' else None,
+        category2=row[18] if len(row) > 18 and row[18] is not None and str(row[18]).strip().upper() != 'NA' else None,
+        category3=row[19] if len(row) > 19 and row[19] is not None and str(row[19]).strip().upper() != 'NA' else None,
+        category4=row[20] if len(row) > 20 and row[20] is not None and str(row[20]).strip().upper() != 'NA' else None,
+        category5=row[21] if len(row) > 21 and row[21] is not None and str(row[21]).strip().upper() != 'NA' else None,
+        category6=row[22] if len(row) > 22 and row[22] is not None and str(row[22]).strip().upper() != 'NA' else None,
+        colour=row[23] if len(row) > 23 and row[23] is not None and str(row[23]).strip().upper() != 'NA' else None,
+        style_code=row[24] if len(row) > 24 and row[24] is not None and str(row[24]).strip().upper() != 'NA' else None,
     )
 
 
@@ -82,6 +90,10 @@ def _build_sku_base_query(
         if division and division.lower() != "all":
             inv_conditions.append("UPPER(i.division) LIKE ?")
             inv_params.append(f"%{division.strip().upper()}%")
+        else:
+            sales_extra = "v.Division NOT IN ('Non Trading Division', 'Sales Promotional Items')"
+            sales_where = f"{sales_where} AND {sales_extra}" if sales_where else f"WHERE {sales_extra}"
+            inv_conditions.append("i.division NOT IN ('Non Trading Division', 'Sales Promotional Items')")
         if department and department.lower() != "all":
             inv_conditions.append("UPPER(i.department) LIKE ?")
             inv_params.append(f"%{department.strip().upper()}%")
@@ -119,7 +131,15 @@ def _build_sku_base_query(
                 0.0 AS purchase_units,
                 0.0 AS transfer_in_units,
                 0.0 AS closing_stock_units,
-                0.0 AS closing_stock_value
+                0.0 AS closing_stock_value,
+                any(v.CNAME1) AS category1,
+                any(v.CNAME2) AS category2,
+                any(v.CNAME3) AS category3,
+                any(v.CNAME4) AS category4,
+                any(v.CNAME5) AS category5,
+                any(v.CNAME6) AS category6,
+                any(v.DESC1) AS colour,
+                any(v.DESC3) AS style_code
             FROM v_fact_item_location_monthly v
             {sales_where}
             GROUP BY v.BARCODE
@@ -142,7 +162,15 @@ def _build_sku_base_query(
                 sum(toFloat64(i.purchase_net_qty)) AS purchase_units,
                 sum(toFloat64(i.transfer_in_qty)) AS transfer_in_units,
                 sum(toFloat64(i.closing_qty)) AS closing_stock_units,
-                sum(toFloat64(i.closing_amt)) AS closing_stock_value
+                sum(toFloat64(i.closing_amt)) AS closing_stock_value,
+                any(i.category1) AS category1,
+                any(i.category2) AS category2,
+                any(i.category3) AS category3,
+                any(i.category4) AS category4,
+                any(i.category5) AS category5,
+                any(i.category6) AS category6,
+                any(i.colour) AS colour,
+                any(i.style_code) AS style_code
             FROM v_fact_inventory_enriched i
             {inv_where}
             GROUP BY i.item_code
@@ -164,7 +192,15 @@ def _build_sku_base_query(
                 sum(purchase_units) AS purchase_units,
                 sum(transfer_in_units) AS transfer_in_units,
                 sum(closing_stock_units) AS closing_stock_units,
-                sum(closing_stock_value) AS closing_stock_value
+                sum(closing_stock_value) AS closing_stock_value,
+                any(category1) AS category1,
+                any(category2) AS category2,
+                any(category3) AS category3,
+                any(category4) AS category4,
+                any(category5) AS category5,
+                any(category6) AS category6,
+                any(colour) AS colour,
+                any(style_code) AS style_code
             FROM unified
             GROUP BY barcode
         ),
@@ -195,7 +231,8 @@ def _build_sku_base_query(
                     WHEN (sales_units / ({num_months} * 4.33)) > 0 AND (closing_stock_units / (sales_units / ({num_months} * 4.33))) < 4.0 THEN 'FAST_MOVER'
                     WHEN (sales_units / ({num_months} * 4.33)) > 0 AND (closing_stock_units / (sales_units / ({num_months} * 4.33))) BETWEEN 4.0 AND 12.0 THEN 'MEDIUM_MOVER'
                     ELSE 'SLOW_MOVER'
-                END AS velocity_status
+                END AS velocity_status,
+                category1, category2, category3, category4, category5, category6, colour, style_code
             FROM sku_agg
         )
         SELECT * FROM sku_summary
@@ -210,6 +247,9 @@ def _build_sku_base_query(
             department=department,
             table_prefix="v"
         )
+        if not division or division.lower() == "all":
+            sales_extra = "v.Division NOT IN ('Non Trading Division', 'Sales Promotional Items')"
+            where_clause = f"{where_clause} AND {sales_extra}" if where_clause else f"WHERE {sales_extra}"
         query = f"""
         WITH filtered_fact AS (
             SELECT 
@@ -342,7 +382,8 @@ def get_sku_velocity_list(
         barcode, description, division, section, department, vendor,
         mrp, cost_rate, net_revenue, sales_units, gross_profit,
         closing_stock_units, closing_stock_value, sell_through_pct,
-        woc, moi, velocity_status
+        woc, moi, velocity_status,
+        category1, category2, category3, category4, category5, category6, colour, style_code
     FROM ({base_query}) sub
     {where_post}
     ORDER BY {sort_column} {sort_order}
@@ -397,7 +438,8 @@ def get_dead_stock_candidates(
         barcode, description, division, section, department, vendor,
         mrp, cost_rate, net_revenue, sales_units, gross_profit,
         closing_stock_units, closing_stock_value, sell_through_pct,
-        woc, moi, velocity_status
+        woc, moi, velocity_status,
+        category1, category2, category3, category4, category5, category6, colour, style_code
     FROM ({base_query}) sub
     WHERE velocity_status = 'DEAD_STOCK'
     ORDER BY closing_stock_value DESC

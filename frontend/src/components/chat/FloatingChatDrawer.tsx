@@ -12,7 +12,7 @@ export const FloatingChatDrawer: React.FC = () => {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Hi! I am your Wren AI GenBI Assistant. Ask me any natural language question about store revenue, department sales, stock cover, or GMROI performance.",
+      text: "👋 Hi! I am your Retail AI Assistant. Ask me any question about store revenue, department sales, stock cover, or GMROI performance.",
       timestamp: ""
     }
   ]);
@@ -76,7 +76,7 @@ export const FloatingChatDrawer: React.FC = () => {
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-brand-500 hover:bg-brand-600 text-white shadow-xl flex items-center justify-center transition-transform hover:scale-105 group"
-        title="Open Wren AI GenBI Assistant"
+        title="Open Retail AI Assistant"
       >
         <span className="text-xl font-bold">🤖</span>
         <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-2 border-white text-[10px] font-bold flex items-center justify-center text-white">
@@ -102,15 +102,15 @@ export const FloatingChatDrawer: React.FC = () => {
         <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
-              Wren
+              AI
             </div>
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white text-sm">
-                Wren AI GenBI Assistant
+                Retail AI Assistant
               </h3>
               <span className="text-[11px] text-green-500 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                DuckDB Context Engine Active
+                AI Intelligence Active
               </span>
             </div>
           </div>

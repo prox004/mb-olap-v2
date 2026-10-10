@@ -13,17 +13,17 @@ export default function AdminOverviewTab({ onNavigateStores }: { onNavigateStore
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-          Stores Overview
+          Stores &amp; Branches Overview
         </h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Overview of retail outlets and central warehouse distribution hubs.
+          Summary of retail store branches and central warehouse network.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="p-4 bg-brand-50/50 dark:bg-brand-950/30 border border-brand-100 dark:border-brand-900 rounded-xl">
           <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider">
-            Total Outlets
+            Total Branches
           </p>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {availableStores.length}
@@ -52,17 +52,17 @@ export default function AdminOverviewTab({ onNavigateStores }: { onNavigateStore
       <div className="p-5 border border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/30 flex items-center justify-between">
         <div>
           <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-            Manage Store Directory
+            Store Branches Management
           </h4>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Add new stores, update store location details, or remove inactive outlets.
+            Add new store branches, update location names, or manage active outlets.
           </p>
         </div>
         <button
           onClick={onNavigateStores}
           className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-lg transition-colors shadow-xs shrink-0"
         >
-          Open Stores Manager
+          View Store Branches
         </button>
       </div>
     </div>

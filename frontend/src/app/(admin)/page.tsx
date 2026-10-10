@@ -31,7 +31,7 @@ export default function CEOExecutivePage() {
       {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 text-xs font-medium">
-          Backend Connection Error: {error}. Make sure backend server is running (`python backend/run.py`).
+          Unable to load data at this moment. Please check your network connection or refresh the page.
         </div>
       )}
 

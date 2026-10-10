@@ -19,17 +19,17 @@ export default function AuthLayout({
             <div className="relative items-center justify-center  flex z-1">
               {/* <!-- ===== Common Grid Shape Start ===== --> */}
               <GridShape />
-              <div className="flex flex-col items-center max-w-xs">
-                <Link href="/" className="block mb-4">
-                  <Image
-                    width={231}
-                    height={48}
-                    src="./images/logo/auth-logo.svg"
-                    alt="Logo"
-                  />
+              <div className="flex flex-col items-center max-w-sm text-center">
+                <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500 text-white font-extrabold text-2xl shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform">
+                    MB
+                  </div>
+                  <span className="text-2xl font-bold text-white tracking-tight">
+                    M Baazar Analytics
+                  </span>
                 </Link>
-                <p className="text-center text-gray-400 dark:text-white/60">
-                  Free and Open-Source Tailwind CSS Admin Dashboard Template
+                <p className="text-center text-sm text-gray-300 dark:text-white/70 font-medium">
+                  Retail Operations &amp; Merchandise Management Platform
                 </p>
               </div>
             </div>

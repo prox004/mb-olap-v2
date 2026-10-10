@@ -14,10 +14,12 @@ from backend.app.api.v1.endpoints.allocation import router as allocation_router
 from backend.app.api.v1.endpoints.recommendations import router as recommendations_router
 from backend.app.api.v1.endpoints.chat import router as chat_router
 from backend.app.api.v1.endpoints.reporting import router as reporting_router
+from backend.app.api.v1.endpoints.auth import router as auth_router
 
 api_router = APIRouter()
 
 # Mount Feature Routers
+api_router.include_router(auth_router, prefix="/auth", tags=["Authentication & Staff"])
 api_router.include_router(executive_router, prefix="/executive", tags=["CEO Executive Dashboard"])
 api_router.include_router(category_router, prefix="/category", tags=["Category Performance"])
 api_router.include_router(merchandise_router, prefix="/merchandise", tags=["Merchandise Buying"])
@@ -67,18 +69,48 @@ from pydantic import BaseModel, Field
 import os
 import pandas as pd
 
+STORE_STATE_MAP = {
+    820: "WEST BENGAL",
+    530: "WEST BENGAL",
+    101: "ODISHA",
+    102: "ODISHA",
+    103: "ASSAM",
+    104: "ASSAM",
+}
+
 class CreateStoreLocationRequest(BaseModel):
     admsite_code: int = Field(..., description="Store AdmSite Code (e.g. 950)")
     name: str = Field(..., description="Store Location Name (e.g. M Baazar - Howrah)")
     site_type: Optional[str] = Field("RETAIL_STORE", description="Site type: RETAIL_STORE or CENTRAL_WAREHOUSE")
+    state: Optional[str] = Field("WEST BENGAL", description="Store State (e.g. WEST BENGAL, ODISHA, ASSAM)")
 
 @api_router.get("/locations", response_model=StandardResponse[list], tags=["Master Lookups"])
-def get_locations(db: DuckDBPyConnection = Depends(get_db)):
+def get_locations(db = Depends(get_db)):
     """
-    Returns store location master lookup array [ADMSITE_CODE, Name].
+    Returns store location master lookup array [ADMSITE_CODE, Name, SITE_TYPE, state].
     """
-    locations = db.execute("SELECT ADMSITE_CODE, Name, SITE_TYPE FROM dim_location ORDER BY ADMSITE_CODE").fetchall()
-    result = [{"admsite_code": loc[0], "name": loc[1], "site_type": loc[2]} for loc in locations]
+    try:
+        locations = db.execute("SELECT ADMSITE_CODE, Name, SITE_TYPE, state FROM dim_location ORDER BY ADMSITE_CODE").fetchall()
+        result = [
+            {
+                "admsite_code": loc[0],
+                "name": loc[1],
+                "site_type": loc[2],
+                "state": loc[3] if len(loc) > 3 and loc[3] else STORE_STATE_MAP.get(loc[0], "WEST BENGAL")
+            }
+            for loc in locations
+        ]
+    except Exception:
+        locations = db.execute("SELECT ADMSITE_CODE, Name, SITE_TYPE FROM dim_location ORDER BY ADMSITE_CODE").fetchall()
+        result = [
+            {
+                "admsite_code": loc[0],
+                "name": loc[1],
+                "site_type": loc[2],
+                "state": STORE_STATE_MAP.get(loc[0], "WEST BENGAL")
+            }
+            for loc in locations
+        ]
     return StandardResponse(success=True, data=result)
 
 
