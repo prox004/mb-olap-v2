@@ -60,7 +60,7 @@ export default function AdminLayout({
           </div>
         </div>
 
-        {/* Global Floating Wren AI Chat Drawer */}
+        {/* Global Floating Smart Retail AI Assistant Drawer */}
         <FloatingChatDrawer />
       </div>
     </OlapFilterProvider>

@@ -1,3 +1,16 @@
+"""
+Legacy AI Recommendations ETL Module (DuckDB Mode Only)
+
+NOTE: This ETL module is retained strictly for backward compatibility with the
+legacy DuckDB pipeline (`backend/etl/run_pipeline.py`) and populates the offline
+`ai_recommendations_feed` in `olap_warehouse.duckdb`.
+
+The active production Recommendation feed (`/api/v1/recommendations/feed` and `/summary`)
+is served dynamically and deterministically by `RecommendationAgent` directly from ClickHouse
+analytical views (`v_fact_inventory_enriched`, `v_fact_sales_enriched`) with zero runtime
+dependency on this ETL module or DuckDB.
+"""
+
 import os
 import time
 import math

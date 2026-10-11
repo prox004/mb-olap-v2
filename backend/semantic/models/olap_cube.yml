@@ -2,8 +2,8 @@
 models:
   - name: fact_cube_monthly
     table_reference:
-      catalog: olap_warehouse
-      schema: main
+      catalog: mb_olap_v2
+      schema: mb_olap_v2
       table: fact_cube_monthly
     primary_key: [ADMSITE_CODE, BARCODE]
     description: "Monthly aggregated OLAP sales cube recording revenue, quantities, inventory, margins, and transfers across retail stores and warehouses."
@@ -47,8 +47,8 @@ models:
 
   - name: dim_item
     table_reference:
-      catalog: olap_warehouse
-      schema: main
+      catalog: mb_olap_v2
+      schema: mb_olap_v2
       table: dim_item
     primary_key: ICODE
     description: "Item Master product hierarchy, vendor details, descriptions, and pricing attributes."
@@ -74,8 +74,8 @@ models:
 
   - name: dim_location
     table_reference:
-      catalog: olap_warehouse
-      schema: main
+      catalog: mb_olap_v2
+      schema: mb_olap_v2
       table: dim_location
     primary_key: ADMSITE_CODE
     description: "Location Master detailing store outlets and central warehouse / distribution center."
