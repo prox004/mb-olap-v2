@@ -82,7 +82,7 @@ export default function ComparisonPage() {
             Store-Month Comparison
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Compare any two store-month combinations using existing OLAP KPIs and charts
+            Compare sales, revenue, and inventory performance across any two stores or time periods
           </p>
         </div>
         {report && <ComparisonExportBar report={report} />}

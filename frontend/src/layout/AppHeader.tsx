@@ -9,7 +9,7 @@ import { useSidebar } from "@/context/SidebarContext";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-  const { toggleMobileSidebar } = useSidebar();
+  const { toggleSidebar } = useSidebar();
 
   const toggleApplicationMenu = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
@@ -33,17 +33,19 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 xl:border-b">
-      <div className="flex flex-col items-center justify-between grow xl:flex-row xl:px-6">
-        <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 xl:py-4">
-          {/* Mobile Sidebar Toggle Button */}
+    <header className="sticky top-0 flex w-full bg-white border-b border-gray-200 z-50 dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex items-center justify-between w-full px-4 py-2.5 sm:px-6">
+        {/* Left Section: Hamburger Toggle, Logo, and Search Bar */}
+        <div className="flex items-center gap-3 sm:gap-4 flex-1">
+          {/* Universal Hamburger Toggle Button */}
           <button
-            onClick={toggleMobileSidebar}
-            aria-label="Toggle Mobile Menu"
-            className="flex items-center justify-center w-9 h-9 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 xl:hidden"
+            onClick={toggleSidebar}
+            aria-label="Toggle Navigation Menu"
+            title="Toggle Menu"
+            className="flex items-center justify-center w-9 h-9 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer shrink-0"
           >
             <svg
-              className="w-6 h-6"
+              className="w-5 h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -57,53 +59,26 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
-          {/* Mobile Logo Branding */}
-          <Link href="/" className="xl:hidden flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-white font-bold text-sm">
+          {/* Logo Branding */}
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-500 text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
               MB
             </div>
-            <span className="text-sm font-bold text-gray-900 dark:text-white">
+            <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white tracking-tight hidden sm:inline-block">
               M Baazar Analytics
             </span>
           </Link>
 
-          {/* Mobile Overflow Menu Toggle */}
-          <button
-            onClick={toggleApplicationMenu}
-            className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 xl:hidden"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M5.99902 10.4951C6.82745 10.4951 7.49902 11.1667 7.49902 11.9951V12.0051C7.49902 12.8335 6.82745 13.5051 5.99902 13.5051C5.1706 13.5051 4.49902 12.8335 4.49902 12.0051V11.9951C4.49902 11.1667 5.1706 10.4951 5.99902 10.4951ZM17.999 10.4951C18.8275 10.4951 19.499 11.1667 19.499 11.9951V12.0051C19.499 12.8335 18.8275 13.5051 17.999 13.5051C17.1706 13.5051 16.499 12.8335 16.499 12.0051V11.9951C16.499 11.1667 17.1706 10.4951 17.999 10.4951ZM13.499 11.9951C13.499 11.1667 12.8275 10.4951 11.999 10.4951C11.1706 10.4951 10.499 11.1667 10.499 11.9951V12.0051C10.499 12.8335 11.1706 13.5051 11.999 13.5051C12.8275 13.5051 13.499 12.8335 13.499 12.0051V11.9951Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
-
-          {/* Desktop Global Search Bar */}
-          <div className="hidden xl:block">
+          {/* Global Search Bar */}
+          <div className="hidden md:block w-72 lg:w-96 ml-2">
             <GlobalSearchBar />
           </div>
         </div>
 
-        {/* Right Action Icons & Profile */}
-        <div
-          className={`${
-            isApplicationMenuOpen ? "flex" : "hidden"
-          } items-center justify-between w-full gap-4 px-5 py-4 xl:flex shadow-theme-md xl:justify-end xl:px-0 xl:shadow-none`}
-        >
-          <div className="flex items-center gap-2 2xsm:gap-3">
-            <ThemeToggleButton />
-            <NotificationDropdown />
-          </div>
+        {/* Right Section: Theme Toggle, Notifications & User Profile */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <ThemeToggleButton />
+          <NotificationDropdown />
           <UserDropdown />
         </div>
       </div>

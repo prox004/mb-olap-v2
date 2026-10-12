@@ -93,7 +93,7 @@ export function RebalanceTable({
               <th className="py-3 px-4">Target Store (Deficit)</th>
               <th className="py-3 px-4">Transfer Qty</th>
               <th className="py-3 px-4">Urgency</th>
-              <th className="py-3 px-4 text-center">Action / STO Order</th>
+              <th className="py-3 px-4 text-center">Action / Transfer Order</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -105,7 +105,7 @@ export function RebalanceTable({
                       Allocation recommendations unavailable
                     </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">
-                      Requires inventory/SOH data, which is unavailable in the current POS sales ledger dataset.
+                      Requires store inventory data, which is currently unavailable.
                     </p>
                   </div>
                 </td>
@@ -168,7 +168,7 @@ export function RebalanceTable({
                   <td className="py-3.5 px-4 text-center">
                     {isApproved ? (
                       <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                        STO Order Generated
+                        Transfer Order Generated
                       </span>
                     ) : (
                       <div className="flex items-center justify-center gap-1.5">

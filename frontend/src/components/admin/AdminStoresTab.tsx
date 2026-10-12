@@ -167,7 +167,7 @@ export default function AdminStoresTab() {
           <form onSubmit={handleSaveStore} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
             <div>
               <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                AdmSite Code (Integer ID)
+                Store Code (e.g. 950)
               </label>
               <input
                 type="number"
@@ -182,7 +182,7 @@ export default function AdminStoresTab() {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Store / Location Name
+                Store Branch Name
               </label>
               <input
                 type="text"
@@ -196,7 +196,7 @@ export default function AdminStoresTab() {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Site Designation
+                Store Type
               </label>
               <div className="flex gap-2">
                 <select
@@ -204,8 +204,8 @@ export default function AdminStoresTab() {
                   onChange={(e) => setSiteType(e.target.value)}
                   className="flex-1 h-10 px-3 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
                 >
-                  <option value="RETAIL_STORE">RETAIL_STORE</option>
-                  <option value="CENTRAL_WAREHOUSE">CENTRAL_WAREHOUSE</option>
+                  <option value="RETAIL_STORE">Retail Store</option>
+                  <option value="CENTRAL_WAREHOUSE">Central Warehouse</option>
                 </select>
                 <button
                   type="submit"
@@ -215,8 +215,8 @@ export default function AdminStoresTab() {
                   {isSubmitting
                     ? "Saving..."
                     : editingCode !== null
-                      ? "Update Store"
-                      : "Save Store Data"}
+                      ? "Save Changes"
+                      : "Add Store"}
                 </button>
               </div>
             </div>
@@ -228,13 +228,13 @@ export default function AdminStoresTab() {
         <div className="flex flex-col gap-4 mb-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h4 className="text-base font-bold text-gray-900 dark:text-white">
-              Managed Store Outlets (<span className="text-brand-600 dark:text-brand-400">{filteredLocations.length}</span>)
+              Registered Store Outlets (<span className="text-brand-600 dark:text-brand-400">{filteredLocations.length}</span>)
             </h4>
           </div>
 
           <input
             type="text"
-            placeholder="Search by store name or AdmSite ID..."
+            placeholder="Search by store name or code..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full md:w-72 h-9 px-3 text-xs rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
@@ -248,9 +248,9 @@ export default function AdminStoresTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableCell isHeader>admSite_code</TableCell>
-                  <TableCell isHeader>Store / Location Name</TableCell>
-                  <TableCell isHeader>Site Type</TableCell>
+                  <TableCell isHeader>Store Code</TableCell>
+                  <TableCell isHeader>Store Branch Name</TableCell>
+                  <TableCell isHeader>Store Type</TableCell>
                   <TableCell isHeader>Actions</TableCell>
                 </TableRow>
               </TableHeader>
@@ -270,7 +270,7 @@ export default function AdminStoresTab() {
                             : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                           }`}
                       >
-                        {cell.site_type || "RETAIL_STORE"}
+                        {cell.site_type === "CENTRAL_WAREHOUSE" || cell.admsite_code === 1070 ? "Central Warehouse" : "Retail Store"}
                       </span>
                     </TableCell>
                     <TableCell>

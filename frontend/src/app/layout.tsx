@@ -4,6 +4,7 @@ import "swiper/swiper-bundle.css";
 import "simplebar-react/dist/simplebar.min.css";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -21,7 +22,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+          <AuthProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

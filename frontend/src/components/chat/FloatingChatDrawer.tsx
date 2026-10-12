@@ -124,7 +124,7 @@ export const FloatingChatDrawer: React.FC = () => {
         <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
-              Wren
+              AI
             </div>
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white text-sm">

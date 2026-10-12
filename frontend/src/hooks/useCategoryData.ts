@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { apiClient } from "@/utils/apiClient";
 import { useOlapFilter } from "@/context/OlapFilterContext";
+import { SkuVelocityItem, SkuVelocityResponse } from "@/hooks/useMerchandiseData";
+
+export type { SkuVelocityItem };
 
 export type CategoryHierarchyItem = {
   division: string;
@@ -118,6 +121,32 @@ export function useCategoryData() {
     fetchData();
   }, [fetchData]);
 
+  // Fetch SKUs for a specific Department node drill-down
+  const fetchDepartmentSkus = useCallback(
+    async (division: string, section: string, department: string): Promise<SkuVelocityItem[]> => {
+      try {
+        const params: Record<string, unknown> = {
+          store_ids: selectedStores,
+          months: selectedMonths,
+          division,
+          section,
+          department,
+          page: 1,
+          page_size: 500,
+        };
+        const res = await apiClient<ApiResponse<SkuVelocityResponse>>("/category/sku-drilldown", { params });
+        if (res.success && res.data) {
+          return res.data.items;
+        }
+        return [];
+      } catch (err) {
+        console.error("Failed to load department SKU drilldown:", err);
+        return [];
+      }
+    },
+    [selectedStores, selectedMonths]
+  );
+
   return {
     hierarchy,
     matrix,
@@ -125,5 +154,6 @@ export function useCategoryData() {
     loading,
     error,
     refresh: fetchData,
+    fetchDepartmentSkus,
   };
 }

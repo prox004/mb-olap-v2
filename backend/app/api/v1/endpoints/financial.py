@@ -39,6 +39,9 @@ def get_gmroi_analysis(
             param_dept = f"%{department.strip().upper()}%"
             params.append(param_dept)
             inv_params.append(param_dept)
+        else:
+            sales_conds.append("p.division NOT IN ('Non Trading Division', 'Sales Promotional Items')")
+            inv_conds.append("p.division NOT IN ('Non Trading Division', 'Sales Promotional Items')")
 
         if store_ids:
             store_placeholders = ", ".join(["?"] * len(store_ids))
@@ -191,6 +194,8 @@ def get_gmroi_analysis(
         if department and department.upper() != "ALL":
             conditions.append("UPPER(department) = ?")
             params.append(department.strip().upper())
+        else:
+            conditions.append("division NOT IN ('Non Trading Division', 'Sales Promotional Items')")
 
         if store_ids:
             store_placeholders = ", ".join(["?"] * len(store_ids))
@@ -272,6 +277,8 @@ def get_buying_accuracy(
         if department and department.upper() != "ALL":
             ch_conds.append("UPPER(p.department) LIKE ?")
             ch_params.append(f"%{department.strip().upper()}%")
+        else:
+            ch_conds.append("p.division NOT IN ('Non Trading Division', 'Sales Promotional Items')")
 
         where_ch = f"WHERE {' AND '.join(ch_conds)}" if ch_conds else ""
         ch_query = f"""

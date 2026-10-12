@@ -10,6 +10,7 @@ from backend.app.schemas.category import (
     TopMoversResponse,
     CategoryGrowthItem,
 )
+from backend.app.schemas.merchandise import SkuVelocityItem, SkuVelocityResponse
 from backend.app.utils.query_builder import build_where_clause
 
 router = APIRouter()
@@ -800,3 +801,62 @@ def get_category_growth(
     meta = FilterMeta(applied_stores=store_ids, applied_months=[target_month], total_records=len(items))
     return StandardResponse(success=True, data=items, meta=meta)
 
+
+
+@router.get('/sku-drilldown', response_model=StandardResponse[SkuVelocityResponse])
+def get_category_sku_drilldown(
+    division: Optional[str] = Query(None),
+    section: Optional[str] = Query(None),
+    department: Optional[str] = Query(None),
+    store_ids: Optional[List[int]] = Query(None),
+    months: Optional[List[str]] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(200, ge=1, le=1000),
+    db = Depends(get_db),
+):
+    from backend.app.api.v1.endpoints.merchandise import _build_sku_base_query, map_sku_row
+
+    base_query, base_params = _build_sku_base_query(
+        store_ids=store_ids,
+        months=months,
+        division=division,
+        department=department,
+    )
+
+    params = list(base_params)
+    post_conditions = []
+
+    if section and section.lower() not in ('all', ''):
+        post_conditions.append('UPPER(section) = UPPER(?)')
+        params.append(section.strip())
+
+    where_post = 'WHERE ' + ' AND '.join(post_conditions) if post_conditions else ''
+
+    count_query = 'SELECT COUNT(*) FROM (' + base_query + ') sub ' + where_post
+    total_records = db.execute(count_query, params).fetchone()[0]
+
+    offset = (page - 1) * page_size
+    col_select = (
+        'SELECT barcode, description, division, section, department, vendor,'
+        ' mrp, cost_rate, net_revenue, sales_units, gross_profit,'
+        ' closing_stock_units, closing_stock_value, sell_through_pct,'
+        ' woc, moi, velocity_status,'
+        ' category1, category2, category3, category4, category5, category6, colour, style_code'
+        ' FROM (' + base_query + ') sub'
+        ' ' + where_post +
+        ' ORDER BY net_revenue DESC'
+        ' LIMIT ' + str(page_size) + ' OFFSET ' + str(offset)
+    )
+
+    rows = db.execute(col_select, params).fetchall()
+    items = [map_sku_row(r) for r in rows]
+
+    response_data = SkuVelocityResponse(
+        total_records=total_records,
+        page=page,
+        page_size=page_size,
+        items=items,
+    )
+
+    meta = FilterMeta(total_records=total_records)
+    return StandardResponse(success=True, data=response_data, meta=meta)

@@ -75,7 +75,7 @@ export function TransferMovementChart({
             Transfer movement history unavailable
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500">
-            Requires store transfer order (STO) tracking data, which is unavailable in the current POS sales ledger dataset.
+            Requires store transfer order tracking data, which is currently unavailable.
           </p>
         </div>
       ) : (
