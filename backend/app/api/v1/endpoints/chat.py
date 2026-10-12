@@ -1,19 +1,16 @@
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from duckdb import DuckDBPyConnection
 
-from backend.app.api.deps import get_db
+from backend.app.api.deps import get_clickhouse_db
 from backend.app.schemas.response import StandardResponse
-from backend.app.services.groq_llm_service import groq_service
-from backend.app.services.sql_validator import sql_validator
-from backend.app.services.chart_classifier import chart_classifier
-from backend.app.services.wren_context_engine import wren_engine
+from backend.app.services.analytics_agent import analytics_agent
 
 router = APIRouter()
 
 class ChatQueryRequest(BaseModel):
     prompt: str
+    conversation_history: Optional[List[Dict[str, str]]] = None
 
 class ChatQueryResponse(BaseModel):
     prompt: str
@@ -30,64 +27,114 @@ class SuggestedPrompt(BaseModel):
     prompt: str
 
 
-def detect_unsupported_inventory_metric(prompt: str) -> Optional[Dict[str, str]]:
+def detect_unsupported_metric(prompt: str, dialect: str = "clickhouse") -> Optional[Dict[str, str]]:
     """
-    Checks if a prompt asks for inventory/stock metrics that cannot be computed
-    from legacy POS sales ledger datasets.
-    When ClickHouse is active with fact_inventory, all SOH and Sell-Through metrics are supported.
+    Checks if a prompt asks for metrics or data streams that are not available in the ClickHouse warehouse.
+    Truly unavailable data: CRM/loyalty customer details, footfall traffic sensors, payroll/rent OpEx,
+    web clickstream, vendor fill rates, vendor returns (RTV), daily inventory history, and markdown schedules.
     """
-    from backend.app.config import settings
-    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
-        return None
-
     p = prompt.lower()
 
-    # 1. Sell-Through Percentage / Rate
-    if any(k in p for k in ["sell-through", "sell through", "sellthrough", "str %"]):
-        return {
-            "metric": "Sell-Through Rate / Percentage",
-            "reason": (
-                "Sell-through rate requires opening stock, incoming shipments/receipts, or stock-on-hand (SOH) inventory snapshots. "
-                "The active ClickHouse data warehouse currently contains verified POS retail sales transactions (397,805 records), "
-                "which does not include physical inventory snapshot feeds."
-            ),
-            "sql_comment": "-- Metric Unavailable: Sell-through requires Stock-On-Hand (SOH) and inventory receipt/transfer feeds\n-- Current active warehouse schema provides verified POS retail sales ledger records."
-        }
-
-    # 2. Weeks of Cover (WOC)
-    if any(k in p for k in ["weeks of cover", "week of cover", "woc", "stock cover", "inventory cover"]):
-        return {
-            "metric": "Weeks of Cover (WOC)",
-            "reason": (
-                "Weeks of Cover (WOC) calculation requires active Stock-On-Hand (SOH) inventory levels divided by average weekly sales velocity. "
-                "Inventory stock balances are unavailable in the current POS sales ledger dataset."
-            ),
-            "sql_comment": "-- Metric Unavailable: Weeks of Cover requires active SOH inventory balances\n-- Current active warehouse schema provides verified POS retail sales ledger records."
-        }
-
-    # 3. Stock on Hand / Closing / Opening Inventory Balances
+    # 1. Customer CRM / Loyalty / Personal shopper records
     if any(k in p for k in [
-        "stock on hand", "stock-on-hand", "soh", "closing stock", "opening stock",
-        "current stock", "stock valuation", "inventory valuation", "stock level", "inventory level"
+        "customer name", "customer phone", "customer email", "customer address",
+        "loyalty card", "loyalty member", "customer retention", "churn rate",
+        "customer ltv", "lifetime value", "shopper demographic", "customer profile"
     ]):
         return {
-            "metric": "Stock-On-Hand (SOH) & Inventory Balances",
+            "metric": "Customer CRM & Loyalty Analytics",
             "reason": (
-                "Stock-On-Hand (SOH), opening/closing stock quantities, and inventory valuation require physical stock snapshot feeds. "
-                "These are unavailable in the current POS sales ledger dataset."
+                "Customer-level CRM records (such as individual shopper names, loyalty card numbers, "
+                "customer contact info, retention metrics, and churn rates) are not captured in the "
+                "merchandising and retail transaction ledger of mb_olap_v2."
             ),
-            "sql_comment": "-- Metric Unavailable: Inventory levels require physical SOH snapshot feeds\n-- Current active warehouse schema provides verified POS retail sales ledger records."
+            "sql_comment": "-- Metric Unavailable: Customer CRM & loyalty profiles are not captured in mb_olap_v2.\n-- mb_olap_v2 provides verified retail sales, product performance, store analytics, and inventory snapshots."
         }
 
-    # 4. Inventory-Based Recommendations
-    if any(k in p for k in ["reorder recommendation", "transfer recommendation", "markdown recommendation", "stock rebalance"]):
+    # 2. Footfall / Store Traffic Sensors
+    if any(k in p for k in [
+        "footfall", "foot traffic", "visitor count", "store traffic",
+        "sensor count", "walk-in count", "conversion rate from footfall"
+    ]):
         return {
-            "metric": "Inventory-Based Optimization Recommendations",
+            "metric": "Store Footfall & Traffic Analytics",
             "reason": (
-                "Purchase reorders, inter-store transfers, and dynamic price markdowns require physical stock-on-hand balances "
-                "and minimum/maximum cover thresholds, which are unavailable in the current POS sales ledger dataset."
+                "Physical store footfall counters, sensor tracking, and footfall-to-sales conversion rates "
+                "are not integrated into the mb_olap_v2 warehouse."
             ),
-            "sql_comment": "-- Metric Unavailable: AI Recommendations require Stock-On-Hand (SOH) feeds\n-- Current active warehouse schema provides verified POS retail sales ledger records."
+            "sql_comment": "-- Metric Unavailable: Footfall sensor feeds are not integrated into mb_olap_v2.\n-- mb_olap_v2 provides POS sales transactions, margins, and stock on hand."
+        }
+
+    # 3. Store Rent, Payroll, Electricity, OpEx
+    if any(k in p for k in [
+        "payroll", "staff salary", "employee wage", "store rent", "lease cost",
+        "electricity bill", "utility expense", "opex", "operating expense"
+    ]):
+        return {
+            "metric": "Operating Expenses & Payroll",
+            "reason": (
+                "Store lease/rent overheads, utility bills, and staff payroll operational expenses (OpEx) "
+                "are corporate financial accounting feeds not present in mb_olap_v2 merchandise OLAP."
+            ),
+            "sql_comment": "-- Metric Unavailable: Store OpEx and payroll are not captured in mb_olap_v2.\n-- mb_olap_v2 provides sales revenue, COGS, gross margin, and stock snapshots."
+        }
+
+    # 4. E-commerce Clickstream & Web Analytics
+    if any(k in p for k in [
+        "clickstream", "website visit", "cart abandonment", "pageview",
+        "bounce rate", "web traffic", "online session"
+    ]):
+        return {
+            "metric": "E-Commerce Clickstream & Web Analytics",
+            "reason": (
+                "Web clickstream, browsing sessions, online cart abandonment, and digital web traffic "
+                "telemetry are not present in mb_olap_v2."
+            ),
+            "sql_comment": "-- Metric Unavailable: Web clickstream and digital telemetry are not present in mb_olap_v2.\n-- mb_olap_v2 provides brick-and-mortar retail transactions and stock snapshots."
+        }
+
+    # 5. Vendor Fill Rate & Supplier Lead Times
+    if any(k in p for k in ["fill rate", "vendor fill", "supplier fill", "lead time", "supplier delivery"]):
+        return {
+            "metric": "Vendor Fill Rate & Supplier Lead Times",
+            "reason": (
+                "Supplier delivery performance, lead-time tracking, and vendor fill rates require Purchase Order "
+                "fulfillment schedules and goods-inward receipt logs not present in the merchandise OLAP schema of mb_olap_v2."
+            ),
+            "sql_comment": "-- Metric Unavailable: Supplier fill rates and lead times are not captured in mb_olap_v2."
+        }
+
+    # 6. Vendor Returns (RTV)
+    if any(k in p for k in ["vendor return", "return to vendor", "rtv rate"]):
+        return {
+            "metric": "Vendor Returns (RTV)",
+            "reason": (
+                "Return-To-Vendor (RTV) manifests and supplier debit notes are corporate supply-chain accounting documents "
+                "not captured in mb_olap_v2."
+            ),
+            "sql_comment": "-- Metric Unavailable: Vendor returns (RTV) are not captured in mb_olap_v2."
+        }
+
+    # 7. Daily Inventory History
+    if any(k in p for k in ["daily stock", "daily inventory", "stock on day", "inventory on day", "intraday stock"]):
+        return {
+            "metric": "Daily Inventory History",
+            "reason": (
+                "Inventory snapshots in mb_olap_v2 are recorded at monthly accounting intervals (fact_inventory). "
+                "Daily stock level history is not tracked in the current warehouse."
+            ),
+            "sql_comment": "-- Metric Unavailable: Daily stock history is not tracked; stock is recorded at monthly snapshot grain."
+        }
+
+    # 8. Promotional Markdown Schedules & Price Elasticity
+    if any(k in p for k in ["markdown schedule", "discount history", "clearance schedule", "price elasticity", "discount percentage", "discount applied", "sale discount"]):
+        return {
+            "metric": "Discount Schedules & Price Elasticity",
+            "reason": (
+                "Individual transaction line discount percentages, promotional markdown calendars, and price elasticity modeling require marketing campaign feeds "
+                "not integrated into mb_olap_v2."
+            ),
+            "sql_comment": "-- Metric Unavailable: Individual transaction discount percentages and markdown schedules are not captured in mb_olap_v2."
         }
 
     return None
@@ -96,15 +143,15 @@ def detect_unsupported_inventory_metric(prompt: str) -> Optional[Dict[str, str]]
 @router.post("/query", response_model=StandardResponse[ChatQueryResponse])
 def process_chat_query(
     request: ChatQueryRequest,
-    db: DuckDBPyConnection = Depends(get_db)
+    db: Any = Depends(get_clickhouse_db)
 ):
     """
     Main GenBI Query Endpoint:
-      1. Translates user business question into Analytical SQL via Groq API & Wren AI Context.
-      2. Detects requests for unsupported inventory/SOH metrics to prevent data fabrication.
-      3. Validates SQL & executes with auto-refinement syntax repair loop against warehouse.
-      4. Classifies visualization type (KPI_CARD, PIE_CHART, BAR_CHART, DATA_TABLE).
-      5. Synthesizes executive summary.
+      1. Detects requests for unsupported warehouse metrics to maintain analytical integrity.
+      2. Routes through the agentic ConversationalAnalyticsAgent powered by ClickHouse.
+      3. Uses agent tools (get_schema, describe_object, execute_readonly_sql, inspect_result).
+      4. Validates security, limit caps, and driver timeouts.
+      5. Synthesizes an executive grounded summary with structured data visualization.
     """
     user_prompt = request.prompt.strip()
     if not user_prompt:
@@ -113,26 +160,27 @@ def process_chat_query(
             detail="Prompt text cannot be empty."
         )
 
-    # Check for unsupported inventory/SOH metrics to prevent hallucination or fabrication
-    unsupported = detect_unsupported_inventory_metric(user_prompt)
+    # Check for unsupported metrics to prevent hallucination or fabrication
+    unsupported = detect_unsupported_metric(user_prompt, dialect="clickhouse")
     if unsupported:
         summary_msg = (
             f"ℹ️ **{unsupported['metric']} is unavailable in the current dataset.**\n\n"
             f"{unsupported['reason']}\n\n"
-            "To maintain analytical integrity, Wren AI does not fabricate inventory data.\n\n"
-            "**Supported metrics and analyses in MB-OLAP V2:**\n"
-            "• **Net Sales Revenue** (`SUM(net_amount)` = ₹331,367,606)\n"
-            "• **Sales Units** (`SUM(sales_quantity)` = 1,234,990 units)\n"
-            "• **Cost of Goods Sold (COGS)** (`SUM(cogs)` = ₹190,626,225)\n"
-            "• **Gross Profit** (`SUM(gross_profit)` = ₹140,741,381 | 42.47% GM)\n"
-            "• **Average Selling Price (ASP)**\n"
-            "• **Monthly Sales Trends by Report Date**\n"
-            "• **Store Rankings & Outlet Performance**\n"
-            "• **Product, Department, Division & Vendor Sales**"
+            f"To maintain analytical integrity, Wren AI does not fabricate unsupported data.\n\n"
+            f"**Supported metrics and analyses in MB-OLAP V2 (Clickhouse):**\n"
+            "• **Net Sales Revenue** (`round(sum(net_amount), 2)`)\n"
+            "• **Sales Units** (`sum(bill_qty)`)\n"
+            "• **Cost of Goods Sold (COGS)** (`sum(cogs)`)\n"
+            "• **Gross Profit & Margin %** (`sum(gross_profit)`, `gross_margin_pct`)\n"
+            "• **Monthly Sales Trends** (`v_monthly_sales_trend`)\n"
+            "• **Store Rankings & Outlet Performance** (`v_store_performance_summary`)\n"
+            "• **Category & Department Summaries** (`v_category_performance_summary`)\n"
+            "• **Stock Valuation & Closing Stock** (`v_fact_inventory_enriched`)\n"
+            "• **Product, Brand & Vendor Sales** (`v_fact_sales_enriched`)"
         )
         return StandardResponse(
             success=True,
-            message=f"{unsupported['metric']} is unsupported due to missing SOH inventory data.",
+            message=f"{unsupported['metric']} is not available in the active warehouse schema.",
             data=ChatQueryResponse(
                 prompt=user_prompt,
                 generated_sql=unsupported["sql_comment"],
@@ -145,68 +193,43 @@ def process_chat_query(
             supported=False
         )
 
-
     try:
-        # Step 1: Generate SQL from natural language prompt
-        initial_sql = groq_service.generate_sql(user_prompt)
-        initial_sql = groq_service.fix_union_order_by(initial_sql)
-
-        # Step 2: Validate security, append limits, execute & auto-refine if syntax error occurs
-        executed_sql, columns, data = sql_validator.execute_with_auto_refinement(
+        agent_res = analytics_agent.run(
             db=db,
-            initial_sql=initial_sql,
-            user_prompt=user_prompt
+            user_prompt=user_prompt,
+            conversation_history=request.conversation_history,
+            dialect="clickhouse"
         )
 
-        # Step 2b: Self-Healing Zero-Result Repair (from sample_server_v1.py)
-        # If query returns 0 rows and isn't an explicit "zero sales/dead stock" query,
-        # extract entities via LLM, search DuckDB for candidates, and repair SQL.
-        from backend.app.services.entity_extractor import (
-            extract_entities_with_llm,
-            search_entity_candidates,
-            should_attempt_zero_result_repair
-        )
-
-        if not data and should_attempt_zero_result_repair(user_prompt):
-            entity_phrases = extract_entities_with_llm(groq_service, user_prompt)
-            if entity_phrases:
-                candidates = search_entity_candidates(db, entity_phrases)
-                if candidates:
-                    repaired_sql = groq_service.generate_zero_result_repair_sql(
-                        user_prompt, executed_sql, entity_phrases, candidates
-                    )
-                    try:
-                        rep_sql, rep_cols, rep_data = sql_validator.execute_with_auto_refinement(
-                            db=db,
-                            initial_sql=repaired_sql,
-                            user_prompt=user_prompt,
-                            max_attempts=1
-                        )
-                        if rep_data:
-                            executed_sql, columns, data = rep_sql, rep_cols, rep_data
-                    except Exception as rep_err:
-                        print(f"[CHAT_PIPELINE] Zero-result repair attempt failed: {rep_err}")
-
-        # Step 3: Classify visualization type
-        viz_type = chart_classifier.classify(columns, data)
-
-        # Step 4: Synthesize natural language executive summary
-        summary = groq_service.generate_summary(user_prompt, executed_sql, data)
-
-        response_payload = ChatQueryResponse(
-            prompt=user_prompt,
-            generated_sql=executed_sql,
-            visualization_type=viz_type,
-            summary=summary,
-            columns=columns,
-            data=data,
-            record_count=len(data)
-        )
+        if not agent_res.supported:
+            return StandardResponse(
+                success=True,
+                message=agent_res.summary,
+                data=ChatQueryResponse(
+                    prompt=user_prompt,
+                    generated_sql=agent_res.generated_sql,
+                    visualization_type="TEXT_ONLY",
+                    summary=agent_res.summary,
+                    columns=[],
+                    data=[],
+                    record_count=0
+                ),
+                supported=False
+            )
 
         return StandardResponse(
             success=True,
             message="Query executed successfully",
-            data=response_payload
+            data=ChatQueryResponse(
+                prompt=user_prompt,
+                generated_sql=agent_res.generated_sql,
+                visualization_type=agent_res.visualization_type,
+                summary=agent_res.summary,
+                columns=agent_res.columns,
+                data=agent_res.data,
+                record_count=agent_res.record_count
+            ),
+            supported=True
         )
 
     except ValueError as ve:

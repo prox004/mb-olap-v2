@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChatMessageList, ChatMessage } from "./ChatMessageList";
 import { SuggestedPrompts } from "./SuggestedPrompts";
+import { getApiBaseUrl } from "@/utils/apiClient";
 
 export const FloatingChatDrawer: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,10 +13,20 @@ export const FloatingChatDrawer: React.FC = () => {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Hi! I am your Wren AI GenBI Assistant. Ask me any natural language question about store revenue, department sales, stock cover, or GMROI performance.",
+      text: "👋 Hi! I am your Smart Retail AI Assistant. Ask me any natural language question about store revenue, department sales, stock cover, or GMROI performance.",
       timestamp: ""
     }
   ]);
+
+  React.useEffect(() => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === "welcome" && !m.timestamp
+          ? { ...m, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+          : m
+      )
+    );
+  }, []);
 
   const handleSend = async (promptToSend?: string) => {
     const queryText = (promptToSend || inputPrompt).trim();
@@ -33,10 +44,21 @@ export const FloatingChatDrawer: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/chat/query", {
+      const baseUrl = getApiBaseUrl();
+      const historyPayload = messages
+        .filter((m) => m.id !== "welcome" && !m.id.startsWith("error_"))
+        .map((m) => ({
+          role: m.sender === "user" ? "user" : "assistant",
+          content: m.text
+        }));
+
+      const res = await fetch(`${baseUrl}/chat/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: queryText })
+        body: JSON.stringify({
+          prompt: queryText,
+          conversation_history: historyPayload
+        })
       });
 
       const json = await res.json();
@@ -57,7 +79,7 @@ export const FloatingChatDrawer: React.FC = () => {
         throw new Error(json.message || "Failed to execute query.");
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Unable to reach Wren AI backend.";
+      const errorMessage = err instanceof Error ? err.message : "Unable to reach AI backend.";
       const errorMsg: ChatMessage = {
         id: `error_${Date.now()}`,
         sender: "assistant",
@@ -76,7 +98,7 @@ export const FloatingChatDrawer: React.FC = () => {
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-brand-500 hover:bg-brand-600 text-white shadow-xl flex items-center justify-center transition-transform hover:scale-105 group"
-        title="Open Wren AI GenBI Assistant"
+        title="Open Smart Retail AI Assistant"
       >
         <span className="text-xl font-bold">🤖</span>
         <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-2 border-white text-[10px] font-bold flex items-center justify-center text-white">
@@ -106,11 +128,11 @@ export const FloatingChatDrawer: React.FC = () => {
             </div>
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white text-sm">
-                Wren AI GenBI Assistant
+                Smart Retail AI Assistant
               </h3>
               <span className="text-[11px] text-green-500 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                DuckDB Context Engine Active
+                ClickHouse Agentic Engine Active
               </span>
             </div>
           </div>

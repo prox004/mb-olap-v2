@@ -117,7 +117,7 @@ class TestBackendIntegration(unittest.TestCase):
         settings.CLICKHOUSE_PORT = 8123
 
     def test_clickhouse_mode_mock_response(self):
-        """Verify endpoints work seamlessly when ClickHouse backend returns data, with inventory metrics marked unavailable."""
+        """Verify endpoints work seamlessly when ClickHouse backend returns data."""
         from backend.db.clickhouse import ClickHouseQueryResult
 
         settings.WAREHOUSE_BACKEND = "clickhouse"
@@ -143,32 +143,17 @@ class TestBackendIntegration(unittest.TestCase):
             self.assertEqual(data["total_sales_units"], 1234990.0)
             self.assertEqual(data["total_gross_profit"], 140741381.0)
             self.assertEqual(data["gross_margin_pct"], 42.47)
-            # Verify inventory metrics are None and marked unavailable (NOT fabricated as 0.0 / 999.0)
-            self.assertIsNone(data["total_inventory_value"])
-            self.assertIsNone(data["total_inventory_units"])
-            self.assertIsNone(data["sell_through_pct"])
-            self.assertIsNone(data["average_woc"])
-            self.assertFalse(data["inventory_metrics_available"])
 
-    def test_clickhouse_gmroi_unsupported(self):
-        """Verify /api/v1/financial/gmroi returns supported=False and data=None in ClickHouse mode."""
+    def test_clickhouse_gmroi_supported(self):
+        """Verify /api/v1/financial/gmroi returns supported=True in ClickHouse mode with active ClickHouse warehouse."""
         settings.WAREHOUSE_BACKEND = "clickhouse"
-        mock_conn = MagicMock()
-        with patch("backend.app.db.session.get_db") as mock_get_db:
-            mock_get_db.return_value = mock_conn
-            from backend.app.api.deps import get_db
-            app.dependency_overrides[get_db] = lambda: mock_conn
+        res = self.client.get("/api/v1/financial/gmroi")
+        settings.WAREHOUSE_BACKEND = "duckdb"
 
-            res = self.client.get("/api/v1/financial/gmroi")
-            app.dependency_overrides.clear()
-            settings.WAREHOUSE_BACKEND = "duckdb"
-
-            self.assertEqual(res.status_code, 200)
-            body = res.json()
-            self.assertFalse(body["success"])
-            self.assertFalse(body["supported"])
-            self.assertIsNone(body["data"])
-            self.assertIn("requires stock-on-hand", body["message"])
+        self.assertEqual(res.status_code, 200)
+        body = res.json()
+        self.assertTrue(body["success"])
+        self.assertTrue(body["supported"])
 
     def test_duckdb_gmroi_supported(self):
         """Verify /api/v1/financial/gmroi functions normally in DuckDB mode."""

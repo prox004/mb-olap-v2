@@ -26,7 +26,7 @@ export const SqlInspectorAccordion: React.FC<SqlInspectorAccordionProps> = ({ sq
           <svg className="w-3.5 h-3.5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
           </svg>
-          <span>View Generated DuckDB SQL</span>
+          <span>View Generated ClickHouse SQL</span>
         </div>
         <svg
           className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}

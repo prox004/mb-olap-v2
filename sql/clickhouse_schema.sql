@@ -184,23 +184,6 @@ SELECT
 FROM v_fact_sales_enriched
 GROUP BY division, section, department;
 
--- Category Hierarchy Summary (Compatibility view for self-service reporting)
-CREATE OR REPLACE VIEW v_category_hierarchy_summary AS
-SELECT
-    division,
-    section,
-    department,
-    department                AS department_alias,
-    total_net_revenue         AS net_revenue,
-    total_sales_units         AS sales_units,
-    total_gross_profit        AS gross_profit,
-    gross_margin_pct          AS margin_pct,
-    0.0                       AS closing_stock_value,
-    0.0                       AS closing_stock_units,
-    0.0                       AS sell_through_pct,
-    999.0                     AS woc
-FROM v_category_performance_summary;
-
 -- Store Performance Summary
 CREATE OR REPLACE VIEW v_store_performance_summary AS
 SELECT
@@ -458,22 +441,7 @@ SELECT
 FROM dim_product;
 
 -- ----------------------------------------------------------------------------
--- 12. CATEGORY HIERARCHY SUMMARY VIEW (Self-Service Reporting)
--- ----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW v_category_hierarchy_summary AS
-SELECT
-    division,
-    section,
-    department,
-    total_net_revenue AS net_revenue,
-    total_sales_units AS sales_units,
-    total_gross_profit AS gross_profit,
-    gross_margin_pct AS margin_pct,
-    total_skus
-FROM v_category_performance_summary;
-
--- ----------------------------------------------------------------------------
--- 13. STAGING TABLE: INVENTORY EXCEL RAW
+-- 12. STAGING TABLE: INVENTORY EXCEL RAW
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS stg_inventory_excel_raw (
     item_code           String,
@@ -575,6 +543,86 @@ SELECT
 FROM fact_inventory i
 LEFT JOIN dim_product p ON i.item_code = p.item_code
 LEFT JOIN dim_location l ON i.store_code = l.store_code;
+
+-- ----------------------------------------------------------------------------
+-- 16. ENRICHED CATEGORY HIERARCHY SUMMARY VIEW (Joining Sales & Inventory)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW v_category_hierarchy_summary AS
+WITH inv AS (
+    SELECT
+        division,
+        section,
+        department,
+        sum(closing_amt) AS closing_stock_value,
+        sum(closing_qty) AS closing_stock_units,
+        sum(opening_qty + purchase_net_qty + transfer_in_qty) AS total_bought_units,
+        sum(final_sale_qty) AS final_sale_qty
+    FROM v_fact_inventory_enriched
+    GROUP BY division, section, department
+)
+SELECT
+    s.division AS division,
+    s.section AS section,
+    s.department AS department,
+    s.department AS department_alias,
+    s.total_net_revenue AS net_revenue,
+    s.total_sales_units AS sales_units,
+    s.total_gross_profit AS gross_profit,
+    s.gross_margin_pct AS margin_pct,
+    COALESCE(i.closing_stock_value, 0.0) AS closing_stock_value,
+    COALESCE(i.closing_stock_units, 0.0) AS closing_stock_units,
+    multiIf(COALESCE(i.total_bought_units, 0) > 0, round((COALESCE(i.final_sale_qty, 0) / i.total_bought_units) * 100.0, 2), 0.0) AS sell_through_pct,
+    multiIf(COALESCE(i.final_sale_qty, 0) > 0, round(COALESCE(i.closing_stock_units, 0.0) / (i.final_sale_qty / 24.0), 1), 999.0) AS woc
+FROM v_category_performance_summary s
+LEFT JOIN inv i ON s.division = i.division AND s.section = i.section AND s.department = i.department;
+
+-- ----------------------------------------------------------------------------
+-- 17. ENRICHED VENDOR PERFORMANCE SCORECARD VIEW (Joining Sales & Inventory)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW v_vendor_scorecard AS
+WITH sales AS (
+    SELECT
+        COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
+        countDistinct(f.item_code) AS total_skus_supplied,
+        sum(f.bill_qty) AS sales_units,
+        round(sum(f.net_amount), 2) AS net_revenue,
+        round(sum(f.gross_profit), 2) AS gross_profit,
+        multiIf(sum(f.net_amount) > 0, round((sum(f.gross_profit) / sum(f.net_amount)) * 100.0, 2), 0.0) AS margin_pct
+    FROM fact_sales_monthly f
+    LEFT JOIN dim_product p ON f.item_code = p.item_code
+    GROUP BY p.vendor_name
+),
+inv AS (
+    SELECT
+        COALESCE(p.vendor_name, 'UNKNOWN_VENDOR') AS vendor_name,
+        sum(i.purchase_net_qty + i.transfer_in_qty) AS receive_units,
+        sum(i.purchase_net_amt + i.transfer_in_amt) AS receive_value,
+        sum(i.closing_qty) AS current_stock_units,
+        sum(i.closing_amt) AS current_stock_value,
+        sum(i.opening_qty + i.purchase_net_qty + i.transfer_in_qty) AS available_units,
+        sum(i.final_sale_qty) AS final_sale_qty
+    FROM fact_inventory i
+    LEFT JOIN dim_product p ON i.item_code = p.item_code
+    GROUP BY p.vendor_name
+)
+SELECT
+    s.vendor_name AS vendor_name,
+    s.total_skus_supplied AS total_skus_supplied,
+    COALESCE(i.receive_units, 0.0) AS receive_units,
+    COALESCE(i.receive_value, 0.0) AS receive_value,
+    0.0 AS return_units,
+    0.0 AS return_value,
+    s.sales_units AS sales_units,
+    s.net_revenue AS net_revenue,
+    s.gross_profit AS gross_profit,
+    COALESCE(i.current_stock_units, 0.0) AS current_stock_units,
+    COALESCE(i.current_stock_value, 0.0) AS current_stock_value,
+    multiIf(COALESCE(i.available_units, 0) > 0, round((COALESCE(i.final_sale_qty, 0) / i.available_units) * 100.0, 2), 0.0) AS sell_through_pct,
+    s.margin_pct AS margin_pct,
+    0.0 AS return_rate_pct,
+    multiIf(s.net_revenue > 0, round((s.gross_profit / s.net_revenue) * 100.0, 1), 0.0) AS vendor_score
+FROM sales s
+LEFT JOIN inv i ON s.vendor_name = i.vendor_name;
 
 
 

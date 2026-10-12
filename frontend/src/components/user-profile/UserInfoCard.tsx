@@ -110,7 +110,7 @@ export default function UserInfoCard() {
                 Analytical Storage Engine
               </p>
               <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                Parquet + DuckDB High-Performance Storage
+                ClickHouse Analytical Data Warehouse (mb_olap_v2)
               </p>
             </div>
           </div>
@@ -122,10 +122,10 @@ export default function UserInfoCard() {
         <div className="flex flex-col gap-4">
           <div>
             <h4 className="text-base font-bold text-gray-900 dark:text-white">
-              Add Store Data to Parquet Storage
+              Add Store Location
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              Enter store AdmSite Code and Location Name to save directly to backend Parquet metadata (`dim_locations.parquet`) and DuckDB.
+              Enter store AdmSite Code and Location Name to synchronize directly with the ClickHouse warehouse (`dim_location`).
             </p>
           </div>
 
