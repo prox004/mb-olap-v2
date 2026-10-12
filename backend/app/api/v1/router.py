@@ -153,6 +153,19 @@ def add_location(payload: CreateStoreLocationRequest):
     finally:
         rw_conn.close()
 
+    # Sync ClickHouse if running on ClickHouse backend
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        try:
+            from backend.db.clickhouse import get_client
+            ch_client = get_client()
+            safe_name = name.replace("'", "\\'")
+            safe_type = site_type.replace("'", "\\'")
+            ch_client.command(
+                f"INSERT INTO dim_location (store_code, admsite_code, store_name, site_type, state) VALUES ('{code}', {code}, '{safe_name}', '{safe_type}', 'Unknown')"
+            )
+        except Exception as ch_err:
+            print(f"Warning: Failed to sync new store to ClickHouse: {ch_err}")
+
     # 3. Trigger Automated ETL Views Regeneration in Background Thread
     import threading
     def trigger_etl_pipeline():
@@ -219,6 +232,19 @@ def update_location(admsite_code: int, payload: UpdateStoreLocationRequest):
     finally:
         rw_conn.close()
 
+    # Sync ClickHouse if running on ClickHouse backend
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        try:
+            from backend.db.clickhouse import get_client
+            ch_client = get_client()
+            safe_name = name.replace("'", "\\'")
+            safe_type = site_type.replace("'", "\\'")
+            ch_client.command(
+                f"ALTER TABLE dim_location UPDATE store_name = '{safe_name}', site_type = '{safe_type}' WHERE admsite_code = {admsite_code}"
+            )
+        except Exception as ch_err:
+            print(f"Warning: Failed to update store in ClickHouse: {ch_err}")
+
     # Trigger Automated ETL Views Regeneration in Background Thread
     import threading
     def trigger_etl_pipeline():
@@ -280,6 +306,17 @@ def delete_location(admsite_code: int):
         rw_conn.execute(f"COPY all_locs TO '{clean_parquet_path}' (FORMAT PARQUET, COMPRESSION SNAPPY)")
     finally:
         rw_conn.close()
+
+    # Sync ClickHouse if running on ClickHouse backend
+    if settings.WAREHOUSE_BACKEND.lower().strip() == "clickhouse":
+        try:
+            from backend.db.clickhouse import get_client
+            ch_client = get_client()
+            ch_client.command(
+                f"ALTER TABLE dim_location DELETE WHERE admsite_code = {admsite_code}"
+            )
+        except Exception as ch_err:
+            print(f"Warning: Failed to delete store from ClickHouse: {ch_err}")
 
     # Trigger Automated ETL Views Regeneration in Background Thread
     import threading

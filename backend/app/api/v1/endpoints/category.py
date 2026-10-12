@@ -641,7 +641,7 @@ def get_category_growth(
     month_sql = (
         "SELECT DISTINCT formatDateTime(period_start_date, '%Y-%m') AS ym FROM fact_sales_monthly ORDER BY ym"
         if is_clickhouse
-        else "SELECT DISTINCT strftime(period_start_date, '%Y-%m') AS ym FROM fact_sales_monthly ORDER BY ym"
+        else "SELECT DISTINCT strftime(REPORT_DATE, '%Y-%m') AS ym FROM fact_cube_monthly ORDER BY ym"
     )
     avail_rows = db.execute(month_sql).fetchall()
     available_months = [r[0] for r in avail_rows]
@@ -660,14 +660,24 @@ def get_category_growth(
     conditions = []
     params = []
 
-    if store_ids:
-        placeholders = ", ".join(["?"] * len(store_ids))
-        conditions.append(f"l.admsite_code IN ({placeholders})")
-        params.extend(store_ids)
+    if is_clickhouse:
+        if store_ids:
+            placeholders = ", ".join(["?"] * len(store_ids))
+            conditions.append(f"l.admsite_code IN ({placeholders})")
+            params.extend(store_ids)
 
-    if division and division.strip().upper() != "ALL":
-        conditions.append("UPPER(p.division) = ?")
-        params.append(division.strip().upper())
+        if division and division.strip().upper() != "ALL":
+            conditions.append("UPPER(p.division) = ?")
+            params.append(division.strip().upper())
+    else:
+        if store_ids:
+            placeholders = ", ".join(["?"] * len(store_ids))
+            conditions.append(f"f.ADMSITE_CODE IN ({placeholders})")
+            params.extend(store_ids)
+
+        if division and division.strip().upper() != "ALL":
+            conditions.append("UPPER(i.Division) = ?")
+            params.append(division.strip().upper())
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
@@ -725,16 +735,16 @@ def get_category_growth(
         query = f"""
         WITH monthly_dept AS (
             SELECT
-                COALESCE(p.department, 'UNKNOWN') AS department,
-                COALESCE(p.division, 'UNKNOWN') AS division,
-                f.period_start_date AS month_date,
-                SUM(f.net_amount) AS revenue,
-                SUM(f.bill_qty) AS units
-            FROM fact_sales_monthly f
-            LEFT JOIN dim_product p ON f.item_code = p.item_code
-            LEFT JOIN dim_location l ON f.store_code = l.store_code
+                COALESCE(i.Department, 'UNKNOWN') AS department,
+                COALESCE(i.Division, 'UNKNOWN') AS division,
+                f.REPORT_DATE AS month_date,
+                SUM(ABS(f.NET_SALE_AMOUNT)) AS revenue,
+                SUM(ABS(f.NET_SALE_QUANTITY)) AS units
+            FROM fact_cube_monthly f
+            LEFT JOIN dim_item i ON f.BARCODE = i.ICODE
+            LEFT JOIN dim_location l ON f.ADMSITE_CODE = l.ADMSITE_CODE
             {where_clause}
-            GROUP BY COALESCE(p.department, 'UNKNOWN'), COALESCE(p.division, 'UNKNOWN'), f.period_start_date
+            GROUP BY COALESCE(i.Department, 'UNKNOWN'), COALESCE(i.Division, 'UNKNOWN'), f.REPORT_DATE
         ),
         ranked AS (
             SELECT

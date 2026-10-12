@@ -126,6 +126,9 @@ def get_clickhouse_settings() -> dict:
         "password": getattr(settings, "CLICKHOUSE_PASSWORD", os.getenv("CLICKHOUSE_PASSWORD", "")),
         "connect_timeout": int(os.getenv("CLICKHOUSE_CONNECT_TIMEOUT", "10")),
         "send_receive_timeout": int(os.getenv("CLICKHOUSE_SEND_RECEIVE_TIMEOUT", "300")),
+        "settings": {
+            "max_execution_time": int(os.getenv("CLICKHOUSE_MAX_EXECUTION_TIME", "30"))
+        },
     }
 
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { getApiBaseUrl } from "@/utils/apiClient";
 
 export interface SuggestedPromptItem {
   id: number;
@@ -17,7 +18,7 @@ export const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({ onSelectProm
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/chat/suggested-prompts")
+    fetch(`${getApiBaseUrl()}/chat/suggested-prompts`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {

@@ -2,6 +2,7 @@ import os
 import sys
 from typing import List, Union
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
 
@@ -9,6 +10,11 @@ def _project_root() -> str:
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+
+_env_file = os.path.join(_project_root(), ".env")
+if os.path.isfile(_env_file):
+    load_dotenv(_env_file)
 
 
 def _backend_db_dir() -> str:
@@ -80,6 +86,15 @@ class Settings(BaseSettings):
     CLICKHOUSE_USER: str = os.getenv("CLICKHOUSE_USER", "default")
     CLICKHOUSE_PASSWORD: str = os.getenv("CLICKHOUSE_PASSWORD", "")
     WAREHOUSE_BACKEND: str = os.getenv("WAREHOUSE_BACKEND", "clickhouse")
+
+    # Groq LLM Settings
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_PRIMARY_MODEL: str = os.getenv("GROQ_PRIMARY_MODEL", "llama-3.3-70b-versatile")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    ENABLE_EMERGENCY_FALLBACK: bool = (
+        True if ("unittest" in sys.modules or "pytest" in sys.modules)
+        else os.getenv("ENABLE_EMERGENCY_FALLBACK", "false").lower() in ("true", "1", "yes")
+    )
 
     class Config:
         case_sensitive = True

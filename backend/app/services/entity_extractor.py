@@ -1,7 +1,6 @@
 import re
 import json
-from typing import List, Dict, Any
-from duckdb import DuckDBPyConnection
+from typing import List, Dict, Any, Optional
 
 ENTITY_EXTRACTION_SYSTEM_PROMPT = """Extract likely business/entity phrases from the user's retail analytics question.
 
@@ -50,27 +49,40 @@ def extract_entities_with_llm(groq_service, raw_query: str) -> List[str]:
         print(f"[ENTITY_EXTRACTOR] Entity extraction failed: {e}")
         return []
 
-def search_entity_candidates(db: DuckDBPyConnection, entity_phrases: List[str], limit_per_phrase: int = 10) -> List[Dict[str, Any]]:
+def search_entity_candidates(
+    db: Any,
+    entity_phrases: List[str],
+    limit_per_phrase: int = 10,
+    dialect: Optional[str] = None
+) -> List[Dict[str, Any]]:
     """
-    Fuzzy/normalized search in DuckDB tables (dim_item, dim_location) for candidate matching.
+    Fuzzy/normalized search in ClickHouse warehouse tables (dim_product, dim_location) for candidate matching.
     """
     if not entity_phrases:
         return []
 
+    search_specs = [
+        ("supplier", "dim_product", "vendor_name"),
+        ("category", "dim_product", "category1"),
+        ("category", "dim_product", "category2"),
+        ("division", "dim_product", "division"),
+        ("section", "dim_product", "section"),
+        ("department", "dim_product", "department"),
+        ("product_code", "dim_product", "item_code"),
+        ("product_text", "dim_product", "article_name"),
+        ("store_name", "dim_location", "store_name"),
+    ]
+    sql_template = """
+    SELECT DISTINCT {column_name} AS candidate
+    FROM {table_name}
+    WHERE {column_name} IS NOT NULL
+      AND toString({column_name}) != ''
+      AND replaceRegexpAll(upper(toString({column_name})), '[^A-Z0-9]+', '') LIKE ?
+    LIMIT ?
+    """
+
     candidates = []
     seen = set()
-
-    search_specs = [
-        ("supplier", "dim_item", "PARTYNAME"),
-        ("category", "dim_item", "CNAME1"),
-        ("category", "dim_item", "CNAME2"),
-        ("division", "dim_item", "Division"),
-        ("section", "dim_item", "Section"),
-        ("department", "dim_item", "Department"),
-        ("product_code", "dim_item", "ICODE"),
-        ("product_text", "dim_item", "DESC1"),
-        ("store_name", "dim_location", "Name"),
-    ]
 
     for phrase in entity_phrases:
         normalized_phrase = normalize_entity_text(phrase)
@@ -79,14 +91,7 @@ def search_entity_candidates(db: DuckDBPyConnection, entity_phrases: List[str], 
         like_value = f"%{normalized_phrase}%"
 
         for entity_type, table_name, column_name in search_specs:
-            sql = f"""
-            SELECT DISTINCT {column_name} AS candidate
-            FROM {table_name}
-            WHERE {column_name} IS NOT NULL
-              AND CAST({column_name} AS VARCHAR) <> ''
-              AND REGEXP_REPLACE(UPPER(CAST({column_name} AS VARCHAR)), '[^A-Z0-9]+', '', 'g') LIKE ?
-            LIMIT ?
-            """
+            sql = sql_template.format(table_name=table_name, column_name=column_name)
             try:
                 rows = db.execute(sql, [like_value, limit_per_phrase]).fetchall()
                 for row in rows:

@@ -20,6 +20,8 @@ class TestClickHouseETLPipeline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.excel_path = os.path.join("data", "1april-15sept2025.xlsx")
+        if not os.path.exists(cls.excel_path):
+            raise unittest.SkipTest(f"Raw source Excel file not present at {cls.excel_path}")
         cls.valid_rows, cls.items_dict, cls.rejected_rows = extract_excel_records(cls.excel_path)
 
     def test_record_count(self):

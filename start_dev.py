@@ -74,8 +74,13 @@ def main():
 
         if not backend_already_running:
             print("1. Launching Backend FastAPI Server (http://localhost:8000)...")
+            venv_python = os.path.join(root_dir, ".venv", "Scripts", "python.exe")
+            if not os.path.isfile(venv_python):
+                venv_python = os.path.join(root_dir, ".venv", "bin", "python")
+            python_bin = venv_python if os.path.isfile(venv_python) else sys.executable
+
             backend_proc = subprocess.Popen(
-                [sys.executable, "backend/run.py"],
+                [python_bin, "backend/run.py"],
                 cwd=root_dir,
                 env=os.environ.copy(),
             )
@@ -87,11 +92,13 @@ def main():
                 sys.exit(1)
 
         print("2. Launching Frontend Next.js Application (http://localhost:3000)...")
+        frontend_env = os.environ.copy()
+        frontend_env["PORT"] = "3000"
         frontend_proc = subprocess.Popen(
-            "npm run dev",
+            "npx next dev -p 3000",
             cwd=frontend_dir,
             shell=True,
-            env=os.environ.copy(),
+            env=frontend_env,
         )
         processes.append(frontend_proc)
 

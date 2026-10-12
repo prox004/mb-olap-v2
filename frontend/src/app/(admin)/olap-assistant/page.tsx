@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChatMessageList, ChatMessage } from "@/components/chat/ChatMessageList";
 import { SuggestedPrompts } from "@/components/chat/SuggestedPrompts";
+import { getApiBaseUrl } from "@/utils/apiClient";
 
 export default function OlapAssistantPage() {
   const [inputPrompt, setInputPrompt] = useState("");
@@ -11,10 +12,20 @@ export default function OlapAssistantPage() {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Welcome to your Retail AI Assistant workspace! Ask any business question to generate dynamic charts, sales breakdowns, and executive insights.",
+      text: "👋 Welcome to the Smart Retail AI Assistant workspace! Ask any business question to generate dynamic charts, sales breakdowns, and executive insights.",
       timestamp: ""
     }
   ]);
+
+  React.useEffect(() => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === "welcome" && !m.timestamp
+          ? { ...m, timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+          : m
+      )
+    );
+  }, []);
 
   const handleSend = async (promptToSend?: string) => {
     const queryText = (promptToSend || inputPrompt).trim();
@@ -32,10 +43,21 @@ export default function OlapAssistantPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/chat/query", {
+      const baseUrl = getApiBaseUrl();
+      const historyPayload = messages
+        .filter((m) => m.id !== "welcome" && !m.id.startsWith("error_"))
+        .map((m) => ({
+          role: m.sender === "user" ? "user" : "assistant",
+          content: m.text
+        }));
+
+      const res = await fetch(`${baseUrl}/chat/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: queryText })
+        body: JSON.stringify({
+          prompt: queryText,
+          conversation_history: historyPayload
+        })
       });
 
       const json = await res.json();
@@ -57,7 +79,7 @@ export default function OlapAssistantPage() {
         throw new Error(errDetail);
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Unable to reach Wren AI backend.";
+      const errorMessage = err instanceof Error ? err.message : "Unable to reach AI backend.";
       const errorMsg: ChatMessage = {
         id: `error_${Date.now()}`,
         sender: "assistant",
