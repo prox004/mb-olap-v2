@@ -2,7 +2,7 @@ from backend.app.db.session import get_db
 
 def get_clickhouse_db():
     """
-    Dedicated database dependency for agentic ClickHouse services (Chat/Wren and AI Recommendations).
+    Dedicated database dependency for agentic ClickHouse services (ClickHouse AI Chat and Recommendations).
     Guarantees a ClickHouse connection regardless of the global WAREHOUSE_BACKEND setting,
     ensuring zero runtime dependency on DuckDB.
     """

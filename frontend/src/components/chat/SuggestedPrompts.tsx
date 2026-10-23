@@ -28,11 +28,12 @@ export const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({ onSelectProm
       .catch(() => {
         // Fallback default suggestions if backend unready
         setPrompts([
-          { id: 1, category: "Revenue", prompt: "What are the top 5 departments by net sales revenue?" },
-          { id: 2, category: "Stores", prompt: "Show revenue and gross profit margin percentage across all retail stores" },
-          { id: 3, category: "Vendors", prompt: "Which vendors have the highest GMROI?" },
-          { id: 4, category: "Inventory", prompt: "What is the sell-through percentage by division?" },
-          { id: 5, category: "Cover", prompt: "What is the closing stock valuation and weeks of cover for Store 6?" }
+          { id: 1, category: "Executive Summary", prompt: "Show an executive summary of monthly sales performance" },
+          { id: 2, category: "Store Rankings", prompt: "Compare total sales and profits across all stores" },
+          { id: 3, category: "Top Departments", prompt: "Which departments generate the highest sales?" },
+          { id: 4, category: "Stock Overview", prompt: "What is our current stock valuation and weeks of cover?" },
+          { id: 5, category: "Supplier Return", prompt: "Which suppliers deliver the best profit return on stock (GMROI)?" },
+          { id: 6, category: "Best Sellers", prompt: "List top 10 best-selling items by quantity sold" }
         ]);
       })
       .finally(() => setLoading(false));

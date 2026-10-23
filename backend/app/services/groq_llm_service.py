@@ -13,6 +13,9 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".env"))
 PRIORITIZED_MODELS = [
     os.getenv("GROQ_PRIMARY_MODEL", ""),
     os.getenv("GROQ_MODEL", ""),
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "qwen/qwen3.8-27b",
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
 ]
@@ -119,7 +122,7 @@ class GroqLLMService:
     def _parse_json_action(self, raw_text: str) -> Dict[str, Any]:
         """
         Extracts and parses JSON action {thought, action, action_input} from LLM response.
-        Handles markdown blocks, raw json, or trailing prose safely.
+        Handles markdown blocks, raw json, unescaped control characters, or trailing prose safely.
         """
         if not raw_text:
             return {
@@ -139,14 +142,32 @@ class GroqLLMService:
                 candidate = match_brace.group(1).strip()
 
         if candidate:
-            try:
-                data = json.loads(candidate)
-                if isinstance(data, dict) and "action" in data:
-                    return data
-            except Exception:
-                pass
+            for strict_mode in (False, True):
+                try:
+                    data = json.loads(candidate, strict=strict_mode)
+                    if isinstance(data, dict) and "action" in data:
+                        return data
+                except Exception:
+                    pass
 
-        # If parsing failed, inspect for SQL or direct answer in raw text
+        # Regex fallback for synthesize_final_answer when JSON has unescaped markdown/quotes
+        if "synthesize_final_answer" in raw_text:
+            summary_match = re.search(
+                r'"summary"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"visualization_type|\s*"\}\s*\}|\s*"\s*\}\s*$)',
+                raw_text
+            )
+            if summary_match:
+                extracted = summary_match.group(1)
+                extracted = extracted.replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
+                vis_match = re.search(r'"visualization_type"\s*:\s*"([^"]+)"', raw_text)
+                vis_type = vis_match.group(1) if vis_match else "DATA_TABLE"
+                return {
+                    "thought": "Direct synthesis response",
+                    "action": "synthesize_final_answer",
+                    "action_input": {"summary": extracted.strip(), "visualization_type": vis_type}
+                }
+
+        # If parsing failed, inspect for SQL in raw text
         if "SELECT" in raw_text.upper():
             sql = self.extract_sql_from_response(raw_text)
             return {
@@ -155,10 +176,20 @@ class GroqLLMService:
                 "action_input": {"sql": sql}
             }
 
+        # Clean up any residual raw JSON if it leaked into raw_text
+        clean_summary = raw_text.strip()
+        if clean_summary.startswith("{") and ('"thought"' in clean_summary or '"action"' in clean_summary):
+            summary_match = re.search(r'"summary"\s*:\s*"([\s\S]*?)"', clean_summary)
+            if summary_match:
+                clean_summary = summary_match.group(1).replace("\\n", "\n").replace('\\"', '"')
+            else:
+                clean_summary = re.sub(r'\{[\s\S]*?"thought":\s*"[^"]*",?\s*', '', clean_summary)
+                clean_summary = clean_summary.strip("{} \n\r\t")
+
         return {
             "thought": "Direct synthesis response",
             "action": "synthesize_final_answer",
-            "action_input": {"summary": raw_text.strip(), "visualization_type": "TEXT_ONLY"}
+            "action_input": {"summary": clean_summary, "visualization_type": "TEXT_ONLY"}
         }
 
     def act_as_agent(
@@ -186,10 +217,10 @@ class GroqLLMService:
         system_context = wren_engine.build_system_prompt_context(user_prompt, dialect=dialect)
 
         system_msg = (
-            "You are the Smart Retail AI Assistant, an autonomous enterprise analytical agent powered by Wren AI semantic MDL "
-            "and ClickHouse analytical warehouse (mb_olap_v2) for M Baazar retail.\n\n"
+            "You are the ClickHouse Enterprise Retail Analytics Agent, an autonomous AI analyst directly integrated with "
+            "the ClickHouse analytical warehouse (mb_olap_v2) for M Baazar retail.\n\n"
             "TARGET DATABASE: mb_olap_v2\n\n"
-            "AVAILABLE WAREHOUSE SCHEMA & GOVERNED METRICS (Wren AI 5-Layer MDL):\n"
+            "AVAILABLE WAREHOUSE SCHEMA & GOVERNED METRICS (ClickHouse Semantic Layer):\n"
             f"{system_context}\n\n"
             "PRIMARY ANALYTICAL VIEWS:\n"
             "- v_fact_sales_enriched: Detailed transaction sales (store_name, state, division, section, department, item_code, article_name, bill_qty, net_amount, gross_profit, period_month_label).\n"
@@ -217,10 +248,12 @@ class GroqLLMService:
             "6. synthesize_final_answer\n"
             "   Input: {\"summary\": \"<executive grounded summary>\", \"visualization_type\": \"<BAR_CHART|LINE_CHART|PIE_CHART|KPI_CARD|DATA_TABLE|TEXT_ONLY>\"}\n"
             "   Use when you have collected enough evidence to answer the question.\n\n"
-            "DECISION PROTOCOL:\n"
-            "- For exploratory questions (e.g. 'What is happening with our business?', 'Which products should I worry about?', 'Find unusual inventory patterns'), "
-            "  first query the relevant high-level view (monthly trend, store summary, category summary, or inventory summary), "
-            "  then inspect the observations. If an anomaly or key driver is detected, drill into it before concluding.\n"
+            "DECISION PROTOCOL (MAXIMUM SPEED & DIRECTNESS):\n"
+            "- Step 1: Immediately formulate the primary ClickHouse SQL query needed to answer the question or generate the report.\n"
+            "- Step 2: Once the query observation is returned, IMMEDIATELY call synthesize_final_answer with the executive summary and data visualization.\n"
+            "- Do NOT run intermediate or redundant exploratory queries. Complete analysis in 2 steps maximum.\n"
+            "- In synthesize_final_answer, write the 'summary' with proper JSON string escaping (use \\n for line breaks, never raw unescaped newlines).\n"
+            "- CLIENT COMMUNICATION GUIDELINE: The client is a retail business manager and non-technical person. Speak in clear, polite, and practical retail terms (Sales, Profit, Margin, Stock, Best-Selling Items, Stores, Revenue). NEVER use technical database or engineering terms like SQL, ClickHouse, database schemas, tables, views, query execution, or code blocks in the summary.\n"
             "- Always format your entire response as a valid JSON object:\n"
             "{\n"
             '  \"thought\": \"Internal reasoning about what information is needed and what to do next\",\n'
@@ -494,7 +527,7 @@ class GroqLLMService:
         system_role_desc = (
             "You are an expert Enterprise Retail OLAP Data Engineer specializing in ClickHouse SQL for M Baazar retail analytics. "
             "Target Database: mb_olap_v2. "
-            "Convert natural language business questions into syntactically valid ClickHouse SQL based ONLY on the provided Wren AI ClickHouse context.\n\n"
+            "Convert natural language business questions into syntactically valid ClickHouse SQL based on the provided ClickHouse schema and analytical views.\n\n"
             f"{system_context}"
         )
 
@@ -654,6 +687,11 @@ Repair Rules:
         if not data:
             return f"Query executed successfully, but returned 0 results for: '{user_prompt}'."
 
+        is_report_request = any(
+            k in user_prompt.lower()
+            for k in ["report", "executive report", "analysis report", "generate report", "create report", "summary report", "briefing"]
+        )
+
         if not self.client:
             row_count = len(data)
             first_row = data[0]
@@ -674,23 +712,56 @@ Repair Rules:
             ]
             top_metric = f" ({metric_keys[0]}: {first_row[metric_keys[0]]})" if metric_keys else ""
             first_val = list(first_row.values())[0] if first_row else ""
+
+            if is_report_request:
+                return (
+                    f"### 📋 Executive Summary\n"
+                    f"Analytical report generated for: **{user_prompt}**. A total of {row_count} records were retrieved from the ClickHouse OLAP warehouse.\n\n"
+                    f"### 📊 Key Performance Highlights\n"
+                    f"• Leading result: **{first_val}**{top_metric}\n"
+                    f"• Total active records evaluated: **{row_count}**\n\n"
+                    f"### 💡 Actionable Recommendations\n"
+                    f"• Review high-velocity entities in the data breakdown below to prioritize stock replenishment.\n"
+                    f"• Use the Export CSV or Print / PDF button to distribute this report to store and inventory operations."
+                )
+
             return f"Found {row_count} records for '{user_prompt}'. Top result: {first_val}{top_metric}."
 
-        sample_data = data[:10]
+        sample_data = data[:15]
+
+        if is_report_request:
+            system_prompt_text = (
+                "You are the ClickHouse Enterprise Retail Analytics Agent for M Baazar retail.\n"
+                "The user requested a FORMAL BUSINESS REPORT. Format your response clearly using markdown with these distinct sections:\n\n"
+                "### 📋 Executive Summary\n"
+                "A concise 1-2 sentence overview of the metric results and scope.\n\n"
+                "### 📊 Key Performance Highlights\n"
+                "Bullet points identifying totals, top performers, and significant observations from the data.\n\n"
+                "### 💡 Actionable Recommendations\n"
+                "2 practical, data-driven recommendations for retail operations, stock rebalancing, or category managers.\n\n"
+                "STRICT DATA INTEGRITY RULES:\n"
+                "1. Base all facts, rankings, and numbers EXCLUSIVELY on the provided Query Results JSON. Never hallucinate names or figures.\n"
+                "2. CURRENCY FORMATTING: All monetary values MUST use the Indian Rupee symbol (₹). Format large numbers clearly in Lakhs (L) and Crores (Cr). Never use $ or USD."
+            )
+            token_budget = 450
+        else:
+            system_prompt_text = (
+                "You are an Executive Retail Intelligence AI for M Baazar retail analytics.\n\n"
+                "STRICT ANTI-HALLUCINATION & FACTUAL ACCURACY RULES:\n"
+                "1. Base your summary EXCLUSIVELY on the provided Query Results JSON data. Never invent entities, store names, categories, or figures not present in the data.\n"
+                "2. State specific top entities and key values directly from the results.\n"
+                "3. CURRENCY & NUMBER FORMATTING (MANDATORY):\n"
+                "   - All monetary amounts are in Indian Rupees (₹). ALWAYS use the ₹ symbol. NEVER use $, USD, Dollar, EUR, or Euros.\n"
+                "   - Format large rupee amounts clearly using Indian numbering conventions: e.g. ₹3.93 Cr for Crores (10,000,000+), ₹22.50 L for Lakhs (100,000+).\n"
+                "   - Format percentages with '%' (e.g. 32.5%).\n"
+                "4. Provide a direct, professional 2-sentence executive summary highlighting the primary finding and top contributors."
+            )
+            token_budget = 250
+
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "You are an Executive Retail Intelligence AI for M Baazar retail analytics.\n\n"
-                    "STRICT ANTI-HALLUCINATION & FACTUAL ACCURACY RULES:\n"
-                    "1. Base your summary EXCLUSIVELY on the provided Query Results JSON data. Never invent entities, store names, categories, or figures not present in the data.\n"
-                    "2. State specific top entities and key values directly from the results.\n"
-                    "3. CURRENCY & NUMBER FORMATTING (MANDATORY):\n"
-                    "   - All monetary amounts are in Indian Rupees (₹). ALWAYS use the ₹ symbol. NEVER use $, USD, Dollar, EUR, or Euros.\n"
-                    "   - Format large rupee amounts clearly using Indian numbering conventions: e.g. ₹3.93 Cr for Crores (10,000,000+), ₹22.50 L for Lakhs (100,000+).\n"
-                    "   - Format percentages with '%' (e.g. 32.5%).\n"
-                    "4. Provide a direct, professional 2-sentence executive summary highlighting the primary finding and top contributors."
-                ),
+                "content": system_prompt_text,
             },
             {
                 "role": "user",
@@ -698,12 +769,12 @@ Repair Rules:
                     f"User Question: \"{user_prompt}\"\n"
                     f"SQL Executed: `{sql}`\n"
                     f"Query Results ({len(data)} total rows, top rows shown): {json.dumps(sample_data, default=str)}\n\n"
-                    "Synthesize a factual, grounded executive summary:"
+                    "Synthesize the response:"
                 ),
             },
         ]
 
-        raw_summary = self._create_completion(messages, temperature=0.1, max_tokens=250)
+        raw_summary = self._create_completion(messages, temperature=0.1, max_tokens=token_budget)
         if raw_summary:
             clean_summary = raw_summary.strip()
             # Sanitize currency symbols to ensure Indian Rupees (₹)

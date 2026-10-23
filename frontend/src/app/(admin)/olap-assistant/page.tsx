@@ -12,7 +12,7 @@ export default function OlapAssistantPage() {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Welcome to the Smart Retail AI Assistant workspace! Ask any business question to generate dynamic charts, sales breakdowns, and executive insights.",
+      text: "👋 Welcome to M Baazar Smart Assistant! Ask me any question about your daily store sales, profits, top-selling items, or stock levels. You can also ask me to create reports like 'Show monthly sales report' or 'Top performing stores'.",
       timestamp: ""
     }
   ]);
@@ -83,7 +83,7 @@ export default function OlapAssistantPage() {
       const errorMsg: ChatMessage = {
         id: `error_${Date.now()}`,
         sender: "assistant",
-        text: `⚠️ Query Error: ${errorMessage}`,
+        text: `⚠️ Notice: ${errorMessage}`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -97,22 +97,25 @@ export default function OlapAssistantPage() {
       {/* Workspace Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-500 text-white font-bold flex items-center justify-center text-lg">
-            Wren
+          <div className="w-10 h-10 rounded-xl bg-brand-500 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+            MB
           </div>
           <div>
-            <h1 className="text-base font-bold text-gray-900 dark:text-white">
-              Smart Retail AI Assistant
+            <h1 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              M Baazar Smart Business Assistant
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
+                Instant Advisor
+              </span>
             </h1>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Conversational analytics for sales, inventory, and category performance
+              Ask questions about sales, stores, and stock in simple words, or generate instant business reports
             </p>
           </div>
         </div>
 
         <span className="px-3 py-1 rounded-full bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 text-xs font-semibold border border-green-200 dark:border-green-800 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          Engine Online
+          Assistant Ready
         </span>
       </div>
 
@@ -136,7 +139,7 @@ export default function OlapAssistantPage() {
             type="text"
             value={inputPrompt}
             onChange={(e) => setInputPrompt(e.target.value)}
-            placeholder="Ask any natural language question (e.g. 'What are the top 5 departments by GMROI?')..."
+            placeholder="Ask anything about sales, stores, or stock (e.g. 'Show last month sales report' or 'Top 5 selling items')..."
             disabled={isLoading}
             className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand-500 transition-colors"
           />

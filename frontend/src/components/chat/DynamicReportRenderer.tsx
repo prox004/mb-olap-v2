@@ -34,10 +34,16 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `olap_export_${Date.now()}.csv`);
+    link.setAttribute("download", `olap_report_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handlePrint = () => {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
   };
 
   // 1. KPI CARD
@@ -84,7 +90,7 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
       <div className="my-3 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-3 flex justify-between items-center">
           <span>{catCol} vs {valCol}</span>
-          <span className="px-2 py-0.5 rounded bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-[10px]">Donut Chart</span>
+          <span className="px-2 py-0.5 rounded bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-[10px]">Distribution Chart</span>
         </div>
         <ReactApexChart options={options} series={series} type="donut" height={280} />
       </div>
@@ -114,7 +120,7 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
       <div className="my-3 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-3 flex justify-between items-center">
           <span>Top Results for {valCol.replace(/_/g, " ")}</span>
-          <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-[10px]">Bar Chart</span>
+          <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-[10px]">Comparison Chart</span>
         </div>
         <ReactApexChart options={options} series={series} type="bar" height={280} />
       </div>
@@ -126,14 +132,24 @@ export const DynamicReportRenderer: React.FC<DynamicReportRendererProps> = ({
     <div className="my-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
       <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
         <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
-          Result Table ({data.length} records)
+          Detailed Business Records ({data.length} entries)
         </span>
-        <button
-          onClick={exportCSV}
-          className="px-2.5 py-1 text-[11px] font-medium rounded bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 transition-colors flex items-center gap-1"
-        >
-          <span>📥 Export CSV</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportCSV}
+            className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 transition-colors flex items-center gap-1 shadow-2xs"
+            title="Download Excel / Spreadsheet"
+          >
+            <span>📥 Download Excel</span>
+          </button>
+          <button
+            onClick={handlePrint}
+            className="px-2.5 py-1 text-[11px] font-medium rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 transition-colors flex items-center gap-1 shadow-2xs"
+            title="Print or Save Report as PDF"
+          >
+            <span>🖨️ Print Report</span>
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto max-h-72">
         <table className="w-full text-left text-xs">

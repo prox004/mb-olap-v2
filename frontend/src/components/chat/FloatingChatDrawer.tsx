@@ -13,7 +13,7 @@ export const FloatingChatDrawer: React.FC = () => {
     {
       id: "welcome",
       sender: "assistant",
-      text: "👋 Hi! I am your Smart Retail AI Assistant. Ask me any natural language question about store revenue, department sales, stock cover, or GMROI performance.",
+      text: "👋 Hi! I am your Smart Retail Assistant. Ask me any question about your store sales, top-selling items, stock availability, or business reports.",
       timestamp: ""
     }
   ]);
@@ -124,15 +124,15 @@ export const FloatingChatDrawer: React.FC = () => {
         <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
-              AI
+              MB
             </div>
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white text-sm">
-                Smart Retail AI Assistant
+                M Baazar Smart Assistant
               </h3>
               <span className="text-[11px] text-green-500 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                ClickHouse Agentic Engine Active
+                Assistant Ready
               </span>
             </div>
           </div>

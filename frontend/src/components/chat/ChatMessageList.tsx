@@ -47,7 +47,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, isLo
                   : "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border border-gray-700"
               }`}
             >
-              {isUser ? "U" : "Wren"}
+              {isUser ? "You" : "MB"}
             </div>
 
             {/* Bubble Container */}
@@ -70,8 +70,8 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, isLo
                 />
               )}
 
-              {/* Render SQL Inspector Accordion */}
-              {!isUser && msg.generated_sql && (
+              {/* Render SQL Inspector Accordion only when an actual query was executed */}
+              {!isUser && msg.generated_sql && msg.generated_sql.trim().length > 0 && msg.generated_sql.toUpperCase().includes("SELECT") && (
                 <SqlInspectorAccordion sql={msg.generated_sql} />
               )}
 
@@ -86,14 +86,14 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({ messages, isLo
       {/* Typing Spinner Indicator */}
       {isLoading && (
         <div className="flex items-center gap-3 mr-auto">
-          <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold">
-            Wren
+          <div className="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-bold">
+            MB
           </div>
           <div className="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce" />
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce delay-150" />
             <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce delay-300" />
-            <span className="text-xs text-gray-400 ml-2 font-medium">Translating to Analytical SQL...</span>
+            <span className="text-xs text-gray-400 ml-2 font-medium">Analyzing store and sales data...</span>
           </div>
         </div>
       )}
