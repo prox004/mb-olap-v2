@@ -42,13 +42,13 @@ def detect_unsupported_metric(prompt: str, dialect: str = "clickhouse") -> Optio
         "customer ltv", "lifetime value", "shopper demographic", "customer profile"
     ]):
         return {
-            "metric": "Customer CRM & Loyalty Analytics",
+            "metric": "Customer CRM & Loyalty Records",
             "reason": (
-                "Customer-level CRM records (such as individual shopper names, loyalty card numbers, "
-                "customer contact info, retention metrics, and churn rates) are not captured in the "
-                "merchandising and retail transaction ledger of mb_olap_v2."
+                "Individual customer contact details (such as shopper names, phone numbers, email addresses, "
+                "loyalty points, and retention rates) are kept in private customer databases and are not "
+                "part of this sales and inventory dashboard."
             ),
-            "sql_comment": "-- Metric Unavailable: Customer CRM & loyalty profiles are not captured in mb_olap_v2.\n-- mb_olap_v2 provides verified retail sales, product performance, store analytics, and inventory snapshots."
+            "sql_comment": "-- Metric Unavailable: Individual customer profiles are stored in external customer management systems.\n-- This assistant provides store sales, stock availability, and branch performance."
         }
 
     # 2. Footfall / Store Traffic Sensors
@@ -57,12 +57,12 @@ def detect_unsupported_metric(prompt: str, dialect: str = "clickhouse") -> Optio
         "sensor count", "walk-in count", "conversion rate from footfall"
     ]):
         return {
-            "metric": "Store Footfall & Traffic Analytics",
+            "metric": "Store Footfall & Visitor Counters",
             "reason": (
-                "Physical store footfall counters, sensor tracking, and footfall-to-sales conversion rates "
-                "are not integrated into the mb_olap_v2 warehouse."
+                "Physical store visitor counters and walk-in sensor feeds are not connected to "
+                "this retail portal."
             ),
-            "sql_comment": "-- Metric Unavailable: Footfall sensor feeds are not integrated into mb_olap_v2.\n-- mb_olap_v2 provides POS sales transactions, margins, and stock on hand."
+            "sql_comment": "-- Metric Unavailable: Store footfall sensors are not connected to this portal.\n-- This assistant provides registered billing sales and inventory levels."
         }
 
     # 3. Store Rent, Payroll, Electricity, OpEx
@@ -71,12 +71,12 @@ def detect_unsupported_metric(prompt: str, dialect: str = "clickhouse") -> Optio
         "electricity bill", "utility expense", "opex", "operating expense"
     ]):
         return {
-            "metric": "Operating Expenses & Payroll",
+            "metric": "Operating Expenses & Staff Payroll",
             "reason": (
-                "Store lease/rent overheads, utility bills, and staff payroll operational expenses (OpEx) "
-                "are corporate financial accounting feeds not present in mb_olap_v2 merchandise OLAP."
+                "Store rent, utility bills, and employee salary expenses are handled in "
+                "separate corporate finance accounts rather than retail merchandise tracking."
             ),
-            "sql_comment": "-- Metric Unavailable: Store OpEx and payroll are not captured in mb_olap_v2.\n-- mb_olap_v2 provides sales revenue, COGS, gross margin, and stock snapshots."
+            "sql_comment": "-- Metric Unavailable: Store lease and payroll expenses are kept in external corporate accounting."
         }
 
     # 4. E-commerce Clickstream & Web Analytics
@@ -85,23 +85,22 @@ def detect_unsupported_metric(prompt: str, dialect: str = "clickhouse") -> Optio
         "bounce rate", "web traffic", "online session"
     ]):
         return {
-            "metric": "E-Commerce Clickstream & Web Analytics",
+            "metric": "Online Website & Web Traffic",
             "reason": (
-                "Web clickstream, browsing sessions, online cart abandonment, and digital web traffic "
-                "telemetry are not present in mb_olap_v2."
+                "Online website browsing, shopping carts, and website visits are managed on "
+                "web platforms and are not linked to physical store retail numbers."
             ),
-            "sql_comment": "-- Metric Unavailable: Web clickstream and digital telemetry are not present in mb_olap_v2.\n-- mb_olap_v2 provides brick-and-mortar retail transactions and stock snapshots."
+            "sql_comment": "-- Metric Unavailable: Online website traffic is managed on separate e-commerce platforms."
         }
 
     # 5. Vendor Fill Rate & Supplier Lead Times
     if any(k in p for k in ["fill rate", "vendor fill", "supplier fill", "lead time", "supplier delivery"]):
         return {
-            "metric": "Vendor Fill Rate & Supplier Lead Times",
+            "metric": "Supplier Delivery Schedules & Fill Rates",
             "reason": (
-                "Supplier delivery performance, lead-time tracking, and vendor fill rates require Purchase Order "
-                "fulfillment schedules and goods-inward receipt logs not present in the merchandise OLAP schema of mb_olap_v2."
+                "Supplier delivery schedules and order receipt logs are not currently loaded into this portal."
             ),
-            "sql_comment": "-- Metric Unavailable: Supplier fill rates and lead times are not captured in mb_olap_v2."
+            "sql_comment": "-- Metric Unavailable: Supplier delivery schedules are not captured here."
         }
 
     # 6. Vendor Returns (RTV)
@@ -109,32 +108,29 @@ def detect_unsupported_metric(prompt: str, dialect: str = "clickhouse") -> Optio
         return {
             "metric": "Vendor Returns (RTV)",
             "reason": (
-                "Return-To-Vendor (RTV) manifests and supplier debit notes are corporate supply-chain accounting documents "
-                "not captured in mb_olap_v2."
+                "Return-To-Vendor records and supplier debit notes are currently kept in external supply chain files."
             ),
-            "sql_comment": "-- Metric Unavailable: Vendor returns (RTV) are not captured in mb_olap_v2."
+            "sql_comment": "-- Metric Unavailable: Vendor returns are tracked in external supply chain logs."
         }
 
     # 7. Daily Inventory History
     if any(k in p for k in ["daily stock", "daily inventory", "stock on day", "inventory on day", "intraday stock"]):
         return {
-            "metric": "Daily Inventory History",
+            "metric": "Daily Historical Stock Balances",
             "reason": (
-                "Inventory snapshots in mb_olap_v2 are recorded at monthly accounting intervals (fact_inventory). "
-                "Daily stock level history is not tracked in the current warehouse."
+                "Store stock is updated at regular monthly inventory audits. Day-by-day historical stock balances are not stored in this view."
             ),
-            "sql_comment": "-- Metric Unavailable: Daily stock history is not tracked; stock is recorded at monthly snapshot grain."
+            "sql_comment": "-- Metric Unavailable: Stock is recorded at monthly audit snapshot intervals."
         }
 
     # 8. Promotional Markdown Schedules & Price Elasticity
     if any(k in p for k in ["markdown schedule", "discount history", "clearance schedule", "price elasticity", "discount percentage", "discount applied", "sale discount"]):
         return {
-            "metric": "Discount Schedules & Price Elasticity",
+            "metric": "Discount Coupons & Markdown Schedules",
             "reason": (
-                "Individual transaction line discount percentages, promotional markdown calendars, and price elasticity modeling require marketing campaign feeds "
-                "not integrated into mb_olap_v2."
+                "Promotional coupon schedules and clearance discount campaigns are managed in external marketing files."
             ),
-            "sql_comment": "-- Metric Unavailable: Individual transaction discount percentages and markdown schedules are not captured in mb_olap_v2."
+            "sql_comment": "-- Metric Unavailable: Promotional coupon schedules are not tracked in this sales summary."
         }
 
     return None
@@ -164,23 +160,21 @@ def process_chat_query(
     unsupported = detect_unsupported_metric(user_prompt, dialect="clickhouse")
     if unsupported:
         summary_msg = (
-            f"ℹ️ **{unsupported['metric']} is unavailable in the current dataset.**\n\n"
+            f"ℹ️ **{unsupported['metric']} is not available in your current business data.**\n\n"
             f"{unsupported['reason']}\n\n"
-            f"To maintain analytical integrity, Wren AI does not fabricate unsupported data.\n\n"
-            f"**Supported metrics and analyses in MB-OLAP V2 (Clickhouse):**\n"
-            "• **Net Sales Revenue** (`round(sum(net_amount), 2)`)\n"
-            "• **Sales Units** (`sum(bill_qty)`)\n"
-            "• **Cost of Goods Sold (COGS)** (`sum(cogs)`)\n"
-            "• **Gross Profit & Margin %** (`sum(gross_profit)`, `gross_margin_pct`)\n"
-            "• **Monthly Sales Trends** (`v_monthly_sales_trend`)\n"
-            "• **Store Rankings & Outlet Performance** (`v_store_performance_summary`)\n"
-            "• **Category & Department Summaries** (`v_category_performance_summary`)\n"
-            "• **Stock Valuation & Closing Stock** (`v_fact_inventory_enriched`)\n"
-            "• **Product, Brand & Vendor Sales** (`v_fact_sales_enriched`)"
+            f"Your assistant only provides verified numbers from your actual store sales and inventory records.\n\n"
+            f"**Key reports and questions you can ask anytime:**\n"
+            "• **Total Sales & Revenue** (Daily, Monthly, or Year-to-Date)\n"
+            "• **Units Sold & Customer Orders**\n"
+            "• **Profit & Margin Percentage** across products and stores\n"
+            "• **Store Comparisons & Branch Rankings**\n"
+            "• **Category & Department Performance** (Men's, Women's, Kids, etc.)\n"
+            "• **Inventory & Current Stock Value**\n"
+            "• **Top Selling Items, Brands & Suppliers**"
         )
         return StandardResponse(
             success=True,
-            message=f"{unsupported['metric']} is not available in the active warehouse schema.",
+            message=f"{unsupported['metric']} is not available in the active business records.",
             data=ChatQueryResponse(
                 prompt=user_prompt,
                 generated_sql=unsupported["sql_comment"],
@@ -198,7 +192,8 @@ def process_chat_query(
             db=db,
             user_prompt=user_prompt,
             conversation_history=request.conversation_history,
-            dialect="clickhouse"
+            dialect="clickhouse",
+            allow_emergency_fallback=True
         )
 
         if not agent_res.supported:
@@ -249,13 +244,15 @@ def get_suggested_prompts():
     Returns curated quick-prompt suggestion pills for the chatbot UI interface.
     """
     suggestions = [
-        SuggestedPrompt(id=1, category="Revenue & Store Sales", prompt="What are the top 5 departments by net sales revenue?"),
-        SuggestedPrompt(id=2, category="Store Performance", prompt="Show revenue and gross profit margin percentage across all retail stores"),
-        SuggestedPrompt(id=3, category="Vendor Analytics", prompt="Which vendors have the highest GMROI?"),
-        SuggestedPrompt(id=4, category="Sell-Through & Inventory", prompt="What is the sell-through percentage by division?"),
-        SuggestedPrompt(id=5, category="Stock & Cover", prompt="What is the closing stock valuation and weeks of cover for Store 6?"),
-        SuggestedPrompt(id=6, category="Item Insights", prompt="List top 10 items by sales volume units"),
-        SuggestedPrompt(id=7, category="Distribution Center", prompt="Show total revenue generated in Central Warehouse versus Retail Stores"),
-        SuggestedPrompt(id=8, category="Trends", prompt="Show monthly sales trend by report date")
+        SuggestedPrompt(id=1, category="Executive Summary", prompt="Show an executive summary of monthly sales performance"),
+        SuggestedPrompt(id=2, category="Store Rankings", prompt="Compare total sales and profits across all stores"),
+        SuggestedPrompt(id=3, category="Top Departments", prompt="Which departments generate the highest sales?"),
+        SuggestedPrompt(id=4, category="Profitability", prompt="Show total sales and profit margins across all retail branches"),
+        SuggestedPrompt(id=5, category="Stock Overview", prompt="What is our current stock valuation and weeks of cover?"),
+        SuggestedPrompt(id=6, category="Supplier Return", prompt="Which suppliers deliver the best profit return on stock (GMROI)?"),
+        SuggestedPrompt(id=7, category="Sell-Through", prompt="Show the sales sell-through percentage by department"),
+        SuggestedPrompt(id=8, category="Store Stock", prompt="What is the current stock value and supply cover for Store 6?"),
+        SuggestedPrompt(id=9, category="Top Products", prompt="List top 10 best-selling items by quantity sold"),
+        SuggestedPrompt(id=10, category="Sales Trends", prompt="Show our month-by-month sales trend")
     ]
     return StandardResponse(success=True, data=suggestions)

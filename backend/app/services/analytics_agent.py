@@ -85,7 +85,7 @@ class ConversationalAnalyticsAgent(BaseAnalyticsAgent):
       6. Enforces strict read-only safety, LIMIT protection, and MAX_ITERATIONS bounds.
     """
 
-    MAX_ITERATIONS = 4
+    MAX_ITERATIONS = 2
 
     def _extract_months(self, text: str) -> List[str]:
         """Extracts month references like August, September, Aug, Sep."""
@@ -731,6 +731,20 @@ class ConversationalAnalyticsAgent(BaseAnalyticsAgent):
             last_sql = executed_sqls[-1] if executed_sqls else ""
             final_summary = groq_service.generate_summary(user_prompt, last_sql, primary_data)
 
+        if final_summary:
+            s_clean = final_summary.strip()
+            if s_clean.startswith("{") and ('"thought"' in s_clean or '"action"' in s_clean):
+                match_s = re.search(r'"summary"\s*:\s*"([\s\S]*?)(?:"\s*,\s*"visualization_type|\s*"\}\s*\}|\s*"\s*\}\s*$)', s_clean)
+                if match_s:
+                    final_summary = match_s.group(1).replace("\\n", "\n").replace('\\"', '"').strip()
+                else:
+                    final_summary = re.sub(r'\{[\s\S]*?"thought":\s*"[^"]*",?\s*', '', s_clean).strip("{} \n\r\t")
+
+            final_summary = re.sub(r"[$€£¥]", "₹", final_summary)
+            final_summary = re.sub(r"\bUSD\b", "INR", final_summary, flags=re.IGNORECASE)
+            if "\\n" in final_summary:
+                final_summary = final_summary.replace("\\n", "\n")
+
         # Intelligent visualization selection
         if vis_type == "BAR_CHART" and primary_columns:
             if len(primary_columns) >= 2 and any(k in primary_columns[0].lower() for k in ["period", "date", "month"]):
@@ -742,7 +756,7 @@ class ConversationalAnalyticsAgent(BaseAnalyticsAgent):
 
         combined_sql = "\n\n".join(
             [f"-- Step {i+1}:\n{q}" for i, q in enumerate(executed_sqls)]
-        ) if executed_sqls else "-- Agent completed investigation using semantic/catalog tools"
+        ) if executed_sqls else ""
 
         return AgentExecutionResult(
             prompt=user_prompt,

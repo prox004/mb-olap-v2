@@ -93,7 +93,7 @@ class Settings(BaseSettings):
     GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
     ENABLE_EMERGENCY_FALLBACK: bool = (
         True if ("unittest" in sys.modules or "pytest" in sys.modules)
-        else os.getenv("ENABLE_EMERGENCY_FALLBACK", "false").lower() in ("true", "1", "yes")
+        else os.getenv("ENABLE_EMERGENCY_FALLBACK", "true").lower() in ("true", "1", "yes")
     )
 
     class Config:

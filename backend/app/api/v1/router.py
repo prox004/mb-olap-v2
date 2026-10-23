@@ -29,7 +29,7 @@ api_router.include_router(vendor_router, prefix="/vendor", tags=["Vendor Perform
 api_router.include_router(colour_router, prefix="/colour", tags=["Colour Analytics"])
 api_router.include_router(allocation_router, prefix="/allocation", tags=["Store Allocation"])
 api_router.include_router(recommendations_router, prefix="/recommendations", tags=["AI Recommendations"])
-api_router.include_router(chat_router, prefix="/chat", tags=["Wren AI Semantic Assistant"])
+api_router.include_router(chat_router, prefix="/chat", tags=["ClickHouse AI Analytics Assistant"])
 api_router.include_router(reporting_router, prefix="/reporting", tags=["Self-Service Report Builder"])
 
 from backend.app.config import settings
